@@ -33,14 +33,37 @@ export async function POST(req: NextRequest) {
       serviceKey
     );
 
-    const { error: updateError } = await adminClient
+    const { error: profileUpsertError } = await adminClient
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          full_name: user.user_metadata?.full_name || user.email || 'Administradora',
+          email: user.email || '',
+          role: 'student',
+        },
+        { onConflict: 'id' }
+      );
+
+    if (profileUpsertError) {
+      console.error('Profile Upsert Error:', profileUpsertError);
+      return NextResponse.json({ error: `Erro ao preparar perfil: ${profileUpsertError.message}` }, { status: 500 });
+    }
+
+    const { data: updatedProfile, error: updateError } = await adminClient
       .from('profiles')
       .update({ role: 'admin' }) // matching DB enum lowercase
-      .eq('id', user.id);
+      .eq('id', user.id)
+      .select('id, role')
+      .single();
 
     if (updateError) {
       console.error('Update Error:', updateError);
       return NextResponse.json({ error: `Erro no banco: ${updateError.message}` }, { status: 403 });
+    }
+
+    if (!updatedProfile) {
+      return NextResponse.json({ error: 'Perfil nao encontrado para promover a administrador.' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, message: 'Perfil promovido a Administrador com sucesso!' });

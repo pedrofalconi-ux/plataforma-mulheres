@@ -48,24 +48,6 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function createProfile(userId: string) {
-    const profileRes = await fetch('/api/auth/create-profile', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        fullName: name,
-        email,
-        role: isAdminRegister ? 'admin' : 'student',
-      }),
-    });
-
-    const profileData = await profileRes.json().catch(() => ({}));
-    if (!profileRes.ok) {
-      throw new Error(profileData.error || 'Erro ao criar perfil');
-    }
-  }
-
   async function upgradeToAdmin() {
     const adminRes = await fetch('/api/auth/admin-upgrade', {
       method: 'POST',
@@ -108,11 +90,6 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
         });
 
         if (signInError) throw signInError;
-
-        const userId = signUpData.user?.id;
-        if (userId) {
-          await createProfile(userId);
-        }
 
         if (isAdminRegister) {
           await upgradeToAdmin();
