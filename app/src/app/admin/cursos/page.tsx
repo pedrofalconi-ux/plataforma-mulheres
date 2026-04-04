@@ -1,57 +1,97 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Search, Edit3, Trash2, Loader2, BookOpen } from 'lucide-react';
+import { BookOpen, Edit3, Image as ImageIcon, Loader2, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function AdminCursosPage() {
   const supabase = createClient();
   const router = useRouter();
-  
+
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [level, setLevel] = useState('Iniciante');
-  const [price, setPrice] = useState('0.00');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
   const fetchCourses = async () => {
-    const { data } = await supabase.from('courses').select('id, title, level, is_published, thumbnail_url, created_at').order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('courses')
+      .select('id, title, level, is_published, thumbnail_url, created_at')
+      .order('created_at', { ascending: false });
+
     setCourses(data || []);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchCourses();
+    void fetchCourses();
   }, []);
 
-  const handleCreateCourse = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const parseResponse = async (response: Response) => {
+    const rawText = await response.text();
+
+    try {
+      return rawText ? JSON.parse(rawText) : {};
+    } catch {
+      return { error: rawText || 'Resposta invalida da API.' };
+    }
+  };
+
+  const handleThumbnailUpload = async (file: File | null) => {
+    if (!file) return;
+
+    try {
+      setIsUploadingThumbnail(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('courseId', 'draft');
+      formData.append('assetType', 'thumbnail');
+
+      const response = await fetch('/api/admin/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await parseResponse(response);
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao enviar a capa.');
+      }
+
+      setThumbnailUrl(data.url || '');
+    } catch (error: any) {
+      alert(error.message || 'Erro ao enviar a capa.');
+    } finally {
+      setIsUploadingThumbnail(false);
+    }
+  };
+
+  const handleCreateCourse = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!title.trim()) return;
+
     setIsCreating(true);
+
     try {
       const response = await fetch('/api/admin/courses', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
           description,
           level,
-          price: parseFloat(price) || 0,
-          thumbnail_url: thumbnailUrl
+          thumbnail_url: thumbnailUrl || null,
         }),
       });
 
-      const data = await response.json();
+      const data = await parseResponse(response);
 
       if (!response.ok) {
         throw new Error(data.error || 'Erro ao criar trilha');
@@ -59,7 +99,6 @@ export default function AdminCursosPage() {
 
       router.push(`/admin/cursos/${data.id}`);
     } catch (error: any) {
-      console.error(error);
       alert(error.message || 'Erro ao criar trilha.');
     } finally {
       setIsCreating(false);
@@ -68,10 +107,11 @@ export default function AdminCursosPage() {
 
   const deleteCourse = async (id: string) => {
     if (!confirm('Tem certeza que deseja apagar esta trilha?')) return;
+
     try {
       const response = await fetch(`/api/admin/courses?id=${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error('Erro ao apagar trilha');
-      setCourses(courses.filter(c => c.id !== id));
+      setCourses((current) => current.filter((course) => course.id !== id));
     } catch (error: any) {
       alert(error.message);
     }
@@ -79,55 +119,65 @@ export default function AdminCursosPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-stone-900">Gestão de Trilhas</h1>
-          <p className="text-stone-500">Crie e organize as trilhas e vídeos da plataforma.</p>
+          <h1 className="text-3xl font-serif font-bold text-stone-900">Gestao de Trilhas</h1>
+          <p className="text-stone-500">Crie e organize as trilhas e aulas da plataforma.</p>
         </div>
-        <button 
+        <button
           onClick={() => setShowModal(true)}
-          className="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-primary-700 transition"
+          className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 font-bold text-white transition hover:bg-primary-700"
         >
           <Plus size={20} /> Nova Trilha
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-4 border-b border-stone-200 bg-stone-50/50 flex gap-4">
-          <div className="relative flex-1 max-w-md">
+      <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
+        <div className="flex gap-4 border-b border-stone-200 bg-stone-50/50 p-4">
+          <div className="relative max-w-md flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-            <input type="text" placeholder="Buscar trilhas..." className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 outline-none focus:ring-2 focus:ring-primary-500" />
+            <input
+              type="text"
+              placeholder="Buscar trilhas..."
+              className="w-full rounded-lg border border-stone-200 py-2 pl-10 pr-4 outline-none focus:ring-2 focus:ring-primary-500"
+            />
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 flex justify-center text-stone-400"><Loader2 className="animate-spin" size={32} /></div>
+          <div className="flex justify-center p-12 text-stone-400">
+            <Loader2 className="animate-spin" size={32} />
+          </div>
         ) : courses.length === 0 ? (
-          <div className="p-16 text-center flex flex-col items-center">
-            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center text-stone-400 mb-4"><BookOpen size={32} /></div>
-            <h3 className="text-lg font-bold text-stone-800 mb-1">Nenhuma trilha encontrada</h3>
-            <p className="text-stone-500 max-w-sm mb-6">Você ainda não tem cursos cadastrados. Clique no botão acima para começar.</p>
+          <div className="flex flex-col items-center p-16 text-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 text-stone-400">
+              <BookOpen size={32} />
+            </div>
+            <h3 className="mb-1 text-lg font-bold text-stone-800">Nenhuma trilha encontrada</h3>
+            <p className="mb-6 max-w-sm text-stone-500">
+              Voce ainda nao tem cursos cadastrados. Clique no botao acima para comecar.
+            </p>
           </div>
         ) : (
           <table className="w-full text-left">
-            <thead className="bg-stone-50 text-stone-500 text-xs uppercase font-bold border-b border-stone-200">
+            <thead className="border-b border-stone-200 bg-stone-50 text-xs font-bold uppercase text-stone-500">
               <tr>
                 <th className="px-6 py-4">Trilha</th>
-                <th className="px-6 py-4">Nível</th>
+                <th className="px-6 py-4">Nivel</th>
                 <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Ações</th>
+                <th className="px-6 py-4 text-right">Acoes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100">
-              {courses.map(course => (
-                <tr key={course.id} className="hover:bg-stone-50 transition-colors">
+              {courses.map((course) => (
+                <tr key={course.id} className="transition-colors hover:bg-stone-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="h-12 w-20 rounded-lg overflow-hidden border border-stone-200 bg-stone-100 flex-shrink-0">
+                      <div className="h-12 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-stone-200 bg-stone-100">
                         {course.thumbnail_url ? (
-                          <img src={course.thumbnail_url} alt="" className="w-full h-full object-cover" />
+                          <img src={course.thumbnail_url} alt="" className="h-full w-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-stone-400">
+                          <div className="flex h-full w-full items-center justify-center text-stone-400">
                             <BookOpen size={16} />
                           </div>
                         )}
@@ -136,19 +186,29 @@ export default function AdminCursosPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-stone-600">
-                    <span className="bg-stone-100 text-stone-600 px-3 py-1 rounded-full text-xs font-bold">{course.level}</span>
+                    <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
+                      {course.level}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
-                    {course.is_published 
-                      ? <span className="text-green-600 font-bold text-sm flex items-center gap-1">● Publicado</span> 
-                      : <span className="text-amber-500 font-bold text-sm flex items-center gap-1">● Rascunho</span>}
+                    {course.is_published ? (
+                      <span className="flex items-center gap-1 text-sm font-bold text-green-600">● Publicado</span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-sm font-bold text-amber-500">● Rascunho</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center gap-3 justify-end">
-                      <Link href={`/admin/cursos/${course.id}`} className="text-primary-600 hover:text-primary-800 font-bold flex items-center gap-1">
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/cursos/${course.id}`}
+                        className="flex items-center gap-1 font-bold text-primary-600 hover:text-primary-800"
+                      >
                         <Edit3 size={16} /> Editar
                       </Link>
-                      <button onClick={() => deleteCourse(course.id)} className="text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded-lg transition">
+                      <button
+                        onClick={() => deleteCourse(course.id)}
+                        className="rounded-lg p-1.5 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -160,58 +220,122 @@ export default function AdminCursosPage() {
         )}
       </div>
 
-      {/* Modal Nova Trilha */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
-            <div className="p-6 border-b border-stone-200 flex justify-between items-center bg-stone-50">
-              <h2 className="font-bold text-xl text-stone-900">Criar Nova Trilha</h2>
-              <button onClick={() => setShowModal(false)} className="text-stone-400 hover:text-stone-600 text-2xl leading-none">&times;</button>
+      {showModal ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50 p-6">
+              <h2 className="text-xl font-bold text-stone-900">Criar Nova Trilha</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-2xl leading-none text-stone-400 hover:text-stone-600"
+              >
+                &times;
+              </button>
             </div>
-            <form onSubmit={handleCreateCourse} className="p-6 space-y-4">
+
+            <form onSubmit={handleCreateCourse} className="space-y-4 p-6">
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-1">Título da Trilha</label>
-                <input required type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Ex: Bioética Avançada" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-stone-700 mb-1">Descrição</label>
-                <textarea required value={description} onChange={e => setDescription(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:ring-2 focus:ring-primary-500 outline-none resize-none h-24" placeholder="Fale um pouco sobre o curso..." />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-stone-700 mb-1">Nível de Dificuldade</label>
-                  <select value={level} onChange={e => setLevel(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:ring-2 focus:ring-primary-500 outline-none bg-white">
-                    <option>Iniciante</option>
-                    <option>Intermediário</option>
-                    <option>Avançado</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-stone-700 mb-1">Preço (R$)</label>
-                  <input type="number" step="0.01" min="0" value={price} onChange={e => setPrice(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:ring-2 focus:ring-primary-500 outline-none bg-white" placeholder="0.00" />
-                </div>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Titulo da Trilha</label>
+                <input
+                  required
+                  type="text"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  className="w-full rounded-lg border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Ex: Casa com direcao"
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-stone-700 mb-1">URL da Imagem de Capa</label>
-                <input type="url" value={thumbnailUrl} onChange={e => setThumbnailUrl(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:ring-2 focus:ring-primary-500 outline-none" placeholder="https://exemplo.com/imagem.jpg" />
-                {thumbnailUrl && (
-                  <div className="mt-2 relative h-32 w-full rounded-xl overflow-hidden border border-stone-200 bg-stone-50">
-                    <img src={thumbnailUrl} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                )}
+                <label className="mb-1 block text-sm font-bold text-stone-700">Descricao</label>
+                <textarea
+                  required
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  className="h-24 w-full resize-none rounded-lg border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500"
+                  placeholder="Fale um pouco sobre a trilha..."
+                />
               </div>
-              
-              <div className="pt-4 flex justify-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl font-bold text-stone-500 hover:bg-stone-100 transition">Cancelar</button>
-                <button type="submit" disabled={isCreating} className="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-primary-700 transition disabled:opacity-50">
+
+              <div>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Nivel de Dificuldade</label>
+                <select
+                  value={level}
+                  onChange={(event) => setLevel(event.target.value)}
+                  className="w-full rounded-lg border border-stone-200 bg-white px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option>Iniciante</option>
+                  <option>Intermediario</option>
+                  <option>Avancado</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-stone-700">Imagem de Capa</label>
+                <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4">
+                  <div className="flex flex-col gap-4">
+                    <div className="relative h-32 w-full overflow-hidden rounded-xl border border-stone-200 bg-white">
+                      {thumbnailUrl ? (
+                        <img src={thumbnailUrl} alt="Preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full items-center justify-center gap-2 text-sm text-stone-400">
+                          <ImageIcon size={18} />
+                          Nenhuma capa enviada
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700">
+                        {isUploadingThumbnail ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                        {isUploadingThumbnail ? 'Enviando...' : 'Enviar capa'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/gif"
+                          className="hidden"
+                          onChange={(event) => {
+                            const file = event.target.files?.[0] || null;
+                            void handleThumbnailUpload(file);
+                            event.currentTarget.value = '';
+                          }}
+                        />
+                      </label>
+
+                      {thumbnailUrl ? (
+                        <button
+                          type="button"
+                          onClick={() => setThumbnailUrl('')}
+                          className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-bold text-stone-600 transition hover:bg-stone-100"
+                        >
+                          <X size={16} />
+                          Remover
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-xl px-5 py-2.5 font-bold text-stone-500 transition hover:bg-stone-100"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreating}
+                  className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 font-bold text-white transition hover:bg-primary-700 disabled:opacity-50"
+                >
                   {isCreating ? <Loader2 size={18} className="animate-spin" /> : 'Salvar e Continuar'}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
