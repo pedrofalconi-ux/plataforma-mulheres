@@ -6,23 +6,59 @@ export async function POST(request: Request) {
     const { userId, fullName, email } = await request.json();
 
     if (!userId || !fullName || !email) {
-      return NextResponse.json({ error: 'Dados obrigatórios ausentes' }, { status: 400 });
+      return NextResponse.json({ error: 'Dados obrigatorios ausentes' }, { status: 400 });
     }
 
     const adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
-    // Verifica se perfil já existe
-    const { data: existing } = await adminClient
+    const {
+      data: { user },
+      error: authUserError,
+    } = await adminClient.auth.admin.getUserById(userId);
+
+    if (authUserError) {
+      return NextResponse.json({ error: authUserError.message }, { status: 500 });
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Usuario ainda nao existe em auth.users. Tente novamente em instantes.' },
+        { status: 409 },
+      );
+    }
+
+    const { data: existing, error: existingError } = await adminClient
       .from('profiles')
-      .select('id')
+      .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
+
+    if (existingError) {
+      throw existingError;
+    }
 
     if (existing) {
-      return NextResponse.json({ message: 'Perfil já existe' });
+      const needsUpdate = existing.full_name !== fullName || existing.email !== email;
+
+      if (!needsUpdate) {
+        return NextResponse.json(existing);
+      }
+
+      const { data: updated, error: updateError } = await adminClient
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          email,
+        })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+      return NextResponse.json(updated);
     }
 
     const { data, error } = await adminClient
@@ -30,7 +66,7 @@ export async function POST(request: Request) {
       .insert({
         id: userId,
         full_name: fullName,
-        email: email,
+        email,
         role: 'student',
       })
       .select()
