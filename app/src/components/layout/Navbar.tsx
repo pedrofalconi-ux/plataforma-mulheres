@@ -1,220 +1,17 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import {
-  BookOpen,
-  Calendar,
-  ChevronDown,
-  Home,
-  Info,
-  LayoutDashboard,
-  LogOut,
-  Map,
-  Menu,
-  MessageSquare,
-  Newspaper,
-  User as UserIcon,
-  Users,
-  X,
-} from 'lucide-react';
+import { BookOpen, LogOut, Menu, User as UserIcon, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { BRAND_NAME } from '@/lib/constants';
-
-type Item = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-};
-
-const communityItems: Item[] = [
-  { href: '/forum', label: 'Comunidade', icon: Users },
-  { href: '/trilhas', label: 'Minhas Trilhas', icon: BookOpen },
-];
-
-const platformItems: Item[] = [
-  { href: '/trilhas', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/eventos', label: 'Eventos', icon: Calendar },
-];
+import { BRAND_EMAIL, BRAND_NAME } from '@/lib/constants';
 
 function BrandMark() {
   return (
     <div className="flex items-center gap-2">
-      <span className="font-serif text-2xl font-bold tracking-tight text-primary-900">{BRAND_NAME}</span>
+      <span className="font-serif text-[2.2rem] font-semibold leading-none tracking-tight text-primary-900">{BRAND_NAME}</span>
     </div>
-  );
-}
-
-function DesktopDropdown({
-  label,
-  items,
-  pathname,
-}: {
-  label: string;
-  items: Item[];
-  pathname: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const active = items.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
-
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, []);
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className={`motion-tab flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-          active || open ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-        }`}
-        data-active={active || open}
-      >
-        <span>{label}</span>
-        <ChevronDown size={16} className={`transition ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open ? (
-        <div className="absolute left-0 top-[calc(100%+0.7rem)] w-64 rounded-3xl border border-primary-900/10 bg-white/95 p-2 shadow-[0_20px_60px_rgba(22,63,46,0.16)] backdrop-blur">
-          {items.map((item) => {
-            const itemActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-                  itemActive ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-                }`}
-              >
-                <Icon size={17} className={itemActive ? 'text-primary-700' : 'text-stone-500'} />
-                <span className="font-semibold">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function AccountMenu({
-  firstName,
-  showAdmin,
-  onLogout,
-  pathname,
-}: {
-  firstName?: string;
-  showAdmin: boolean;
-  onLogout: () => void;
-  pathname: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    return () => document.removeEventListener('mousedown', handlePointerDown);
-  }, []);
-
-  const profileActive = pathname === '/perfil' || pathname.startsWith('/perfil/');
-  const adminActive = pathname === '/admin' || pathname.startsWith('/admin/');
-
-  return (
-    <div ref={rootRef} className="relative hidden items-center gap-2 lg:flex">
-
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className={`motion-button flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-          open ? 'border-primary-200 bg-primary-50 text-primary-800' : 'border-primary-900/8 bg-white/80 text-stone-700 hover:bg-primary-50'
-        }`}
-      >
-        <UserIcon size={16} />
-        <span>{firstName ? firstName : 'Conta'}</span>
-        <ChevronDown size={16} className={`transition ${open ? 'rotate-180' : ''}`} />
-      </button>
-
-      {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.7rem)] w-60 rounded-3xl border border-primary-900/10 bg-white/95 p-2 shadow-[0_20px_60px_rgba(22,63,46,0.16)] backdrop-blur">
-          <Link
-            href="/perfil"
-            onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-              profileActive ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-            }`}
-          >
-            <UserIcon size={17} className={profileActive ? 'text-primary-700' : 'text-stone-500'} />
-            <span className="font-semibold">Meu perfil</span>
-          </Link>
-
-          {showAdmin ? (
-            <Link
-              href="/admin"
-              onClick={() => setOpen(false)}
-              className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-                adminActive ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-              }`}
-            >
-              <LayoutDashboard size={17} className={adminActive ? 'text-primary-700' : 'text-stone-500'} />
-              <span className="font-semibold">Painel admin</span>
-            </Link>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onLogout();
-            }}
-            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-primary-600 transition hover:bg-primary-50"
-          >
-            <LogOut size={17} />
-            <span>Sair</span>
-          </button>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function MobileLink({
-  href,
-  label,
-  icon: Icon,
-  active,
-  onNavigate,
-}: Item & { active: boolean; onNavigate: () => void }) {
-  return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-        active ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-      }`}
-    >
-      <Icon size={17} className={active ? 'text-primary-700' : 'text-stone-500'} />
-      <span>{label}</span>
-    </Link>
   );
 }
 
@@ -223,49 +20,63 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'admin';
-  const firstName = user?.name?.split(' ')[0];
+  const firstName = user?.name?.split(' ')[0] || 'Conta';
+
+  const navLinks = [
+    { href: '/', label: 'Inicio' },
+    { href: '/sobre', label: 'Sobre' },
+    { href: '/trilhas', label: 'Aprendizado' },
+    { href: '/blog', label: 'Papelaria' },
+  ];
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
 
   return (
-    <nav className="sticky top-0 z-50 px-3 py-3 sm:px-5">
-      <div className="glass-panel motion-float motion-glow mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[28px] px-4 py-3 sm:px-6">
+    <nav className="site-header sticky top-0 z-50">
+      <div className="site-header-inner">
         <Link href="/" className="flex min-w-0 items-center">
           <BrandMark />
         </Link>
 
-        <div className="hidden items-center gap-1 rounded-full border border-primary-900/8 bg-white/65 p-1 lg:flex">
-          <Link
-            href="/"
-            className={`motion-tab rounded-full px-4 py-2 text-sm font-semibold transition ${
-              isActive('/') ? 'bg-primary-100 text-primary-800' : 'text-stone-700 hover:bg-primary-50'
-            }`}
-            data-active={isActive('/')}
-          >
-            Inicio
-          </Link>
-          <DesktopDropdown label="Comunidade" items={communityItems} pathname={pathname} />
-          {user ? <DesktopDropdown label="Plataforma" items={platformItems} pathname={pathname} /> : null}
+        <div className="hidden items-center gap-8 lg:flex">
+          {navLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="header-link"
+              data-active={isActive(item.href)}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <a href={`mailto:${BRAND_EMAIL}`} className="header-link">
+            Contato
+          </a>
         </div>
 
         <div className="flex items-center gap-2">
           {user ? (
-            <AccountMenu
-              firstName={firstName}
-              showAdmin={isAdmin}
-              onLogout={logout}
-              pathname={pathname}
-            />
+            <div className="hidden items-center gap-2 lg:flex">
+              <Link href="/perfil" className="header-link" data-active={isActive('/perfil')}>
+                {firstName}
+              </Link>
+              {isAdmin ? (
+                <Link href="/admin" className="button-secondary border border-primary-900/20 !px-4 !py-3 !text-primary-900">
+                  Admin
+                </Link>
+              ) : null}
+              <button type="button" onClick={logout} className="button-secondary border border-primary-900/20 !px-4 !py-3 !text-primary-900">
+                <LogOut size={16} />
+                Sair
+              </button>
+            </div>
           ) : (
             <div className="hidden items-center gap-2 lg:flex">
-              <Link href="/login" className="rounded-full px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-primary-50">
+              <Link href="/login" className="header-link" data-active={isActive('/login')}>
                 Entrar
               </Link>
-              <Link
-                href="/cadastro"
-                className="motion-button rounded-full bg-primary-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary-700/20 hover:bg-primary-800"
-              >
-                Comecar
+              <Link href="/cadastro" className="button-primary">
+                Acessar plataforma
               </Link>
             </div>
           )}
@@ -273,7 +84,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setIsOpen((current) => !current)}
-            className="rounded-2xl bg-primary-50 p-3 text-primary-800 lg:hidden"
+            className="border border-primary-900/15 bg-white p-3 text-primary-900 lg:hidden"
             aria-label="Abrir menu"
           >
             {isOpen ? <X size={22} /> : <Menu size={22} />}
@@ -282,45 +93,48 @@ export default function Navbar() {
       </div>
 
       {isOpen ? (
-        <div className="glass-panel motion-modal mx-auto mt-3 max-w-7xl rounded-[28px] p-4 lg:hidden">
-          <div className="grid gap-2">
-            <MobileLink href="/" label="Inicio" icon={Home} active={isActive('/')} onNavigate={() => setIsOpen(false)} />
-
-            <div className="px-3 pt-3 text-[11px] font-bold uppercase tracking-[0.2em] text-primary-600">Comunidade</div>
-            {communityItems.map((item) => (
-              <MobileLink key={item.href} {...item} active={isActive(item.href)} onNavigate={() => setIsOpen(false)} />
+        <div className="border-t border-primary-900/10 bg-[#f7f1ec] px-4 py-5 lg:hidden">
+          <div className="mx-auto grid max-w-7xl gap-4">
+            {navLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className="border-b border-primary-900/8 pb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary-900"
+              >
+                {item.label}
+              </Link>
             ))}
+            <a href={`mailto:${BRAND_EMAIL}`} className="border-b border-primary-900/8 pb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary-900">
+              Contato
+            </a>
 
             {user ? (
-              <>
-                <div className="px-3 pt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-primary-600">Plataforma</div>
-                {platformItems.map((item) => (
-                  <MobileLink key={item.href} {...item} active={isActive(item.href)} onNavigate={() => setIsOpen(false)} />
-                ))}
-                <div className="px-3 pt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-primary-600">Conta</div>
-                <MobileLink href="/perfil" label="Meu perfil" icon={UserIcon} active={isActive('/perfil')} onNavigate={() => setIsOpen(false)} />
+              <div className="grid gap-3 pt-3">
+                <Link href="/perfil" onClick={() => setIsOpen(false)} className="flex items-center gap-3 border border-primary-900/10 px-4 py-4 text-sm font-semibold text-primary-900">
+                  <UserIcon size={18} />
+                  Meu perfil
+                </Link>
+                <Link href="/trilhas" onClick={() => setIsOpen(false)} className="flex items-center gap-3 border border-primary-900/10 px-4 py-4 text-sm font-semibold text-primary-900">
+                  <BookOpen size={18} />
+                  Meu aprendizado
+                </Link>
                 {isAdmin ? (
-                  <MobileLink href="/admin" label="Painel admin" icon={LayoutDashboard} active={isActive('/admin')} onNavigate={() => setIsOpen(false)} />
+                  <Link href="/admin" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
+                    Admin
+                  </Link>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                >
-                  <LogOut size={17} />
-                  <span>Sair</span>
+                <button type="button" onClick={() => { logout(); setIsOpen(false); }} className="button-primary !justify-center">
+                  Sair
                 </button>
-              </>
+              </div>
             ) : (
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href="/login" onClick={() => setIsOpen(false)} className="rounded-2xl border border-primary-900/10 px-4 py-3 text-center text-sm font-semibold text-stone-700">
+              <div className="grid gap-3 pt-3">
+                <Link href="/login" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
                   Entrar
                 </Link>
-                <Link href="/cadastro" onClick={() => setIsOpen(false)} className="rounded-2xl bg-primary-700 px-4 py-3 text-center text-sm font-bold text-white">
-                  Comecar
+                <Link href="/cadastro" onClick={() => setIsOpen(false)} className="button-primary !justify-center">
+                  Acessar plataforma
                 </Link>
               </div>
             )}

@@ -8,9 +8,7 @@ import {
   LayoutDashboard,
   Shield,
   ChevronLeft,
-  MapPin,
   Users,
-  CalendarDays,
   FileText,
   Newspaper,
 } from 'lucide-react';
@@ -28,8 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navLinks: AdminLink[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/eventos', label: 'Gestão de Eventos', icon: CalendarDays },
-    { href: '/admin/cursos', label: 'Gestão de Trilhas', icon: BookOpen },
+    { href: '/admin/cursos', label: 'Gestao de Trilhas', icon: BookOpen },
     { href: '/admin/blog', label: 'Blog Engine', icon: Newspaper },
     { href: '/admin/talentos', label: 'Banco de Talentos', icon: Users },
     { href: '/admin/institucional', label: 'Painel Institucional', icon: FileText },
@@ -49,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex-1 space-y-2 px-4 py-6">
           {navLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = link.href === '/admin' 
-              ? pathname === '/admin' 
+            const isActive = link.href === '/admin'
+              ? pathname === '/admin'
               : pathname === link.href || pathname.startsWith(`${link.href}/`);
 
             return (

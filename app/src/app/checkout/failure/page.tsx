@@ -19,13 +19,13 @@ export default function CheckoutFailurePage() {
         </p>
         <div className="grid gap-4">
           <Link
-            href="/trilhas"
+            href="/checkout"
             className="flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-6 py-3 font-bold text-white transition-all hover:bg-primary-700 shadow-md"
           >
             Tentar Novamente <RefreshCw size={18} />
           </Link>
           <Link
-            href="/sobre/suporte"
+            href="/sobre"
             className="text-sm font-medium text-stone-500 hover:text-stone-700"
           >
             Precisa de ajuda? Fale conosco

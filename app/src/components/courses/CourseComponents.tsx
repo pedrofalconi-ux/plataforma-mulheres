@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, BookOpen, Loader2, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ArrowRight, Clock3, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
-import { BRAND_NAME } from '@/lib/constants';
+import { EditorialButtonLink, EditorialPanel, PageSection, SectionIntro } from '@/components/brand/Editorial';
 
-type DashboardCourse = {
+type LearningCourse = {
   id: string;
   slug: string;
   title: string;
@@ -23,31 +22,22 @@ type DashboardCourse = {
   durationMinutes: number;
 };
 
-const TESTIMONIALS = [
-  {
-    id: 't1',
-    name: 'Maria Silva',
-    text: 'A ordem no meu lar transformou não só a rotina, mas a paz da minha família. Sou outra mulher depois dessa jornada.',
-    role: 'Aluna da Comunidade'
-  },
-  {
-    id: 't2',
-    name: 'Ana Oliveira',
-    text: 'Educar com intencionalidade me deu as ferramentas que eu buscava há anos. Nathi tem uma profundidade rara.',
-    role: 'Mãe de 3 filhos'
-  },
-  {
-    id: 't3',
-    name: 'Julia Santos',
-    text: 'O equilíbrio entre vocação e lar ficou muito mais claro para mim. Recomendo a todas as minhas amigas.',
-    role: 'Empreendedora'
-  }
-];
-
 const FALLBACK_THUMBNAIL =
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80';
 
-function CourseThumbnail({ src, alt, fill, className, sizes }: { src: string, alt: string, fill?: boolean, className?: string, sizes?: string }) {
+function CourseThumbnail({
+  src,
+  alt,
+  fill,
+  className,
+  sizes,
+}: {
+  src: string;
+  alt: string;
+  fill?: boolean;
+  className?: string;
+  sizes?: string;
+}) {
   const [imgSrc, setImgSrc] = useState(src);
 
   useEffect(() => {
@@ -67,12 +57,92 @@ function CourseThumbnail({ src, alt, fill, className, sizes }: { src: string, al
   );
 }
 
-export function CourseDashboard() {
-  const [courses, setCourses] = useState<DashboardCourse[]>([]);
+function formatDuration(durationMinutes: number) {
+  if (!durationMinutes) return 'Ritmo livre';
+  const hours = Math.floor(durationMinutes / 60);
+  if (hours === 0) return `${durationMinutes} min`;
+  return `${hours}h${durationMinutes % 60 ? ` ${durationMinutes % 60}min` : ''}`;
+}
+
+function ProgressLine({ progress }: { progress: number }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-[0.2em] text-primary-900/45">
+        <span>Progresso</span>
+        <span>{progress}%</span>
+      </div>
+      <div className="h-2 border border-primary-900/10 bg-primary-50 p-[2px]">
+        <div className="h-full bg-primary-900" style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function FeaturedCourse({ course }: { course: LearningCourse }) {
+  return (
+    <div className="grid gap-8 border border-primary-900/12 bg-white lg:grid-cols-[0.95fr_1.05fr]">
+      <div className="relative min-h-[360px] overflow-hidden">
+        <CourseThumbnail src={course.thumbnail} alt={course.title} fill className="object-cover" sizes="(min-width: 1024px) 50vw, 100vw" />
+      </div>
+      <div className="flex flex-col justify-between p-8 lg:p-10">
+        <div>
+          <p className="editorial-kicker">{course.level}</p>
+          <h3 className="mt-4 text-5xl leading-none text-primary-900">{course.title}</h3>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-primary-900/72">{course.description}</p>
+        </div>
+
+        <div className="mt-8 space-y-6">
+          <ProgressLine progress={course.progress} />
+          <div className="flex flex-wrap gap-4 border-t border-primary-900/10 pt-5 text-sm text-primary-900/68">
+            <span>{course.totalModules || 0} modulos</span>
+            <span>{formatDuration(course.durationMinutes)}</span>
+          </div>
+          <EditorialButtonLink href={`/trilhas/${course.id}/aula`} className="w-full sm:w-auto">
+            Continuar aprendizado <ArrowRight size={18} />
+          </EditorialButtonLink>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CourseCard({ course }: { course: LearningCourse }) {
+  const href = course.isEnrolled ? `/trilhas/${course.id}/aula` : `/cursos/${course.slug}`;
+
+  return (
+    <Link href={href} className="group block border border-primary-900/10 bg-white transition-colors hover:border-primary-900/30">
+      <div className="relative h-56 overflow-hidden border-b border-primary-900/10">
+        <CourseThumbnail src={course.thumbnail} alt={course.title} fill className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="(min-width: 768px) 33vw, 100vw" />
+      </div>
+      <div className="space-y-5 p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="editorial-kicker">{course.isEnrolled ? 'Em andamento' : 'Disponivel'}</p>
+            <h3 className="mt-3 text-3xl leading-none text-primary-900">{course.title}</h3>
+          </div>
+          <span className="border border-primary-900/10 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary-900/65">
+            {course.level}
+          </span>
+        </div>
+
+        <p className="line-clamp-3 text-sm leading-7 text-primary-900/72">{course.description}</p>
+
+        {course.isEnrolled ? <ProgressLine progress={course.progress} /> : null}
+
+        <div className="flex items-center justify-between border-t border-primary-900/10 pt-4 text-sm text-primary-900/68">
+          <span>{course.totalModules || 0} modulos</span>
+          <span>{course.price > 0 ? `R$ ${course.price.toFixed(2).replace('.', ',')}` : 'Acesso incluso'}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+export function LearningHub() {
+  const [courses, setCourses] = useState<LearningCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
-  const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
@@ -99,14 +169,14 @@ export function CourseDashboard() {
           enrollmentsData = enrollments || [];
         }
 
-        const mappedCourses: DashboardCourse[] = (coursesData || []).map((course: any) => {
+        const mappedCourses: LearningCourse[] = (coursesData || []).map((course: any) => {
           const enrollment = enrollmentsData.find((item) => item.course_id === course.id);
 
           return {
             id: course.id,
             slug: course.slug,
             title: course.title,
-            description: course.description || 'Instruções para sua jornada.',
+            description: course.description || 'Instrucoes para sua jornada.',
             level: course.level || 'Essencial',
             thumbnail: course.thumbnail_url || FALLBACK_THUMBNAIL,
             progress: enrollment?.progress_percent || 0,
@@ -120,189 +190,108 @@ export function CourseDashboard() {
         setCourses(mappedCourses);
       } catch (err: any) {
         console.error('Fetch Error:', err);
-        setError('Não foi possível carregar suas trilhas agora.');
+        setError('Nao foi possivel carregar suas trilhas agora.');
       } finally {
         setLoading(false);
       }
     }
 
     fetchCourses();
-  }, [supabase]);
+  }, [supabase, user]);
 
   const myCourses = courses.filter((course) => course.isEnrolled);
-  const activeCourse = myCourses.find(c => c.progress > 0 && c.progress < 100) || myCourses[0] || null;
+  const activeCourse = myCourses.find((course) => course.progress > 0 && course.progress < 100) || myCourses[0] || null;
 
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center bg-[#F7F2ED]">
-        <Loader2 className="animate-spin text-[#DBA1A2]" size={40} />
+      <div className="flex min-h-[400px] items-center justify-center bg-[#f7f1ec]">
+        <Loader2 className="animate-spin text-primary-700" size={40} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F2ED] pb-20">
-      <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8">
-        <header className="mb-20 text-center lg:text-left transition-all">
-          <span className="text-[#DBA1A2] text-sm font-bold tracking-[0.2em] uppercase">Seu Atelier Digital</span>
-          <h1 className="mt-4 font-serif text-5xl font-medium text-[#422523] md:text-6xl tracking-tight">
-            Minhas Trilhas
-          </h1>
-          <p className="mt-6 text-[#422523]/60 max-w-2xl text-lg leading-relaxed font-light">
-            Bem-vinda ao seu espaço de evolução. Continue sua jornada de autoconhecimento e virtude com calma e foco absoluto.
-          </p>
-          <div className="mt-8 h-1 w-24 bg-[#DBA1A2] rounded-full mx-auto lg:mx-0 opacity-40" />
-        </header>
+    <div className="pb-20">
+      <PageSection className="pt-12">
+        <SectionIntro
+          eyebrow="Aprendizado"
+          title="Uma area mais limpa para acompanhar o que voce estuda."
+          description="Sem visual inflado, sem blocos artificiais. Apenas o que importa: continuar, revisar e escolher a proxima trilha."
+        />
 
-        <div className="grid gap-20 lg:grid-cols-[0.8fr_1.2fr] items-start">
-          {/* Block A: Testimonials / Community (Editorial Style) */}
-          <aside className="space-y-12">
-            <div className="flex items-center gap-4 border-b border-[#E7D8D8] pb-6">
-              <Sparkles className="text-[#DBA1A2]" size={28} />
-              <h2 className="font-serif text-3xl font-medium text-[#422523]">Comunidade</h2>
-            </div>
-            
-            <div className="space-y-10">
-              {TESTIMONIALS.map((t, idx) => (
-                <div key={t.id} className="group relative">
-                  <div className="bg-white p-8 rounded-[36px] border border-[#E7D8D8] shadow-[0_10px_40px_rgba(66,37,35,0.03)] group-hover:shadow-[0_20px_60px_rgba(66,37,35,0.08)] transition-all duration-700 hover:-translate-y-1">
-                    <p className="font-serif italic text-[#422523] leading-relaxed text-base">
-                      &quot;{t.text}&quot;
-                    </p>
-                    <div className="mt-6 pt-6 border-t border-[#F7F2ED] flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-[#Vanilla Ice] border border-[#DBA1A2]/20 flex items-center justify-center text-[#DBA1A2] font-bold text-xs">
-                        {t.name.charAt(0)}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-[#422523]">{t.name}</span>
-                        <span className="text-[10px] text-[#DBA1A2] uppercase tracking-widest font-black mt-0.5">{t.role}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {error ? (
+          <EditorialPanel className="mt-10 border-red-200 bg-red-50 text-red-700">
+            {error}
+          </EditorialPanel>
+        ) : null}
 
-            <div className="pt-6">
-               <Link href="/forum" className="group flex items-center gap-3 text-xs font-black tracking-widest text-[#422523] hover:text-[#DBA1A2] transition-colors">
-                  EXPLORAR COMUNIDADE <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-               </Link>
-            </div>
-          </aside>
-
-          {/* Block B: Course Journey (Education Focused) */}
-          <main className="space-y-12">
-            <div className="flex items-center gap-4 border-b border-[#E7D8D8] pb-6">
-              <BookOpen className="text-[#DBA1A2]" size={28} />
-              <h2 className="font-serif text-3xl font-medium text-[#422523]">Continuar Assistindo</h2>
-            </div>
-
+        <div className="mt-12 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-10">
             {activeCourse ? (
-              <div className="group relative bg-white rounded-[48px] border border-[#E7D8D8] overflow-hidden shadow-[0_30px_90px_rgba(66,37,35,0.06)] hover:shadow-[0_40px_110px_rgba(66,37,35,0.12)] transition-all duration-700">
-                <div className="grid md:grid-cols-[0.9fr_1.1fr]">
-                  <div className="relative h-64 md:h-full min-h-[400px] overflow-hidden">
-                    <CourseThumbnail 
-                      src={activeCourse.thumbnail} 
-                      alt={activeCourse.title} 
-                      fill 
-                      className="object-cover transition-transform duration-1000 group-hover:scale-105" 
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#422523]/20 to-transparent" />
-                  </div>
-                  
-                  <div className="p-10 md:p-14 flex flex-col justify-center bg-white relative">
-                    <div className="absolute top-10 right-10">
-                      <div className="h-12 w-12 rounded-full border-4 border-[#F7F2ED] border-t-[#DBA1A2] animate-[spin_3s_linear_infinite]" />
-                    </div>
-
-                    <span className="px-4 py-1.5 bg-[#F7F2ED] text-[#DBA1A2] text-[11px] font-black tracking-[0.2em] uppercase rounded-full w-fit">
-                      {activeCourse.level}
-                    </span>
-                    
-                    <h3 className="mt-8 font-serif text-4xl font-medium text-[#422523] leading-tight group-hover:text-black transition-colors">
-                      {activeCourse.title}
-                    </h3>
-                    
-                    <p className="mt-6 text-[#422523]/60 text-base leading-relaxed line-clamp-3 font-light">
-                      {activeCourse.description}
-                    </p>
-
-                    <div className="mt-10 space-y-5">
-                      <div className="flex justify-between items-end">
-                        <span className="text-[11px] font-black text-[#422523]/30 uppercase tracking-[0.2em]">Progresso na Trilha</span>
-                        <span className="text-lg font-serif font-bold text-[#422523]">{activeCourse.progress}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-[#F7F2ED] rounded-full overflow-hidden p-0.5 border border-[#E7D8D8]">
-                        <div 
-                          className="h-full bg-gradient-to-r from-[#DBA1A2] to-[#E7D8D8] rounded-full transition-all duration-1500 ease-in-out" 
-                          style={{ width: `${activeCourse.progress}%` }} 
-                        />
-                      </div>
-                    </div>
-
-                    <Link
-                      href={`/trilhas/${activeCourse.id}/aula`}
-                      className="mt-12 inline-flex items-center justify-center gap-4 bg-[#422523] hover:bg-[#2C1917] text-white py-5 px-10 rounded-[24px] font-bold text-lg transition-all active:scale-[0.97] shadow-2xl shadow-[#422523]/30 group-hover:-translate-y-1"
-                    >
-                      Continuar Jornada <ArrowRight size={22} className="transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <FeaturedCourse course={activeCourse} />
             ) : (
-              <div className="bg-white p-20 text-center rounded-[56px] border border-[#E7D8D8] border-dashed shadow-sm">
-                <div className="mx-auto w-24 h-24 bg-[#F7F2ED] rounded-full flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                  <BookOpen className="text-[#DBA1A2]" size={40} />
-                </div>
-                <h3 className="font-serif text-3xl font-medium text-[#422523]">Sua jornada ainda não começou</h3>
-                <p className="mt-6 text-[#422523]/50 max-w-sm mx-auto text-lg leading-relaxed font-light">
-                  Explore nossas trilhas de formação e comece a transformar o seu legado hoje mesmo.
+              <EditorialPanel className="p-10">
+                <p className="editorial-kicker">Sua proxima etapa</p>
+                <h3 className="mt-4 text-4xl leading-none text-primary-900">Seu aprendizado ainda nao comecou.</h3>
+                <p className="mt-5 max-w-2xl text-base leading-8 text-primary-900/72">
+                  Explore as trilhas disponiveis e comece com um caminho que faca sentido para o momento da sua casa e da sua rotina.
                 </p>
-                <Link
-                  href="/trilhas"
-                  className="mt-12 inline-flex items-center gap-3 bg-[#DBA1A2] hover:bg-[#D48F90] px-12 py-6 rounded-[24px] font-bold text-white shadow-2xl shadow-[#DBA1A2]/20 transition-all text-lg"
-                >
-                  Conhecer Coleções <ArrowRight size={22} />
-                </Link>
-              </div>
+                <EditorialButtonLink href="/blog" className="mt-8 w-full sm:w-auto">
+                  Ver materiais da casa
+                </EditorialButtonLink>
+              </EditorialPanel>
             )}
 
-            {myCourses.length > 1 && (
-              <div className="mt-20 space-y-10">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#422523]/30">Suas Coleções</h3>
-                  <div className="h-px flex-1 bg-[#E7D8D8] ml-10 opacity-50" />
+            <div className="space-y-6">
+              <div className="editorial-rule" />
+              <SectionIntro
+                eyebrow="Biblioteca"
+                title="Todas as trilhas publicadas em um unico lugar."
+                description="Se voce ja esta inscrita, continue de onde parou. Se ainda nao entrou, use essa pagina para explorar com calma."
+              />
+            </div>
+          </div>
+
+          <EditorialPanel className="flex h-full flex-col justify-between bg-primary-900 p-8 text-white">
+            <div>
+              <p className="editorial-kicker !text-white/58">Resumo</p>
+              <h3 className="mt-4 text-4xl leading-none text-white">Seu ritmo de estudo agora.</h3>
+              <div className="mt-10 space-y-6 border-t border-white/12 pt-6">
+                <div className="flex items-center justify-between text-sm uppercase tracking-[0.18em] text-white/72">
+                  <span>Trilhas iniciadas</span>
+                  <span>{myCourses.length}</span>
                 </div>
-                
-                <div className="grid gap-8 sm:grid-cols-2">
-                  {myCourses.filter(c => c.id !== activeCourse?.id).map(course => (
-                    <Link 
-                      key={course.id} 
-                      href={`/trilhas/${course.id}/aula`} 
-                      className="group bg-white flex items-center gap-6 p-6 rounded-[36px] border border-[#E7D8D8] hover:border-[#DBA1A2] transition-all hover:shadow-[0_20px_50px_rgba(66,37,35,0.05)]"
-                    >
-                      <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-[20px] bg-[#F7F2ED]">
-                        <CourseThumbnail src={course.thumbnail} alt={course.title} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="truncate font-serif text-xl font-medium text-[#422523] group-hover:text-[#DBA1A2] transition-colors">
-                          {course.title}
-                        </h4>
-                        <div className="mt-3 flex items-center gap-4">
-                          <div className="flex-1 h-1.5 bg-[#F7F2ED] rounded-full overflow-hidden">
-                            <div className="h-full bg-[#DBA1A2]/40 rounded-full transition-all duration-1000" style={{ width: `${course.progress}%` }} />
-                          </div>
-                          <span className="text-[10px] font-black text-[#422523]/40 tracking-wider text-right">{course.progress}%</span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                <div className="flex items-center justify-between text-sm uppercase tracking-[0.18em] text-white/72">
+                  <span>Disponiveis</span>
+                  <span>{courses.length}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm uppercase tracking-[0.18em] text-white/72">
+                  <span>Em andamento</span>
+                  <span>{myCourses.filter((course) => course.progress > 0 && course.progress < 100).length}</span>
                 </div>
               </div>
-            )}
-          </main>
+            </div>
+
+            <div className="mt-10 border-t border-white/12 pt-6">
+              <div className="flex items-center gap-3 text-white/75">
+                <Clock3 size={18} />
+                <p className="text-sm leading-7">
+                  A comunidade continua disponivel em paralelo, mas o foco desta area agora e o seu aprendizado.
+                </p>
+              </div>
+              <Link href="/forum" className="mt-6 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.22em] text-white">
+                Ir para a comunidade <ArrowRight size={16} />
+              </Link>
+            </div>
+          </EditorialPanel>
         </div>
-      </div>
+
+        <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {courses.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      </PageSection>
     </div>
   );
 }

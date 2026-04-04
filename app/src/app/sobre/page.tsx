@@ -3,39 +3,39 @@ import { ArrowRight, HeartHandshake, ShieldCheck, Sparkles, Users } from 'lucide
 import { createAdminClient } from '@/lib/supabase/server';
 
 export const metadata = {
-  title: 'Sobre | Dignare',
+  title: 'Sobre | Nathi Faria',
   description:
-    'Conheça a visão, a linguagem e a proposta da Dignare para formação, comunidade e impacto social.',
+    'Conheca a visao, a linguagem e a proposta da plataforma Nathi Faria.',
 };
 
 const timeline = [
   {
     year: '2026',
-    title: 'Nascimento da marca',
-    text: 'A Dignare surge como uma nova expressão visual e conceitual para unir formação, presença comunitária e impacto social.',
+    title: 'Refinamento da marca',
+    text: 'A plataforma assume uma linguagem mais editorial, mais feminina e mais silenciosa visualmente.',
   },
   {
     year: 'Fase atual',
-    title: 'Plataforma em consolidação',
-    text: 'A experiência evolui com jornadas, observatório, blog, perfis, eventos e ferramentas mais claras de navegação.',
+    title: 'Plataforma em consolidacao',
+    text: 'A experiencia evolui com jornadas de aprendizagem, blog, perfis e uma navegacao mais clara.',
   },
   {
-    year: 'Próximas entregas',
-    title: 'Cuidado e serviços expandidos',
-    text: 'Novas experiências de acompanhamento e suporte serão incorporadas em ciclos, com foco em utilidade real.',
+    year: 'Proximas entregas',
+    title: 'Cuidado e servicos expandidos',
+    text: 'Novas experiencias de acompanhamento e suporte serao incorporadas em ciclos, com foco em utilidade real.',
   },
 ];
 
 const fallback = {
-  hero_title: 'Dignare',
-  hero_subtitle: 'Aprendizagem viva, comunidade pulsante e iniciativas com direção.',
+  hero_title: 'Nathi Faria',
+  hero_subtitle: 'Aprendizagem viva, casa com direcao e uma presenca mais intencional no cotidiano.',
   about_summary:
-    'A plataforma conecta formação, participação comunitária e impacto social com uma linguagem mais humana, contemporânea e serena.',
+    'A plataforma conecta formacao, presenca e conteudo com uma linguagem mais serena, madura e feminina.',
   mission:
-    'Cultivar jornadas de aprendizagem e participação que fortaleçam pessoas, vínculos e iniciativas concretas.',
+    'Cultivar jornadas de aprendizagem que fortaleçam o lar, a presenca e a clareza na vida cotidiana.',
   vision:
-    'Ser uma plataforma de referência em formação comunitária com estética, clareza e profundidade.',
-  values: ['Clareza', 'Cuidado', 'Comunidade', 'Responsabilidade', 'Presença'],
+    'Ser uma referencia em formacao feminina com estetica, profundidade e direcao.',
+  values: ['Clareza', 'Cuidado', 'Presenca', 'Responsabilidade', 'Beleza'],
 };
 
 async function getInstitutionalContent() {
@@ -66,20 +66,18 @@ export default async function SobrePage() {
   const content = await getInstitutionalContent();
 
   const pillars = [
-    { title: 'Missão', text: content.mission, icon: HeartHandshake },
-    { title: 'Visão', text: content.vision, icon: Sparkles },
+    { title: 'Missao', text: content.mission, icon: HeartHandshake },
+    { title: 'Visao', text: content.vision, icon: Sparkles },
     { title: 'Valores', text: content.values.join(', '), icon: ShieldCheck },
   ];
 
   return (
-    <div className="px-4 pb-10 pt-4 sm:px-6 lg:px-8">
-      <section className="hero-sheen mx-auto max-w-7xl overflow-hidden rounded-[36px] px-8 py-18 text-white shadow-[0_28px_90px_rgba(22,63,46,0.18)]">
+    <div className="px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl border border-primary-900/10 bg-white px-8 py-12">
         <div className="max-w-3xl">
-          <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
-            quem somos
-          </span>
-          <h1 className="mt-6 text-5xl font-bold tracking-tight sm:text-6xl">{content.hero_title}</h1>
-          <p className="mt-6 text-lg leading-8 text-primary-100">{content.hero_subtitle}</p>
+          <span className="editorial-kicker">Sobre a marca</span>
+          <h1 className="mt-5 text-6xl leading-none text-primary-900">{content.hero_title}</h1>
+          <p className="mt-6 text-lg leading-9 text-primary-900/72">{content.hero_subtitle}</p>
         </div>
       </section>
 
@@ -88,12 +86,12 @@ export default async function SobrePage() {
           {pillars.map((item) => {
             const Icon = item.icon;
             return (
-              <article key={item.title} className="soft-card rounded-[30px] p-8">
-                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
+              <article key={item.title} className="border border-primary-900/10 bg-white p-8">
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center border border-primary-900/10 bg-primary-50 text-primary-700">
                   <Icon size={24} />
                 </div>
-                <h2 className="text-2xl font-bold text-stone-900">{item.title}</h2>
-                <p className="mt-4 leading-7 text-stone-600">{item.text}</p>
+                <h2 className="text-3xl leading-none text-primary-900">{item.title}</h2>
+                <p className="mt-4 leading-8 text-primary-900/72">{item.text}</p>
               </article>
             );
           })}
@@ -102,39 +100,39 @@ export default async function SobrePage() {
 
       <section className="mx-auto mt-8 max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="soft-card rounded-[30px] p-8">
-            <h2 className="text-3xl font-bold text-stone-900">A história que estamos construindo</h2>
-            <p className="mt-4 max-w-2xl leading-7 text-stone-600">{content.about_summary}</p>
+          <div className="border border-primary-900/10 bg-white p-8">
+            <h2 className="text-4xl leading-none text-primary-900">A historia que estamos construindo</h2>
+            <p className="mt-4 max-w-2xl leading-8 text-primary-900/72">{content.about_summary}</p>
 
             <div className="mt-8 space-y-4">
               {timeline.map((item) => (
-                <div key={item.year} className="rounded-2xl bg-white/80 p-5">
+                <div key={item.year} className="border border-primary-900/10 bg-primary-50/40 p-5">
                   <div className="text-xs font-bold uppercase tracking-[0.2em] text-primary-600">{item.year}</div>
-                  <h3 className="mt-2 text-lg font-bold text-stone-900">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-stone-600">{item.text}</p>
+                  <h3 className="mt-2 text-2xl leading-none text-primary-900">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-primary-900/72">{item.text}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <aside className="rounded-[30px] bg-[linear-gradient(160deg,#173728_0%,#224737_52%,#2d8159_100%)] p-8 text-white shadow-[0_26px_80px_rgba(22,63,46,0.18)]">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-primary-200">
+          <aside className="border border-primary-900/10 bg-primary-900 p-8 text-white">
+            <div className="flex h-12 w-12 items-center justify-center border border-white/16 bg-white/5 text-primary-200">
               <Users size={24} />
             </div>
-            <h2 className="mt-6 text-3xl font-bold">Feita para gente real</h2>
-            <p className="mt-4 leading-7 text-primary-100">
-              A Dignare foi desenhada para quem aprende, serve, organiza, cuida e deseja uma plataforma mais respirável e coerente.
+            <h2 className="mt-6 text-4xl leading-none">Feita para gente real</h2>
+            <p className="mt-4 leading-8 text-white/76">
+              A plataforma foi desenhada para quem aprende, serve, organiza, cuida e deseja uma experiencia mais respiravel e coerente.
             </p>
-            <div className="mt-8 rounded-2xl border border-white/10 bg-white/8 p-5">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-200">Próximo passo</p>
+            <div className="mt-8 border border-white/10 bg-white/5 p-5">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-200">Proximo passo</p>
               <p className="mt-3 text-lg font-semibold">
-                Se você quer sentir o novo fluxo da plataforma, comece pelas trilhas e pela comunidade.
+                Se voce quer sentir o novo fluxo da plataforma, comece pela area de aprendizado.
               </p>
               <Link
                 href="/trilhas"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-primary-900 hover:bg-stone-100"
+                className="mt-6 inline-flex items-center gap-2 border border-white/20 bg-white px-5 py-3 font-bold text-primary-900 hover:bg-stone-100"
               >
-                Ir para as trilhas
+                Ir para aprendizado
                 <ArrowRight size={18} />
               </Link>
             </div>
