@@ -16,8 +16,6 @@ import {
   Menu,
   MessageSquare,
   Newspaper,
-  ShoppingCart,
-  Stethoscope,
   User as UserIcon,
   Users,
   X,
@@ -115,13 +113,11 @@ function DesktopDropdown({
 
 function AccountMenu({
   firstName,
-  cartCount,
   showAdmin,
   onLogout,
   pathname,
 }: {
   firstName?: string;
-  cartCount: number;
   showAdmin: boolean;
   onLogout: () => void;
   pathname: string;
@@ -145,20 +141,6 @@ function AccountMenu({
 
   return (
     <div ref={rootRef} className="relative hidden items-center gap-2 lg:flex">
-      <Link
-        href="/carrinho"
-        className={`motion-button relative flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-          pathname === '/carrinho'
-            ? 'border-primary-200 bg-primary-100 text-primary-800'
-            : 'border-primary-900/8 bg-white/80 text-stone-700 hover:bg-primary-50'
-        }`}
-      >
-        <ShoppingCart size={17} />
-        <span>Carrinho</span>
-        {cartCount > 0 ? (
-          <span className="rounded-full bg-primary-700 px-2 py-0.5 text-xs font-bold text-white">{cartCount}</span>
-        ) : null}
-      </Link>
 
       <button
         type="button"
@@ -221,8 +203,7 @@ function MobileLink({
   icon: Icon,
   active,
   onNavigate,
-  badge,
-}: Item & { active: boolean; onNavigate: () => void; badge?: number }) {
+}: Item & { active: boolean; onNavigate: () => void }) {
   return (
     <Link
       href={href}
@@ -233,39 +214,18 @@ function MobileLink({
     >
       <Icon size={17} className={active ? 'text-primary-700' : 'text-stone-500'} />
       <span>{label}</span>
-      {typeof badge === 'number' && badge > 0 ? (
-        <span className="ml-auto rounded-full bg-primary-700 px-2 py-0.5 text-xs font-bold text-white">{badge}</span>
-      ) : null}
     </Link>
   );
 }
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'admin';
   const firstName = user?.name?.split(' ')[0];
+
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
-
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchCart = async () => {
-      try {
-        const res = await fetch('/api/cart');
-        const data = await res.json();
-        setCartCount(Array.isArray(data) ? data.length : 0);
-      } catch {
-        setCartCount(0);
-      }
-    };
-
-    fetchCart();
-    window.addEventListener('cart-updated', fetchCart);
-    return () => window.removeEventListener('cart-updated', fetchCart);
-  }, [user]);
 
   return (
     <nav className="sticky top-0 z-50 px-3 py-3 sm:px-5">
@@ -292,7 +252,6 @@ export default function Navbar() {
           {user ? (
             <AccountMenu
               firstName={firstName}
-              cartCount={user ? cartCount : 0}
               showAdmin={isAdmin}
               onLogout={logout}
               pathname={pathname}
@@ -339,14 +298,6 @@ export default function Navbar() {
                   <MobileLink key={item.href} {...item} active={isActive(item.href)} onNavigate={() => setIsOpen(false)} />
                 ))}
                 <div className="px-3 pt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-primary-600">Conta</div>
-                <MobileLink
-                  href="/carrinho"
-                  label="Carrinho"
-                  icon={ShoppingCart}
-                  active={isActive('/carrinho')}
-                  onNavigate={() => setIsOpen(false)}
-                  badge={user ? cartCount : 0}
-                />
                 <MobileLink href="/perfil" label="Meu perfil" icon={UserIcon} active={isActive('/perfil')} onNavigate={() => setIsOpen(false)} />
                 {isAdmin ? (
                   <MobileLink href="/admin" label="Painel admin" icon={LayoutDashboard} active={isActive('/admin')} onNavigate={() => setIsOpen(false)} />

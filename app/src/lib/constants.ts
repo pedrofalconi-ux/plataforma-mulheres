@@ -34,30 +34,30 @@ export const MOCK_NEWS: NewsItem[] = [
 export const MOCK_COURSES: Course[] = [
   {
     id: 'c1',
-    title: 'A Ordem no Lar',
-    description: 'Como estabelecer uma rotina que traz paz, clareza e presença para sua família.',
+    title: 'O Ritual da Manhã',
+    description: 'Presença e propósito: como as primeiras horas do dia moldam sua energia criativa e liderança.',
     level: 'Essencial',
-    thumbnail: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800',
+    thumbnail: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800',
     progress: 0,
-    totalModules: 12
-  },
-  {
-    id: 'c2',
-    title: 'Educação com Intencionalidade',
-    description: 'Ferramentas práticas para guiar seus filhos com virtude e sabedoria.',
-    level: 'Intermediário',
-    thumbnail: 'https://images.unsplash.com/photo-1502086223501-7ea2962254de?q=80&w=800',
-    progress: 45,
     totalModules: 8
   },
   {
+    id: 'c2',
+    title: 'Liderança Afetiva',
+    description: 'Construindo autoridade através da empatia, escuta ativa e presença intencional.',
+    level: 'Intermediário',
+    thumbnail: 'https://images.unsplash.com/photo-1502086223501-7ea2962254de?q=80&w=800',
+    progress: 45,
+    totalModules: 10
+  },
+  {
     id: 'c3',
-    title: 'O Papel da Mulher no Mundo Moderno',
-    description: 'Reflexões e orientações sobre equilíbrio, liderança feminina e vocação.',
+    title: 'O Poder do Artesanal',
+    description: 'Estratégias para negócios digitais com alma, exclusividade e o valor do feito à mão.',
     level: 'Avançado',
     thumbnail: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
     progress: 10,
-    totalModules: 15
+    totalModules: 12
   }
 ];
 

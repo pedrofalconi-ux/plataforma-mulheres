@@ -16,39 +16,6 @@ const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1522202176988-6627
 
 export function CoursePreview({ course }: { course: CoursePreviewData }) {
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const { user } = useAuth();
-  const router = useRouter();
-
-  const handleAddToCart = async () => {
-    if (!user) {
-      router.push(`/login?redirect=/cursos/${course.slug}`);
-      return;
-    }
-
-    setCheckoutLoading(true);
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course_id: course.id }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        window.dispatchEvent(new Event('cart-updated'));
-        alert('Curso adicionado ao seu carrinho!');
-      } else {
-        alert(data.error || 'Erro ao adicionar ao carrinho.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Erro de conexão ao processar carrinho.');
-    } finally {
-      setCheckoutLoading(false);
-    }
-  };
-
   const toggleModule = (id: string) => {
     setOpenModules(prev => ({ ...prev, [id]: !prev[id] }));
   };
@@ -128,14 +95,14 @@ export function CoursePreview({ course }: { course: CoursePreviewData }) {
             {/* O Que Você Vai Aprender */}
             <section className="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
               <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6 flex items-center gap-3">
-                Por que se matricular nesta trilha?
+                Por que percorrer esta trilha?
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   "Acesso imediato a todas as aulas de base.",
                   "Metodologia prática com materiais complementares.",
                   "Acompanhamento e fórum tira-dúvidas dedicado.",
-                  "Garantia de atualização e acesso estendido."
+                  "Garantia de acesso vitalício para alunas matriculadas."
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="mt-0.5 text-primary-600 shrink-0" size={20} />
@@ -149,8 +116,8 @@ export function CoursePreview({ course }: { course: CoursePreviewData }) {
             <section>
               <div className="mb-6 flex items-end justify-between border-b border-stone-200 pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl font-bold text-stone-900">Grade Curricular</h2>
-                  <p className="mt-1 text-sm text-stone-500">Conteúdo programático bloqueado até a matrícula.</p>
+                  <h2 className="font-serif text-2xl font-bold text-stone-900">Conteúdo Programático</h2>
+                  <p className="mt-1 text-sm text-stone-500">Cronograma completo da jornada.</p>
                 </div>
               </div>
 
@@ -223,48 +190,42 @@ export function CoursePreview({ course }: { course: CoursePreviewData }) {
           <div className="lg:sticky lg:top-24 space-y-6">
             <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xl shadow-stone-200/50">
               <div className="mb-6 border-b border-stone-100 pb-6 text-center">
-                <p className="text-sm font-bold uppercase tracking-wide text-primary-600 mb-2">Plano Único</p>
-                <h2 className="text-4xl font-black text-stone-900 mb-1">
-                  <span className="text-2xl font-bold text-stone-400 mr-1">R$</span>
-                  {(Number(course.price) || 0).toFixed(2)}
+                <p className="text-sm font-bold uppercase tracking-wide text-primary-600 mb-2">Acesso Restrito</p>
+                <h2 className="text-3xl font-black text-stone-900 mb-1">
+                  Trilha Exclusiva
                 </h2>
-                <p className="text-sm text-stone-500">Acesso ilimitado ao curso</p>
+                <p className="text-sm text-stone-500">Conteúdo disponível para alunas</p>
               </div>
 
               <div className="space-y-4 mb-8">
-                <button 
-                  onClick={handleAddToCart}
-                  disabled={checkoutLoading}
-                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-primary-600 hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
+                <Link
+                  href="/cadastro"
+                  className="group flex w-full items-center justify-center gap-2 rounded-xl bg-stone-900 px-6 py-4 text-sm font-bold text-white transition-all hover:bg-[#DBA1A2] hover:shadow-lg hover:-translate-y-0.5"
                 >
-                  {checkoutLoading ? (
-                    <Loader2 className="animate-spin" size={20} />
-                  ) : (
-                    <>
-                      Adicionar ao Carrinho
-                      <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-                <p className="text-center text-xs text-stone-500">Pagamento 100% seguro via sistema blindado.</p>
+                  Entrar na Plataforma
+                  <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </Link>
+                <p className="text-center text-[10px] text-stone-400 leading-tight">
+                  Se você já adquiriu através do checkout oficial, faça login para acessar.
+                </p>
               </div>
 
               <div className="space-y-3 rounded-xl bg-stone-50 p-4 border border-stone-100">
                 <div className="flex items-center gap-3 text-sm text-stone-700">
                   <ShieldCheck size={18} className="text-green-600" />
-                  <span>Garantia de 7 dias ou seu dinheiro de volta.</span>
+                  <span>Ambiente de aprendizado seguro.</span>
                 </div>
               </div>
             </div>
             
-            {/* Instructor snippet (Optional) */}
+            {/* Instructor snippet */}
             <div className="rounded-xl border border-stone-200 bg-white p-5 flex items-center gap-4">
-               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-primary-700 shrink-0">
-                  <User size={24} />
+               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#Vanilla Ice] border border-[#DBA1A2]/20 text-[#DBA1A2] shrink-0 font-bold">
+                  NF
                </div>
                <div>
                  <p className="text-xs text-stone-500 font-medium">Oferecido por</p>
-                 <p className="font-bold text-stone-900">Dignare</p>
+                 <p className="font-bold text-stone-900 uppercase tracking-tighter">Nathi Faria</p>
                </div>
             </div>
           </div>

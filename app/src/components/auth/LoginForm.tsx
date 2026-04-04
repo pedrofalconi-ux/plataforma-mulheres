@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Lock, Mail, Loader2, AlertCircle, User as UserIcon, Heart } from 'lucide-react';
+import { Lock, Mail, Loader2, AlertCircle, User as UserIcon, Heart, CheckCircle2 } from 'lucide-react';
 import { z } from 'zod';
 import { BRAND_NAME } from '@/lib/constants';
 
@@ -22,9 +22,12 @@ function BrandMark() {
   );
 }
 
-export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'register' }) {
+function FormContent({ mode = 'login' }: { mode?: 'login' | 'register' }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  const isBought = searchParams.get('bought') === 'true';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -141,6 +144,18 @@ export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'regist
               <BrandMark />
             </div>
             
+            {mode === 'register' && isBought && (
+              <div className="mb-8 p-6 bg-[#DBA1A2]/10 border border-[#DBA1A2]/20 rounded-3xl animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="flex items-center gap-3 text-[#DBA1A2] mb-2">
+                  <CheckCircle2 size={24} />
+                  <span className="font-bold text-lg">Parabéns pela sua compra!</span>
+                </div>
+                <p className="text-[#422523]/70 text-sm leading-relaxed">
+                  Sua jornada acaba de começar. Finalize seu cadastro abaixo para acessar suas trilhas agora mesmo.
+                </p>
+              </div>
+            )}
+
             <h2 className="text-3xl font-serif font-medium text-[#422523]">
               {mode === 'login' ? 'Entrar na área da aluna' : 'Começar minha jornada'}
             </h2>
@@ -235,5 +250,13 @@ export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'regist
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'register' }) {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F7F2ED] flex items-center justify-center">Carregando...</div>}>
+      <FormContent mode={mode} />
+    </Suspense>
   );
 }
