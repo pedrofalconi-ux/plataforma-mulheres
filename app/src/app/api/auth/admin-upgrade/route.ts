@@ -14,10 +14,10 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse request body
     const body = await req.json();
-    const { secretKey } = body;
+    const secretKey = String(body?.secretKey || '').trim();
 
     // 3. Verify Custom Secret Key (Mestra)
-    const validKey = process.env.ADMIN_SECRET_KEY;
+    const validKey = String(process.env.ADMIN_SECRET_KEY || '').trim();
     if (!validKey || secretKey !== validKey) {
       return NextResponse.json({ error: 'Chave de segurança mestra inválida.' }, { status: 403 });
     }
