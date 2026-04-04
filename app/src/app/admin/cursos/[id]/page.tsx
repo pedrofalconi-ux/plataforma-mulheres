@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, FileText, Image as ImageIcon, Link as LinkIcon, Loader2, Paperclip, Play, Plus, Save, Settings, Trash2, Upload, Video, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import ImageCropper from '@/components/admin/ImageCropper';
 
 const YOUTUBE_URL_PATTERN =
   /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
@@ -112,6 +113,10 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   const [isUploadingLessonMaterial, setIsUploadingLessonMaterial] = useState(false);
   const [isDetectingLessonDuration, setIsDetectingLessonDuration] = useState(false);
   const [lessonDurationStatus, setLessonDurationStatus] = useState('');
+
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [cropperTarget, setCropperTarget] = useState<'thumbnail' | 'instructor'>('thumbnail');
 
   const youtubeDurationPlayerRef = useRef<any>(null);
 
@@ -411,7 +416,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
       const data = await parseResponse(response);
       if (!response.ok) throw new Error(data.error || 'Erro ao salvar as configuracoes.');
-      alert('Configuracoes da trilha salvas com sucesso.');
+      alert('Configuracoes do bloco salvas com sucesso.');
       void fetchCourseData();
     } catch (error: any) {
       alert(error.message);
@@ -523,7 +528,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   };
 
   const deleteCourse = async () => {
-    if (!confirm('Tem certeza que deseja apagar esta trilha inteira?')) return;
+    if (!confirm('Tem certeza que deseja apagar este bloco inteiro?')) return;
 
     try {
       const response = await fetch(`/api/admin/courses?id=${courseId}`, { method: 'DELETE' });
@@ -554,13 +559,13 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <h1 className="text-2xl font-serif font-bold text-stone-900">{course?.title}</h1>
               <span className="rounded bg-stone-200 px-2 py-0.5 text-xs font-bold uppercase text-stone-600">{course?.level}</span>
             </div>
-            <p className="mt-1 text-sm text-stone-500">Configure modulos, aulas e materiais da trilha.</p>
+            <p className="mt-1 text-sm text-stone-500">Configure modulos, aulas e materiais deste bloco.</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <button onClick={deleteCourse} className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 font-bold text-red-600">
-            <Trash2 size={16} /> Apagar Trilha
+            <Trash2 size={16} /> Apagar Bloco
           </button>
           <button
             onClick={handleTogglePublish}
@@ -568,7 +573,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               course?.is_published ? 'border border-amber-200 bg-amber-100 text-amber-800' : 'bg-green-600 text-white'
             }`}
           >
-            {course?.is_published ? 'Despublicar' : 'Publicar Curso'}
+            {course?.is_published ? 'Despublicar' : 'Publicar Bloco'}
           </button>
         </div>
       </div>
@@ -588,7 +593,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
         {activeTab === 'settings' ? (
           <form onSubmit={handleSaveSettings} className="space-y-6 p-6">
             <div>
-              <label className="mb-1 block text-sm font-bold text-stone-700">Titulo da Trilha</label>
+              <label className="mb-1 block text-sm font-bold text-stone-700">Titulo do Bloco</label>
               <input value={courseForm.title} onChange={(event) => setCourseForm({ ...courseForm, title: event.target.value })} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
@@ -619,7 +624,20 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white">
                     {isUploadingThumbnail ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                     {isUploadingThumbnail ? 'Enviando...' : 'Enviar capa'}
-                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={(event) => { const file = event.target.files?.[0] || null; void uploadImageField(file, 'thumbnail'); event.currentTarget.value = ''; }} />
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0] || null;
+                        if (file) {
+                          setPendingImage(file);
+                          setCropperTarget('thumbnail');
+                          setShowCropper(true);
+                        }
+                        event.currentTarget.value = '';
+                      }}
+                    />
                   </label>
                   {courseForm.thumbnail_url ? <button type="button" onClick={() => setCourseForm({ ...courseForm, thumbnail_url: '' })} className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-bold text-stone-600"><X size={16} /> Remover</button> : null}
                 </div>
@@ -633,7 +651,20 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white">
                     {isUploadingInstructorAvatar ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                     {isUploadingInstructorAvatar ? 'Enviando...' : 'Enviar foto'}
-                    <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={(event) => { const file = event.target.files?.[0] || null; void uploadImageField(file, 'instructor'); event.currentTarget.value = ''; }} />
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="hidden"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0] || null;
+                        if (file) {
+                          setPendingImage(file);
+                          setCropperTarget('instructor');
+                          setShowCropper(true);
+                        }
+                        event.currentTarget.value = '';
+                      }}
+                    />
                   </label>
                   {courseForm.instructor_avatar_url ? <button type="button" onClick={() => setCourseForm({ ...courseForm, instructor_avatar_url: '' })} className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-bold text-stone-600"><X size={16} /> Remover</button> : null}
                 </div>
@@ -657,7 +688,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
         ) : (
           <div className="space-y-6 p-6">
             <div className="flex items-end justify-between border-b border-stone-100 pb-4">
-              <h2 className="text-xl font-bold text-stone-800">Modulos da trilha</h2>
+              <h2 className="text-xl font-bold text-stone-800">Modulos do bloco</h2>
               <button onClick={() => setShowModuleModal(true)} className="flex items-center gap-2 rounded-lg bg-primary-50 px-4 py-2 font-bold text-primary-600">
                 <Plus size={18} /> Novo Modulo
               </button>
@@ -821,6 +852,22 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
           </form>
         </div>
       ) : null}
+
+      {showCropper && pendingImage && (
+        <ImageCropper
+          imageFile={pendingImage}
+          aspectRatio={cropperTarget === 'thumbnail' ? 16 / 9 : 1}
+          onCrop={(cropped) => {
+            setShowCropper(false);
+            setPendingImage(null);
+            void uploadImageField(cropped, cropperTarget);
+          }}
+          onCancel={() => {
+            setShowCropper(false);
+            setPendingImage(null);
+          }}
+        />
+      )}
     </div>
   );
 }

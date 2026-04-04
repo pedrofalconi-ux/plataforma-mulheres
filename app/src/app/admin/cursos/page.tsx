@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BookOpen, Edit3, Image as ImageIcon, Loader2, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import ImageCropper from '@/components/admin/ImageCropper';
 
 export default function AdminCursosPage() {
   const supabase = createClient();
@@ -20,6 +21,9 @@ export default function AdminCursosPage() {
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  
+  const [pendingImage, setPendingImage] = useState<File | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   const fetchCourses = async () => {
     const { data } = await supabase
@@ -94,7 +98,14 @@ export default function AdminCursosPage() {
       const data = await parseResponse(response);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao criar trilha');
+        const errorMsg = data.error || 'Erro ao criar trilha';
+        if (data.details && data.details.fieldErrors) {
+          const fieldErrors = Object.entries(data.details.fieldErrors)
+            .map(([field, errors]) => `${field}: ${(errors as string[]).join(', ')}`)
+            .join('\n');
+          throw new Error(`${errorMsg}:\n${fieldErrors}`);
+        }
+        throw new Error(errorMsg);
       }
 
       router.push(`/admin/cursos/${data.id}`);
@@ -121,14 +132,14 @@ export default function AdminCursosPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-stone-900">Gestao de Trilhas</h1>
-          <p className="text-stone-500">Crie e organize as trilhas e aulas da plataforma.</p>
+          <h1 className="text-3xl font-serif font-bold text-stone-900">Gestao de Blocos</h1>
+          <p className="text-stone-500">Organize os blocos da area de aprendizado, como Aprendizado e Testemunhos.</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 font-bold text-white transition hover:bg-primary-700"
         >
-          <Plus size={20} /> Nova Trilha
+          <Plus size={20} /> Novo Bloco
         </button>
       </div>
 
@@ -153,16 +164,16 @@ export default function AdminCursosPage() {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 text-stone-400">
               <BookOpen size={32} />
             </div>
-            <h3 className="mb-1 text-lg font-bold text-stone-800">Nenhuma trilha encontrada</h3>
+            <h3 className="mb-1 text-lg font-bold text-stone-800">Nenhum bloco encontrado</h3>
             <p className="mb-6 max-w-sm text-stone-500">
-              Voce ainda nao tem cursos cadastrados. Clique no botao acima para comecar.
+              Crie primeiro os blocos principais, como Aprendizado e Testemunhos, ou adicione um novo bloco extra.
             </p>
           </div>
         ) : (
           <table className="w-full text-left">
             <thead className="border-b border-stone-200 bg-stone-50 text-xs font-bold uppercase text-stone-500">
               <tr>
-                <th className="px-6 py-4">Trilha</th>
+                <th className="px-6 py-4">Bloco</th>
                 <th className="px-6 py-4">Nivel</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Acoes</th>
@@ -224,7 +235,7 @@ export default function AdminCursosPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-stone-200 bg-stone-50 p-6">
-              <h2 className="text-xl font-bold text-stone-900">Criar Nova Trilha</h2>
+              <h2 className="text-xl font-bold text-stone-900">Criar Novo Bloco</h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="text-2xl leading-none text-stone-400 hover:text-stone-600"
@@ -235,14 +246,14 @@ export default function AdminCursosPage() {
 
             <form onSubmit={handleCreateCourse} className="space-y-4 p-6">
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Titulo da Trilha</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Titulo do Bloco</label>
                 <input
                   required
                   type="text"
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   className="w-full rounded-lg border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Ex: Casa com direcao"
+                  placeholder="Ex: Aprendizado"
                 />
               </div>
 
@@ -250,11 +261,13 @@ export default function AdminCursosPage() {
                 <label className="mb-1 block text-sm font-bold text-stone-700">Descricao</label>
                 <textarea
                   required
+                  minLength={10}
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
                   className="h-24 w-full resize-none rounded-lg border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500"
                   placeholder="Fale um pouco sobre a trilha..."
                 />
+                <p className="mt-1 text-xs text-stone-400">Minimo de 10 caracteres.</p>
               </div>
 
               <div>
@@ -295,7 +308,10 @@ export default function AdminCursosPage() {
                           className="hidden"
                           onChange={(event) => {
                             const file = event.target.files?.[0] || null;
-                            void handleThumbnailUpload(file);
+                            if (file) {
+                              setPendingImage(file);
+                              setShowCropper(true);
+                            }
                             event.currentTarget.value = '';
                           }}
                         />
@@ -336,6 +352,21 @@ export default function AdminCursosPage() {
           </div>
         </div>
       ) : null}
+
+      {showCropper && pendingImage && (
+        <ImageCropper
+          imageFile={pendingImage}
+          onCrop={(cropped) => {
+            setShowCropper(false);
+            setPendingImage(null);
+            void handleThumbnailUpload(cropped);
+          }}
+          onCancel={() => {
+            setShowCropper(false);
+            setPendingImage(null);
+          }}
+        />
+      )}
     </div>
   );
 }
