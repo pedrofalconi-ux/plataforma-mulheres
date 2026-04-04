@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-serif: 'Fraunces', serif;
+
+  --color-primary-50: #f1faf4;
+  --color-primary-100: #dff4e6;
+  --color-primary-200: #bae7ca;
+  --color-primary-300: #8dd4a8;
+  --color-primary-400: #5fbb85;
+  --color-primary-500: #379868;
+  --color-primary-600: #247a52;
+  --color-primary-700: #1d6244;
+  --color-primary-800: #194f38;
+  --color-primary-900: #163f2e;
+
+  --color-secondary: #5f6f67;
+}
+
+:root {
+  --background: #f4f7f1;
+  --foreground: #152019;
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --border-soft: rgba(36, 122, 82, 0.12);
+  --glow: radial-gradient(circle at top, rgba(141, 212, 168, 0.25), transparent 45%);
+  --hero-gradient: linear-gradient(135deg, #163f2e 0%, #1d6244 48%, #2b8e60 100%);
+  --card-gradient: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(243,249,245,0.88));
+  --motion-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --pointer-x: 50vw;
+  --pointer-y: 22vh;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    var(--glow),
+    linear-gradient(180deg, #f7fbf7 0%, #f1f6f2 38%, #edf4ee 100%);
+  color: var(--foreground);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  position: relative;
+}
+
+body::selection {
+  background: rgba(55, 152, 104, 0.18);
+}
+
+/* Mouse track elements removed for performance */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', serif;
+  letter-spacing: -0.03em;
+}
+
+a, button {
+  transition: all 220ms var(--motion-spring);
+}
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 12px 40px rgba(24, 53, 38, 0.04);
+}
+
+.soft-card {
+  background: var(--card-gradient);
+  border: 1px solid rgba(22, 63, 46, 0.08);
+  box-shadow: 0 10px 30px rgba(21, 32, 25, 0.04);
+}
+
+.hero-sheen {
+  background: var(--hero-gradient);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Removed sheen layers */
+
+/* Entrance animations removed */
+.motion-page,
+.motion-shell > *,
+.motion-float,
+.motion-card,
+.motion-list > * {
+  animation: none !important;
+}
+
+.soft-card:hover,
+.glass-panel:hover {
+  transform: scale(1.005);
+  box-shadow: 0 16px 48px rgba(21, 32, 25, 0.08);
+}
+
+.pointer-reactive {
+  position: relative;
+}
+
+/* Sequential animations removed */
+
+.motion-button {
+  transition:
+    transform 220ms var(--motion-spring),
+    box-shadow 220ms var(--motion-spring),
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.motion-button:hover {
+  filter: brightness(1.05); /* Very basic interactive feedback */
+}
+
+.motion-tab {
+  position: relative;
+  overflow: hidden;
+}
+
+.motion-tab::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 8px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 240ms var(--motion-spring);
+  opacity: 0.7;
+}
+
+.motion-tab[data-active="true"]::after,
+.motion-tab:hover::after {
+  transform: scaleX(1);
+}
+
+.motion-glow {
+  box-shadow: 0 12px 40px rgba(36, 122, 82, 0.12);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* All keyframes removed for performance */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pointer-reactive[data-pointer="active"] {
+    transform: none !important;
+  }
+}
+
+@media (pointer: coarse) {
+  body::before,
+  body::after,
+  .pointer-reactive::before,
+  .pointer-reactive::after {
+    display: none;
+  }
+}
