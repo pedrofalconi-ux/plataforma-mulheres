@@ -17,7 +17,6 @@ const PUBLIC_PAGES = [
   '/blog',                 // Blog
   '/forum',                // Fórum
   '/sobre',                // Sobre/Institucional
-  '/observatorio',         // Observatório
   '/ao-vivo',              // Ao vivo
   '/teleatendimento',      // Teleatendimento
 ];
@@ -38,7 +37,6 @@ const ADMIN_PAGES = [
   '/admin/blog',           // Gerenciar blog
   '/admin/talentos',       // Gerenciar talentos
   '/admin/usuarios',       // Gerenciar usuários
-  '/admin/observatorio',   // Gerenciar observatório
   '/admin/institucional',  // Gerenciar institucional
 ];
 

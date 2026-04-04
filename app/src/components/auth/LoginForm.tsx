@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Lock, Mail, Loader2, AlertCircle, User as UserIcon, Sparkles } from 'lucide-react';
+import { Lock, Mail, Loader2, AlertCircle, User as UserIcon, Heart } from 'lucide-react';
 import { z } from 'zod';
 import { BRAND_NAME } from '@/lib/constants';
 
@@ -16,8 +16,8 @@ const loginSchema = z.object({
 
 function BrandMark() {
   return (
-    <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-[linear-gradient(135deg,#2f9464,#163f2e)] text-white shadow-[0_18px_40px_rgba(22,63,46,0.25)]">
-      <span className="font-serif text-2xl font-bold">D</span>
+    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#DBA1A2] text-white shadow-xl">
+      <Heart size={28} fill="currentColor" />
     </div>
   );
 }
@@ -109,89 +109,96 @@ export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'regist
   };
 
   return (
-    <div className="motion-shell px-4 py-10">
-      <div className="mx-auto grid min-h-[calc(100vh-140px)] max-w-6xl overflow-hidden rounded-[36px] border border-primary-900/10 bg-white/70 shadow-[0_30px_90px_rgba(21,32,25,0.08)] backdrop-blur lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="hero-sheen motion-float flex flex-col justify-between p-8 text-white sm:p-10">
+    <div className="min-h-screen bg-[#F7F2ED] flex items-center justify-center p-4">
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-[40px] shadow-2xl overflow-hidden border border-[#E7D8D8]">
+        {/* Left Side: Brand Experience */}
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#422523] to-[#5D3A38] text-[#F7F2ED]">
           <div>
             <BrandMark />
-            <p className="mt-8 text-sm font-bold uppercase tracking-[0.22em] text-primary-100">Nova identidade</p>
-            <h1 className="mt-4 text-5xl font-bold leading-tight">{BRAND_NAME}</h1>
-            <p className="mt-4 max-w-md text-base leading-8 text-primary-100">
-              Uma plataforma com presença mais calma, linguagem mais acolhedora e jornadas mais gostosas de acompanhar.
-            </p>
+            <div className="mt-12">
+              <span className="text-[#DBA1A2] text-sm font-bold tracking-widest uppercase">Boas-vindas</span>
+              <h1 className="mt-4 text-5xl font-serif font-medium leading-tight">
+                Plataforma <br />
+                {BRAND_NAME}
+              </h1>
+              <p className="mt-6 text-lg text-[#E7D8D8]/80 leading-relaxed max-w-sm">
+                Um espaço sagrado para sua evolução, onde o conhecimento encontra o acolhimento.
+              </p>
+            </div>
           </div>
 
-          <div className="motion-card rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
-            <div className="flex items-center gap-2 text-sm font-semibold text-primary-100">
-              <Sparkles size={16} />
-              experiência redesenhada
-            </div>
-            <p className="mt-3 text-xl font-serif font-bold">
-              Entre para uma área de aprendizagem com mais clareza visual e menos fricção.
+          <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+            <p className="text-sm italic text-[#E7D8D8]/60">
+              &quot;Honrar sua história é o primeiro passo para construir seu legado.&quot;
             </p>
           </div>
         </div>
 
-        <div className="p-8 sm:p-10">
-          <div className="motion-card mx-auto max-w-md">
-            <h2 className="text-4xl font-bold text-stone-900">
-              {mode === 'login' ? 'Entrar' : 'Criar conta'}
+        {/* Right Side: Form */}
+        <div className="p-8 md:p-16 flex flex-col justify-center">
+          <div className="w-full max-w-sm mx-auto">
+            <div className="lg:hidden mb-8">
+              <BrandMark />
+            </div>
+            
+            <h2 className="text-3xl font-serif font-medium text-[#422523]">
+              {mode === 'login' ? 'Entrar na área da aluna' : 'Começar minha jornada'}
             </h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">
-              {mode === 'login'
-                ? `Acesse a ${BRAND_NAME} para continuar suas jornadas, revisar progresso e retomar o que importa.`
-                : `Abra sua conta na ${BRAND_NAME} e entre em uma experiência mais humana de formação e comunidade.`}
+            <p className="mt-3 text-[#422523]/60">
+              {mode === 'login' 
+                ? 'Retome seu progresso e conecte-se com a comunidade.' 
+                : 'Crie sua conta e acesse conteúdos exclusivos selecionados para você.'}
             </p>
 
             {error && (
-              <div className="mt-6 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm">
                 <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <form onSubmit={handleSubmit} className="mt-10 space-y-6">
               {mode === 'register' && (
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-stone-700">Nome completo</label>
-                  <div className="relative">
-                    <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-[#422523]/80 ml-1">Nome completo</label>
+                  <div className="relative group">
+                    <UserIcon size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors" />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-2xl border border-primary-900/10 bg-white px-12 py-3.5 outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-100"
-                      placeholder="Seu nome completo"
+                      className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                      placeholder="Como você prefere ser chamada?"
                       required={mode === 'register'}
                     />
                   </div>
                 </div>
               )}
 
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-stone-700">E-mail</label>
-                <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[#422523]/80 ml-1">Seu melhor e-mail</label>
+                <div className="relative group">
+                  <Mail size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-2xl border border-primary-900/10 bg-white px-12 py-3.5 outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-100"
-                    placeholder="seu@email.com"
+                    className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                    placeholder="email@exemplo.com"
                     required
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-stone-700">Senha</label>
-                <div className="relative">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[#422523]/80 ml-1">Sua senha</label>
+                <div className="relative group">
+                  <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-2xl border border-primary-900/10 bg-white px-12 py-3.5 outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-100"
+                    className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
                     placeholder="••••••••"
                     required
                   />
@@ -201,17 +208,28 @@ export default function LoginForm({ mode = 'login' }: { mode?: 'login' | 'regist
               <button
                 type="submit"
                 disabled={loading}
-                className="motion-button inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-700 px-5 py-3.5 font-bold text-white shadow-lg shadow-primary-700/20 hover:bg-primary-800 disabled:opacity-70"
+                className="w-full bg-[#DBA1A2] hover:bg-[#D48F90] text-white font-bold py-4 rounded-2xl shadow-lg shadow-[#DBA1A2]/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70"
               >
-                {loading ? <Loader2 size={20} className="animate-spin" /> : (mode === 'login' ? 'Entrar na plataforma' : 'Criar minha conta')}
+                {loading ? (
+                  <Loader2 size={24} className="animate-spin" />
+                ) : (
+                  <>
+                    {mode === 'login' ? 'Entrar agora' : 'Criar minha conta'}
+                  </>
+                )}
               </button>
             </form>
 
-            <div className="mt-6 text-sm text-stone-600">
-              {mode === 'login' ? 'Ainda não tem conta?' : 'Já tem conta?'}{' '}
-              <Link href={mode === 'login' ? '/cadastro' : '/login'} className="motion-button font-bold text-primary-700 hover:text-primary-900">
-                {mode === 'login' ? 'Criar conta' : 'Fazer login'}
-              </Link>
+            <div className="mt-8 text-center">
+              <p className="text-[#422523]/60 text-sm">
+                {mode === 'login' ? 'Ainda não faz parte?' : 'Já tem uma conta?'}{' '}
+                <Link 
+                  href={mode === 'login' ? '/cadastro' : '/login'} 
+                  className="text-[#DBA1A2] font-bold hover:underline underline-offset-4"
+                >
+                  {mode === 'login' ? 'Inscreva-se aqui' : 'Faça login'}
+                </Link>
+              </p>
             </div>
           </div>
         </div>

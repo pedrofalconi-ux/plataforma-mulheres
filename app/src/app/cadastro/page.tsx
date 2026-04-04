@@ -1,8 +1,8 @@
 import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata = {
-  title: "Criar Conta | Dignare",
-  description: "Crie sua conta na Dignare e comece sua jornada com uma experiência mais humana e contemporânea.",
+  title: "Criar Conta | Nathi Faria",
+  description: "Torne-se parte da nossa comunidade. Comece sua jornada de formação e autoconhecimento hoje.",
 };
 
 export default function CadastroPage() {

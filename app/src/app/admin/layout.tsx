@@ -28,7 +28,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navLinks: AdminLink[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/observatorio', label: 'Observatório', icon: MapPin },
     { href: '/admin/eventos', label: 'Gestão de Eventos', icon: CalendarDays },
     { href: '/admin/cursos', label: 'Gestão de Trilhas', icon: BookOpen },
     { href: '/admin/blog', label: 'Blog Engine', icon: Newspaper },

@@ -1,8 +1,8 @@
 import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata = {
-  title: "Login | Dignare",
-  description: "Entre na Dignare para acessar suas jornadas, comunidade e progresso.",
+  title: "Entrar | Nathi Faria",
+  description: "Acesse sua jornada de transformação e reconexão na plataforma Nathi Faria.",
 };
 
 export default function LoginPage() {

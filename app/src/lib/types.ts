@@ -18,16 +18,6 @@ export interface Course {
   totalModules: number;
 }
 
-export interface ObservatoryProject {
-  id: string;
-  name: string;
-  category: 'Alimentação' | 'Saúde' | 'Educação' | 'Espiritualidade' | 'Moradia';
-  lat: number;
-  lng: number;
-  description: string;
-  contact: string;
-  address: string;
-}
 
 export interface NewsItem {
   id: string;

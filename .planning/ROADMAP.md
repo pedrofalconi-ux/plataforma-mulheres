@@ -1,67 +1,51 @@
-# ROADMAP — Ecossistema da Dignidade
+# ROADMAP — Plataforma “É no lar que tudo começa”
 
-## Milestone 1: MVP da Plataforma
+Este roadmap detalha as etapas de desenvolvimento do MVP para a cliente Nathi Faria, focando em uma experiência mobile-first simplificada e eficiente.
 
-## Phase 1: Fundação Técnica
-- **Status:** complete
-- **Goal:** Estrutura de pastas, aliases TypeScript, constantes globais, layout responsivo base, componentes UI base, padrão de erro/loading.
+## Milestone 1: MVP - Fundação e LMS Central (60% concluído)
 
-## Phase 2: Backend Base e Modelagem
-- **Status:** complete
-- **Goal:** Supabase configurado, 17+ tabelas, migrations, seeds, Zod schemas, camada de services.
-
-## Phase 3: Autenticação e Autorização
-- **Status:** complete
-- **Goal:** Supabase Auth, RBAC, Middleware, Sessão persistente, Redirect smart.
-
-## Phase 4: LMS (Trilhas, Aulas, Progresso, Certificados)
-- **Status:** complete
-- **Goal:** CourseComponents, Matrículas, Rastreamento de progresso, Geração de Certificados com QR Code.
-
-## Phase 5: Observatório Social e Landing Page
-- **Status:** complete
-- **Goal:** ObservatoryView, Submissão de projetos, LandingSections, Blog básico.
-
-## Phase 6: Perfis Avançados e Admin
-- **Status:** complete
-- **Goal:** Edição de perfil, Gestão de usuários/papéis, Carrinho básico.
-
-## Phase 7: Fórum da Comunidade
-- **Status:** complete
-- **Goal:** APIs de fórum, Tela de criação e thread de respostas.
-- **Notes:** Ativado com sucesso via migração SQL no Supabase.
-
-## Phase 8: Course Preview (Venda de Curso)
-- **Status:** complete
-- **Goal:** Rota `/cursos/[slug]` com hero e grade curricular.
-
-## Phase 9: Monetização e Checkout
-- **Status:** complete
-- **Goal:** Gateway de pagamento (Mercado Pago), Fluxo de pedido, Webhook e Liberação automática.
-- **Notes:** Implementado via Checkout Pro e Webhooks Next.js.
-
-## Phase 10: Dashboards e Analytics
-- **Status:** complete
-- **Goal:** Dashboard admin com KPIs (usuários, vendas, conclusões) usando Recharts.
-- **Notes:** Implementado com faturamento, volume mensal e transações recentes.
-
-## Phase 11: Segurança, LGPD e Performance
+### Phase 1: Autenticação e Perfil Enriquecido
+- **Goal:** Cadastro e login com Email e Telefone (RF01, RF02, RF03).
 - **Status:** in_progress
-- **Goal:** Rate limiting, Logs, Consentimento LGPD, Otimização Core Web Vitals.
-- **Notes:** Rotas admin com validação e auditoria, sanitização de HTML, exportação/exclusão de dados LGPD, Speed Insights, skeletons e boundaries de erro já implementados.
+- **Details:** O sistema já possui Auth por e-mail no Supabase. Precisamos garantir a captura do campo `telefone` no onboarding.
 
-## Phase 12: Testes de Segurança e QA
-- **Status:** planned
-- **Goal:** Implementar infraestrutura de testes (E2E, API), realizar testes de injeção de BD e validar o desenvolvimento seguro e controlado.
-
-## Phase 13: Deploy Estável e Go-Live
-- **Status:** planned
-- **Goal:** Ambientes Staging/Prod, Checklist de homologação, Rollback plan.
-
-## Backlog (Parking Lot)
-
-### Phase 999.1: Correção do Cálculo de Carga Horária (BACKLOG)
+### Phase 2: Trilhas e Gestão de Aulas
+- **Goal:** Implementar estrutura de Trilhas, Módulos e Aulas com vídeos (RF06, RF07, RF08, RF09, RF10, RF11).
 - **Status:** complete
-- **Goal:** Resolver bug onde o curso "Connecta Ci" mostra 3h mas a soma das aulas é 16min.
-- **Requirements:** Implementar cálculo automático ou trigger para atualizar `courses.duration_minutes`.
-- **Plans:** 0 plans
+- **Details:** Estrutura básica de CRUD de trilhas e aulas já funcional no painel administrativo e na área do aluno.
+
+### Phase 3: Materiais Complementares (PDF)
+- **Goal:** Upload e download de arquivos PDF associados às aulas (RF12, RF13, RF21).
+- **Status:** complete
+- **Details:** Funcionalidade de materiais de apoio já integrada no player de aula.
+
+## Milestone 2: Engajamento e Comunidade (0% concluído)
+
+### Phase 4: Seção de Devocionais
+- **Goal:** Criar área para conteúdos textuais diários/periódicos (RF16).
+- **Status:** planned
+
+### Phase 5: Testemunhos e Social
+- **Goal:** Canal para envio de depoimentos e redirecionamento para WhatsApp (RF17, RF18).
+- **Status:** planned
+
+## Milestone 3: Comercial e Pagamento (40% concluído)
+
+### Phase 6: Fluxo de Pagamento Integrado
+- **Goal:** Integração formal com Mercado Pago para assinaturas/cursos (RF14).
+- **Status:** in_progress
+- **Details:** Checkout Pro configurado, pendente ajustes de webhook de aprovação para este novo contexto de assinatura.
+
+### Phase 7: Liberação Manual e Painel Admin Final
+- **Goal:** Controle administrativo completo para gestão de usuárias e acessos manuais (RF15, RF19, RF20, RF22).
+- **Status:** in_progress
+- **Details:** Painel admin básico funcional para trilhas, pendente listagem de usuários com gestão de acesso manual.
+
+---
+
+## Recursos Legados (Descontinuados ou Fora do Escopo Inicial)
+Os recursos abaixo faziam parte do projeto anterior ("Ecossistema da Dignidade") e estão desativados ou ocultos no contexto atual da Nathi Faria:
+- **Observatório Social**: Oculto.
+- **Fórum de Comunidade**: Oculto.
+- **Teleatendimento**: Descontinuado.
+- **Eventos e Ingressos**: Movido para funcionalidades futuras.

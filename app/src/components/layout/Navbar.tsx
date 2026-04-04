@@ -14,6 +14,7 @@ import {
   LogOut,
   Map,
   Menu,
+  MessageSquare,
   Newspaper,
   ShoppingCart,
   Stethoscope,
@@ -31,28 +32,19 @@ type Item = {
 };
 
 const communityItems: Item[] = [
-  { href: '/sobre', label: 'Manifesto', icon: Info },
-  { href: '/observatorio', label: 'Observatorio', icon: Map },
-  { href: '/blog', label: 'Conteudos', icon: Newspaper },
-  { href: '/teleatendimento', label: 'Cuidado', icon: Stethoscope },
+  { href: '/forum', label: 'Comunidade', icon: Users },
+  { href: '/trilhas', label: 'Minhas Trilhas', icon: BookOpen },
 ];
 
 const platformItems: Item[] = [
-  { href: '/trilhas', label: 'Minhas Trilhas', icon: BookOpen },
+  { href: '/trilhas', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/eventos', label: 'Eventos', icon: Calendar },
-  { href: '/forum', label: 'Comunidade', icon: Users },
 ];
 
 function BrandMark() {
   return (
-    <div className="relative h-16 w-52 overflow-hidden">
-      <Image
-        src="/logo.png.png"
-        alt="Logo Dignare"
-        fill
-        className="object-contain object-left"
-        priority
-      />
+    <div className="flex items-center gap-2">
+      <span className="font-serif text-2xl font-bold tracking-tight text-primary-900">{BRAND_NAME}</span>
     </div>
   );
 }
@@ -212,7 +204,7 @@ function AccountMenu({
               setOpen(false);
               onLogout();
             }}
-            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-primary-600 transition hover:bg-primary-50"
           >
             <LogOut size={17} />
             <span>Sair</span>

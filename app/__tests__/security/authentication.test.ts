@@ -32,7 +32,6 @@ describe('🔐 Testes de Autenticação e Autorização', () => {
       { method: 'POST' as const, path: '/api/admin/events', body: { title: 'Test' } },
       { method: 'POST' as const, path: '/api/admin/lessons', body: { title: 'Test' } },
       { method: 'POST' as const, path: '/api/admin/modules', body: { title: 'Test' } },
-      { method: 'POST' as const, path: '/api/admin/observatorio', body: { title: 'Test' } },
       { method: 'POST' as const, path: '/api/admin/talents', body: { title: 'Test' } },
     ];
 

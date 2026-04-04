@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, BookOpen, Clock3, Loader2, ShoppingBag, Sparkles, Target, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -23,15 +23,29 @@ type DashboardCourse = {
   durationMinutes: number;
 };
 
+const TESTIMONIALS = [
+  {
+    id: 't1',
+    name: 'Maria Silva',
+    text: 'A ordem no meu lar transformou não só a rotina, mas a paz da minha família. Sou outra mulher depois dessa jornada.',
+    role: 'Aluna da Comunidade'
+  },
+  {
+    id: 't2',
+    name: 'Ana Oliveira',
+    text: 'Educar com intencionalidade me deu as ferramentas que eu buscava há anos. Nathi tem uma profundidade rara.',
+    role: 'Mãe de 3 filhos'
+  },
+  {
+    id: 't3',
+    name: 'Julia Santos',
+    text: 'O equilíbrio entre vocação e lar ficou muito mais claro para mim. Recomendo a todas as minhas amigas.',
+    role: 'Empreendedora'
+  }
+];
+
 const FALLBACK_THUMBNAIL =
   'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80';
-
-function formatDuration(durationMinutes: number) {
-  if (durationMinutes < 60) return `${durationMinutes} min`;
-  const hours = Math.floor(durationMinutes / 60);
-  const minutes = durationMinutes % 60;
-  return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`;
-}
 
 function CourseThumbnail({ src, alt, fill, className, sizes }: { src: string, alt: string, fill?: boolean, className?: string, sizes?: string }) {
   const [imgSrc, setImgSrc] = useState(src);
@@ -55,10 +69,8 @@ function CourseThumbnail({ src, alt, fill, className, sizes }: { src: string, al
 
 export function CourseDashboard() {
   const [courses, setCourses] = useState<DashboardCourse[]>([]);
-  const [activeTab, setActiveTab] = useState<'my_courses' | 'catalog'>('my_courses');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
   const supabase = createClient();
@@ -72,8 +84,7 @@ export function CourseDashboard() {
         const { data: coursesData, error: coursesError } = await supabase
           .from('courses')
           .select('*')
-          .eq('is_published', true)
-          .order('created_at', { ascending: false });
+          .eq('is_published', true);
 
         if (coursesError) throw coursesError;
 
@@ -95,8 +106,8 @@ export function CourseDashboard() {
             id: course.id,
             slug: course.slug,
             title: course.title,
-            description: course.description || 'Descrição em breve.',
-            level: course.level || 'Iniciante',
+            description: course.description || 'Instruções para sua jornada.',
+            level: course.level || 'Essencial',
             thumbnail: course.thumbnail_url || FALLBACK_THUMBNAIL,
             progress: enrollment?.progress_percent || 0,
             totalModules: course.total_modules || 0,
@@ -107,12 +118,9 @@ export function CourseDashboard() {
         });
 
         setCourses(mappedCourses);
-        if (currentUser && mappedCourses.filter((course) => course.isEnrolled).length === 0) {
-          setActiveTab('catalog');
-        }
       } catch (err: any) {
         console.error('Fetch Error:', err);
-        setError('Não foi possível carregar suas jornadas agora. Tente novamente em instantes.');
+        setError('Não foi possível carregar suas trilhas agora.');
       } finally {
         setLoading(false);
       }
@@ -121,273 +129,168 @@ export function CourseDashboard() {
     fetchCourses();
   }, [supabase]);
 
-  const handleAddToCart = async (courseId: string) => {
-    if (!user) {
-      router.push('/login?redirect=/trilhas');
-      return;
-    }
-
-    setCheckoutLoading(courseId);
-    try {
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course_id: courseId }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        window.dispatchEvent(new Event('cart-updated'));
-        alert('Curso adicionado ao seu carrinho!');
-      } else {
-        alert(data.error || 'Erro ao adicionar ao carrinho.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Erro de conexão ao processar carrinho.');
-    } finally {
-      setCheckoutLoading(null);
-    }
-  };
-
   const myCourses = courses.filter((course) => course.isEnrolled);
-  const inProgressCourses = myCourses.filter((course) => course.progress > 0 && course.progress < 100);
-  const nextCourse = inProgressCourses[0] || myCourses[0] || null;
-  const displayedCourses = activeTab === 'my_courses' ? myCourses : courses;
-  const averageProgress = myCourses.length > 0 ? Math.round(myCourses.reduce((total, course) => total + course.progress, 0) / myCourses.length) : 0;
+  const activeCourse = myCourses.find(c => c.progress > 0 && c.progress < 100) || myCourses[0] || null;
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center bg-[#F7F2ED]">
+        <Loader2 className="animate-spin text-[#DBA1A2]" size={40} />
+      </div>
+    );
+  }
 
   return (
-    <div className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <section className="hero-sheen motion-float relative overflow-hidden rounded-[36px] px-6 py-10 text-white shadow-[0_25px_80px_rgba(22,63,46,0.18)] sm:px-8 lg:px-10">
-          <div className="relative z-10 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-            <div>
-              <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-primary-100">
-                <Sparkles size={14} />
-                Área de aprendizagem {BRAND_NAME}
-              </p>
-              <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-                {activeTab === 'my_courses' ? 'Minhas Trilhas' : 'Catálogo de Jornadas'}
-              </h1>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-primary-100 md:text-lg">
-                {activeTab === 'my_courses'
-                  ? 'Uma visão mais clara do seu progresso, do que retomar agora e de quais jornadas merecem sua próxima energia.'
-                  : 'Escolha novas jornadas com mais contexto visual, entendimento de carga e intenção de percurso.'}
-              </p>
+    <div className="min-h-screen bg-[#F7F2ED] pb-20">
+      <div className="mx-auto max-w-7xl px-4 pt-12 sm:px-6 lg:px-8">
+        <header className="mb-16">
+          <span className="text-[#DBA1A2] text-sm font-bold tracking-widest uppercase ml-1">Sua Área</span>
+          <h1 className="mt-2 font-serif text-4xl font-medium text-[#422523] md:text-5xl">Minhas Trilhas</h1>
+          <div className="mt-6 h-1 w-20 bg-[#DBA1A2] rounded-full" />
+        </header>
 
-              <div className="mt-7 flex flex-wrap gap-3">
-                <button
-                  onClick={() => setActiveTab('my_courses')}
-                  className={`motion-tab rounded-full px-5 py-3 text-sm font-bold ${activeTab === 'my_courses' ? 'bg-white text-primary-900' : 'bg-white/10 text-white hover:bg-white/15'}`}
-                  data-active={activeTab === 'my_courses'}
-                >
-                  Minhas Trilhas
-                </button>
-                <button
-                  onClick={() => setActiveTab('catalog')}
-                  className={`motion-tab rounded-full px-5 py-3 text-sm font-bold ${activeTab === 'catalog' ? 'bg-white text-primary-900' : 'bg-white/10 text-white hover:bg-white/15'}`}
-                  data-active={activeTab === 'catalog'}
-                >
-                  Explorar Catálogo
-                </button>
-              </div>
+        <div className="grid gap-16 lg:grid-cols-[1fr_2fr]">
+          {/* Block A: Testimonials / Community (Social Proof/Belonging) */}
+          <aside className="space-y-10">
+            <div className="flex items-center gap-3">
+              <Sparkles className="text-[#DBA1A2]" size={24} />
+              <h2 className="font-serif text-2xl font-medium text-[#422523]">Comunidade</h2>
             </div>
-
-            <div className="motion-list grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              <div className="motion-card rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
-                <div className="flex items-center gap-2 text-primary-100"><BookOpen size={16} /> jornadas ativas</div>
-                <div className="mt-3 text-3xl font-serif font-bold">{myCourses.length}</div>
-              </div>
-              <div className="motion-card rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
-                <div className="flex items-center gap-2 text-primary-100"><TrendingUp size={16} /> progresso médio</div>
-                <div className="mt-3 text-3xl font-serif font-bold">{averageProgress}%</div>
-              </div>
-              <div className="motion-card rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
-                <div className="flex items-center gap-2 text-primary-100"><Target size={16} /> agora</div>
-                <div className="mt-3 text-lg font-bold">{nextCourse ? nextCourse.title : 'Escolha sua primeira jornada'}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-primary-600" size={48} />
-          </div>
-        ) : error ? (
-          <div className="mt-8 rounded-[28px] border border-red-200 bg-red-50 p-6 text-center text-red-700">{error}</div>
-        ) : (
-          <>
-            {activeTab === 'my_courses' && nextCourse && (
-              <section className="motion-list mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="soft-card motion-card overflow-hidden rounded-[30px]">
-                  <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
-                    <div className="relative min-h-[260px]">
-                      <CourseThumbnail src={nextCourse.thumbnail} alt={nextCourse.title} fill className="object-cover" />
-                    </div>
-                    <div className="p-7">
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Retomar agora</p>
-                      <h2 className="mt-3 text-3xl font-bold text-stone-900">{nextCourse.title}</h2>
-                      <p className="mt-4 text-sm leading-7 text-stone-600">{nextCourse.description}</p>
-
-                      <div className="mt-6 space-y-3">
-                        <div className="flex items-center justify-between text-sm font-semibold text-stone-700">
-                          <span>Progresso</span>
-                          <span>{nextCourse.progress}%</span>
-                        </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-primary-100">
-                          <div className="h-full rounded-full bg-[linear-gradient(90deg,#5fbb85,#247a52)]" style={{ width: `${nextCourse.progress}%` }} />
-                        </div>
-                      </div>
-
-                      <div className="mt-6 flex flex-wrap gap-3 text-sm text-stone-600">
-                        <span className="rounded-full bg-primary-50 px-3 py-1.5 font-semibold text-primary-800">{nextCourse.level}</span>
-                        <span className="rounded-full bg-stone-100 px-3 py-1.5 font-semibold">{nextCourse.totalModules} módulos</span>
-                        <span className="rounded-full bg-stone-100 px-3 py-1.5 font-semibold">{formatDuration(nextCourse.durationMinutes)}</span>
-                      </div>
-
-                      <Link
-                        href={`/trilhas/${nextCourse.id}/aula`}
-                        className="mt-7 inline-flex items-center gap-2 rounded-full bg-primary-700 px-6 py-3 font-bold text-white shadow-lg shadow-primary-700/20 hover:bg-primary-800"
-                      >
-                        Continuar jornada <ArrowRight size={18} />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="motion-list grid gap-4">
-                  <div className="soft-card motion-card rounded-[30px] p-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Seu ritmo</p>
-                    <h3 className="mt-3 text-2xl font-bold text-stone-900">Clareza sobre o que já avançou</h3>
-                    <p className="mt-3 text-sm leading-7 text-stone-600">
-                      A nova visualização destaca retomada, progresso e duração para ajudar você a entrar na trilha certa com menos esforço cognitivo.
+            
+            <div className="space-y-8 relative">
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-[#E7D8D8]" />
+              
+              {TESTIMONIALS.map((t) => (
+                <div key={t.id} className="relative pl-12 group">
+                  <div className="absolute left-[19px] top-2 h-3 w-3 rounded-full bg-[#E7D8D8] border-2 border-[#F7F2ED] z-10 group-hover:bg-[#DBA1A2] transition-colors" />
+                  <div className="bg-white p-6 rounded-[24px] border border-[#E7D8D8] shadow-sm group-hover:shadow-md transition-all">
+                    <p className="font-serif italic text-[#422523]/80 leading-relaxed text-sm">
+                      &quot;{t.text}&quot;
                     </p>
-                  </div>
-                  <div className="soft-card motion-card rounded-[30px] p-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Acesso rápido</p>
-                    <div className="mt-4 grid gap-3">
-                      <Link href="/eventos" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-stone-700 hover:bg-primary-50">Ver eventos ao vivo</Link>
-                      <Link href="/forum" className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-stone-700 hover:bg-primary-50">Entrar na comunidade</Link>
-                      <button onClick={() => setActiveTab('catalog')} className="rounded-2xl bg-primary-50 px-4 py-3 text-left text-sm font-semibold text-primary-800 hover:bg-primary-100">
-                        Descobrir novas jornadas
-                      </button>
+                    <div className="mt-4 border-t border-[#F7F2ED] pt-4 flex flex-col">
+                      <span className="text-sm font-bold text-[#422523]">{t.name}</span>
+                      <span className="text-[10px] text-[#DBA1A2] uppercase tracking-widest font-bold mt-1">{t.role}</span>
                     </div>
                   </div>
                 </div>
-              </section>
+              ))}
+            </div>
+
+            <div className="pl-12">
+               <Link href="/forum" className="group flex items-center gap-2 text-xs font-bold text-[#422523]/60 hover:text-[#DBA1A2] transition-colors">
+                  VER TODAS AS HISTÓRIAS <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+               </Link>
+            </div>
+          </aside>
+
+          {/* Block B: Course Journey (Education) */}
+          <main className="space-y-10">
+            <div className="flex items-center gap-3">
+              <BookOpen className="text-[#DBA1A2]" size={24} />
+              <h2 className="font-serif text-2xl font-medium text-[#422523]">Sua Jornada Atual</h2>
+            </div>
+
+            {activeCourse ? (
+              <div className="group relative bg-white rounded-[40px] border border-[#E7D8D8] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
+                <div className="grid md:grid-cols-2">
+                  <div className="relative h-64 md:h-full min-h-[320px] overflow-hidden">
+                    <CourseThumbnail 
+                      src={activeCourse.thumbnail} 
+                      alt={activeCourse.title} 
+                      fill 
+                      className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-[#422523]/10" />
+                  </div>
+                  
+                  <div className="p-8 md:p-12 flex flex-col justify-center">
+                    <span className="inline-block px-3 py-1 bg-[#F7F2ED] text-[#DBA1A2] text-[10px] font-bold tracking-widest uppercase rounded-full w-fit">
+                      {activeCourse.level}
+                    </span>
+                    
+                    <h3 className="mt-6 font-serif text-3xl font-medium text-[#422523] leading-tight">
+                      {activeCourse.title}
+                    </h3>
+                    
+                    <p className="mt-4 text-[#422523]/70 text-sm leading-relaxed line-clamp-3">
+                      {activeCourse.description}
+                    </p>
+
+                    <div className="mt-8 space-y-4">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-bold text-[#422523]/40 uppercase tracking-widest">Progresso</span>
+                        <span className="text-sm font-serif font-medium text-[#422523]">{activeCourse.progress}%</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-[#F7F2ED] rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-[#DBA1A2] rounded-full transition-all duration-1000 ease-out" 
+                          style={{ width: `${activeCourse.progress}%` }} 
+                        />
+                      </div>
+                    </div>
+
+                    <Link
+                      href={`/trilhas/${activeCourse.id}/aula`}
+                      className="mt-10 inline-flex items-center justify-center gap-3 bg-[#422523] hover:bg-[#5D3A38] text-white py-4 px-8 rounded-2xl font-bold transition-all active:scale-[0.98] shadow-lg shadow-[#422523]/20"
+                    >
+                      Continuar de onde parou <ArrowRight size={18} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white p-12 text-center rounded-[40px] border border-[#E7D8D8] border-dashed">
+                <div className="mx-auto w-16 h-16 bg-[#F7F2ED] rounded-full flex items-center justify-center mb-6">
+                  <BookOpen className="text-[#DBA1A2]" size={32} />
+                </div>
+                <h3 className="font-serif text-2xl font-medium text-[#422523]">Sua jornada ainda não começou</h3>
+                <p className="mt-4 text-[#422523]/60 max-w-xs mx-auto text-sm leading-relaxed">
+                  Explore nosso catálogo e comece hoje mesmo a transformar o seu lar com intencionalidade.
+                </p>
+                <Link
+                  href="/trilhas"
+                  className="mt-8 inline-flex items-center gap-2 bg-[#DBA1A2] hover:bg-[#D48F90] px-8 py-4 rounded-2xl font-bold text-white shadow-lg shadow-[#DBA1A2]/20 transition-all border border-transparent"
+                >
+                  Ver Catálogo de Cursos <ArrowRight size={18} />
+                </Link>
+              </div>
             )}
 
-            <section className="mt-8">
-              {displayedCourses.length > 0 ? (
-                <div className="motion-list grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {displayedCourses.map((course) => (
-                    <article key={course.id} className="soft-card motion-card overflow-hidden rounded-[30px] transition hover:-translate-y-1">
-                      <div className="relative h-52">
-                        <CourseThumbnail
-                          src={course.thumbnail}
-                          alt={course.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
-                          <span className="rounded-full bg-white/88 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-800 backdrop-blur">
-                            {course.level}
-                          </span>
-                          {activeTab === 'catalog' && course.price > 0 ? (
-                            <span className="rounded-full bg-primary-700 px-3 py-1 text-xs font-bold text-white shadow-lg">
-                              R$ {course.price.toFixed(2)}
-                            </span>
-                          ) : null}
-                        </div>
+            {myCourses.length > 1 && (
+              <div className="mt-16 space-y-8">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#422523]/40">Outras jornadas iniciadas</h3>
+                  <div className="h-px flex-1 bg-[#E7D8D8] ml-6" />
+                </div>
+                
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {myCourses.filter(c => c.id !== activeCourse?.id).map(course => (
+                    <Link 
+                      key={course.id} 
+                      href={`/trilhas/${course.id}/aula`} 
+                      className="group bg-white flex items-center gap-5 p-5 rounded-[28px] border border-[#E7D8D8] hover:border-[#DBA1A2] transition-all hover:shadow-md"
+                    >
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-[#F7F2ED]">
+                        <CourseThumbnail src={course.thumbnail} alt={course.title} fill className="object-cover transition-transform group-hover:scale-110" />
                       </div>
-
-                      <div className="p-6">
-                        <div className="mb-3 flex flex-wrap gap-2 text-xs font-semibold text-stone-500">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-3 py-1 text-primary-700">
-                            <BookOpen size={13} /> {course.totalModules} módulos
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1">
-                            <Clock3 size={13} /> {formatDuration(course.durationMinutes)}
-                          </span>
-                        </div>
-
-                        <h3 className="text-2xl font-bold leading-tight text-stone-900">{course.title}</h3>
-                        <p className="mt-3 line-clamp-3 text-sm leading-7 text-stone-600">{course.description}</p>
-
-                        {course.isEnrolled ? (
-                          <div className="mt-5">
-                            <div className="mb-2 flex items-center justify-between text-sm font-semibold text-stone-700">
-                              <span>Avanço</span>
-                              <span>{course.progress}%</span>
-                            </div>
-                            <div className="h-2.5 overflow-hidden rounded-full bg-primary-100">
-                              <div className="h-full rounded-full bg-[linear-gradient(90deg,#5fbb85,#247a52)]" style={{ width: `${course.progress}%` }} />
-                            </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="truncate font-serif text-lg font-medium text-[#422523] group-hover:text-[#DBA1A2] transition-colors">
+                          {course.title}
+                        </h4>
+                        <div className="mt-2 flex items-center gap-3">
+                          <div className="flex-1 h-1 bg-[#F7F2ED] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#DBA1A2]/60 rounded-full" style={{ width: `${course.progress}%` }} />
                           </div>
-                        ) : null}
-
-                        <div className="mt-6 grid gap-3">
-                          {course.isEnrolled ? (
-                            <Link
-                              href={`/trilhas/${course.id}/aula`}
-                              className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary-700/20 hover:bg-primary-800"
-                            >
-                              {course.progress > 0 ? 'Continuar trilha' : 'Começar trilha'} <ArrowRight size={16} />
-                            </Link>
-                          ) : (
-                            <>
-                              <Link
-                                href={`/cursos/${course.slug}`}
-                                className="inline-flex items-center justify-center rounded-full border border-primary-900/10 bg-white px-5 py-3 text-sm font-bold text-stone-700 hover:bg-primary-50"
-                              >
-                                Ver detalhes
-                              </Link>
-                              <button
-                                onClick={() => handleAddToCart(course.id)}
-                                disabled={checkoutLoading === course.id}
-                                className="inline-flex items-center justify-center gap-2 rounded-full bg-primary-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-primary-700/20 hover:bg-primary-800 disabled:opacity-50"
-                              >
-                                {checkoutLoading === course.id ? (
-                                  <Loader2 className="animate-spin" size={16} />
-                                ) : (
-                                  <>
-                                    <ShoppingBag size={16} />
-                                    Adicionar ao carrinho
-                                  </>
-                                )}
-                              </button>
-                            </>
-                          )}
+                          <span className="text-[10px] font-bold text-[#422523]/40">{course.progress}%</span>
                         </div>
                       </div>
-                    </article>
+                    </Link>
                   ))}
                 </div>
-              ) : (
-                <div className="soft-card motion-card rounded-[30px] p-10 text-center">
-                  <h3 className="text-3xl font-bold text-stone-900">
-                    {activeTab === 'my_courses' ? 'Sua área ainda está vazia' : 'Nenhuma jornada publicada agora'}
-                  </h3>
-                  <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-stone-600">
-                    {activeTab === 'my_courses'
-                      ? 'Quando você iniciar uma jornada, ela aparece aqui com progresso, retomada rápida e visual mais agradável para acompanhar sua evolução.'
-                      : 'Volte em breve ou explore outras áreas da plataforma enquanto novas jornadas são publicadas.'}
-                  </p>
-                  {activeTab === 'my_courses' ? (
-                    <button
-                      onClick={() => setActiveTab('catalog')}
-                      className="mt-6 rounded-full bg-primary-700 px-6 py-3 font-bold text-white hover:bg-primary-800"
-                    >
-                      Explorar catálogo
-                    </button>
-                  ) : null}
-                </div>
-              )}
-            </section>
-          </>
-        )}
+              </div>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );
