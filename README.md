@@ -3,7 +3,7 @@
 
 Portal Educacional e Observatório Social do Ecossistema da Dignidade. Construído com **Next.js 16 (App Router)**, **Supabase (PostgreSQL)** e **Tailwind CSS v4**.
 
-🔗 **Produção:** https://app-connectacipb-9739s-projects.vercel.app/
+🔗 **Produção:** https://plataforma-mulheres.vercel.app/
 
 ---
 
