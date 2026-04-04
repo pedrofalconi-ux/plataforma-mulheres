@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { userId, fullName, email, role } = await request.json();
+    const { userId, fullName, email } = await request.json();
 
     if (!userId || !fullName || !email) {
       return NextResponse.json({ error: 'Dados obrigatórios ausentes' }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         id: userId,
         full_name: fullName,
         email: email,
-        role: role || 'student',
+        role: 'student',
       })
       .select()
       .single();

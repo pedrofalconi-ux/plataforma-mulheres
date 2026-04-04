@@ -114,7 +114,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-bold text-stone-800 flex items-center gap-2">
                         {comment.profiles.full_name} 
-                        {comment.profiles.role === 'ADMIN' && <span className="bg-primary-100 text-primary-800 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Professor</span>}
+                        {comment.profiles.role?.toLowerCase() === 'admin' && <span className="bg-primary-100 text-primary-800 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Professor</span>}
                       </span>
                       <span className="text-xs text-stone-400">
                         {new Date(comment.created_at).toLocaleDateString()}

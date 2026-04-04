@@ -43,7 +43,7 @@ export async function requireAdmin(): Promise<AdminContext | NextResponse> {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin' && profile?.role !== 'ADMIN') {
+  if (profile?.role?.toLowerCase() !== 'admin') {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 

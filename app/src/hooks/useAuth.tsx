@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: data.id,
           name: data.full_name || data.name || '',
           email: email || '',
-          role: data.role || 'STUDENT',
+          role: data.role || 'student',
           avatar: data.avatar_url,
         });
       } else if (mounted) {
@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: userId,
           name: '',
           email: email || '',
-          role: 'STUDENT',
+          role: 'student',
         });
       }
       setLoading(false);
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       logout,
       isAuthenticated: !!user,
-      isAdmin: user?.role === 'admin' || user?.role === 'ADMIN',
+      isAdmin: user?.role?.toLowerCase() === 'admin',
     }}>
       {children}
     </AuthContext.Provider>

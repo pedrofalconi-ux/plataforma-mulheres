@@ -65,7 +65,7 @@ async function requireAdmin() {
     .eq('id', user.id)
     .single();
 
-  if (profile?.role !== 'admin' && profile?.role !== 'ADMIN') {
+  if (profile?.role?.toLowerCase() !== 'admin') {
     return { error: NextResponse.json({ error: 'Acesso negado' }, { status: 403 }) };
   }
 

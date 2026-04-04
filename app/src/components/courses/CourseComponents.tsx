@@ -216,7 +216,7 @@ export function LearningHub() {
         <SectionIntro
           eyebrow="Aprendizado"
           title="Uma area mais limpa para acompanhar o que voce estuda."
-          description="Sem visual inflado, sem blocos artificiais. Apenas o que importa: continuar, revisar e escolher a proxima trilha."
+          description="Aqui o foco e simples: assistir aulas, acessar materiais em PDF e continuar sua trilha com clareza."
         />
 
         {error ? (
@@ -234,10 +234,10 @@ export function LearningHub() {
                 <p className="editorial-kicker">Sua proxima etapa</p>
                 <h3 className="mt-4 text-4xl leading-none text-primary-900">Seu aprendizado ainda nao comecou.</h3>
                 <p className="mt-5 max-w-2xl text-base leading-8 text-primary-900/72">
-                  Explore as trilhas disponiveis e comece com um caminho que faca sentido para o momento da sua casa e da sua rotina.
+                  Explore as trilhas disponiveis e encontre aulas e materiais que facam sentido para o momento da sua casa e da sua rotina.
                 </p>
-                <EditorialButtonLink href="/blog" className="mt-8 w-full sm:w-auto">
-                  Ver materiais da casa
+                <EditorialButtonLink href="/trilhas" className="mt-8 w-full sm:w-auto">
+                  Explorar aprendizado
                 </EditorialButtonLink>
               </EditorialPanel>
             )}
@@ -247,7 +247,7 @@ export function LearningHub() {
               <SectionIntro
                 eyebrow="Biblioteca"
                 title="Todas as trilhas publicadas em um unico lugar."
-                description="Se voce ja esta inscrita, continue de onde parou. Se ainda nao entrou, use essa pagina para explorar com calma."
+                description="Se voce ja esta inscrita, continue de onde parou. Se ainda nao entrou, use essa pagina para explorar aulas e materiais com calma."
               />
             </div>
           </div>

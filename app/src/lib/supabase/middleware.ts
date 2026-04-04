@@ -33,7 +33,7 @@ export async function updateSession(request: NextRequest) {
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
   if (isAdminRoute && user) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-    if (profile?.role !== 'admin' && profile?.role !== 'ADMIN') {
+    if (profile?.role?.toLowerCase() !== 'admin') {
       const url = request.nextUrl.clone();
       url.pathname = '/trilhas';
       return NextResponse.redirect(url);

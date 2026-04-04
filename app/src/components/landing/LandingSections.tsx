@@ -24,8 +24,8 @@ export function HeroSection() {
               <EditorialButtonLink href="/cadastro" className="!min-w-[260px]">
                 Comece sua transformacao <ArrowRight size={18} />
               </EditorialButtonLink>
-              <EditorialButtonLink href="/blog" variant="secondary" className="!min-w-[220px] border-white/55 !text-white">
-                Materiais exclusivos
+              <EditorialButtonLink href="/trilhas" variant="secondary" className="!min-w-[220px] border-white/55 !text-white">
+                Ver aulas e materiais
               </EditorialButtonLink>
             </div>
           </div>
@@ -76,12 +76,12 @@ export function PillarsSection() {
 
   return (
     <PageSection className="py-24">
-      <SectionIntro
-        eyebrow="Um aprendizado que transforma"
-        title="Aprendizado, presenca e clareza para o lar e o coracao."
-        description="Cada trilha foi pensada para unir beleza, rotina e direcao. Sem excesso visual, sem ruido, com estrutura para sustentar uma transformacao real."
-        align="center"
-      />
+        <SectionIntro
+          eyebrow="Um aprendizado que transforma"
+          title="Aprendizado, presenca e clareza para o lar e o coracao."
+          description="Cada trilha foi pensada para reunir aulas, materiais em PDF e uma sequencia clara para sustentar uma transformacao real."
+          align="center"
+        />
 
       <div className="mt-16 grid gap-6 md:grid-cols-3">
         {pillars.map((pillar) => (

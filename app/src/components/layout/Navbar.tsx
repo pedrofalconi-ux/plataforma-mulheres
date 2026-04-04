@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BookOpen, LogOut, Menu, User as UserIcon, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { BRAND_EMAIL, BRAND_NAME } from '@/lib/constants';
+import { BRAND_NAME } from '@/lib/constants';
 
 function BrandMark() {
   return (
@@ -19,14 +19,13 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'admin';
+  const isAdmin = user?.role?.toLowerCase() === 'admin';
   const firstName = user?.name?.split(' ')[0] || 'Conta';
 
   const navLinks = [
     { href: '/', label: 'Inicio' },
     { href: '/sobre', label: 'Sobre' },
     { href: '/trilhas', label: 'Aprendizado' },
-    { href: '/blog', label: 'Papelaria' },
   ];
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
@@ -49,9 +48,6 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-          <a href={`mailto:${BRAND_EMAIL}`} className="header-link">
-            Contato
-          </a>
         </div>
 
         <div className="flex items-center gap-2">
@@ -74,6 +70,9 @@ export default function Navbar() {
             <div className="hidden items-center gap-2 lg:flex">
               <Link href="/login" className="header-link" data-active={isActive('/login')}>
                 Entrar
+              </Link>
+              <Link href="/cadastro/admin" className="header-link" data-active={isActive('/cadastro/admin')}>
+                Cadastro admin
               </Link>
               <Link href="/cadastro" className="button-primary">
                 Acessar plataforma
@@ -105,9 +104,6 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <a href={`mailto:${BRAND_EMAIL}`} className="border-b border-primary-900/8 pb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary-900">
-              Contato
-            </a>
 
             {user ? (
               <div className="grid gap-3 pt-3">
@@ -132,6 +128,9 @@ export default function Navbar() {
               <div className="grid gap-3 pt-3">
                 <Link href="/login" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
                   Entrar
+                </Link>
+                <Link href="/cadastro/admin" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
+                  Cadastro admin
                 </Link>
                 <Link href="/cadastro" onClick={() => setIsOpen(false)} className="button-primary !justify-center">
                   Acessar plataforma
