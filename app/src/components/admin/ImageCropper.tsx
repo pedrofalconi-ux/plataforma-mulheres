@@ -32,17 +32,22 @@ export default function ImageCropper({
     reader.onload = (e) => {
       const image = new Image();
       image.onload = () => {
-        setImg(image);
-        // Initial scale to fit the crop area
         const containerWidth = 600; // rough guess for preview
         const containerHeight = 400;
-        const initialScale = Math.max(containerWidth / image.width, containerHeight / image.height);
+        const cropHeight = containerWidth / aspectRatio;
+        const initialScale = Math.max(containerWidth / image.width, cropHeight / image.height);
+
+        setImg(image);
         setScale(initialScale);
+        setOffset({
+          x: (containerWidth - image.width * initialScale) / 2,
+          y: (containerHeight - image.height * initialScale) / 2,
+        });
       };
       image.src = e.target?.result as string;
     };
     reader.readAsDataURL(imageFile);
-  }, [imageFile]);
+  }, [aspectRatio, imageFile]);
 
   useEffect(() => {
     if (!img || !canvasRef.current) return;

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const parsed = CreateCourseSchema.safeParse({
       ...payload,
       title: sanitizeText(payload.title),
-      description: sanitizeText(payload.description),
+      description: emptyStringToNull(sanitizeText(payload.description)),
       level: sanitizeText(payload.level),
       thumbnail_url: emptyStringToNull(sanitizeText(payload.thumbnail_url)),
       instructor_name: emptyStringToNull(sanitizeText(payload.instructor_name)),
@@ -35,8 +35,9 @@ export async function POST(request: Request) {
     });
 
     if (!parsed.success) {
+      console.error('Course Creation Validation Error:', JSON.stringify(parsed.error.flatten(), null, 2));
       return NextResponse.json(
-        { error: 'Dados invÃ¡lidos', details: parsed.error.flatten() },
+        { error: 'Dados inválidos', details: parsed.error.flatten() },
         { status: 400 }
       );
     }

@@ -11,13 +11,13 @@ export function HeroSection() {
   return (
     <PageSection className="pt-10">
       <div className="hero-sheen border border-primary-900/8 px-8 py-10 text-white sm:px-10 lg:px-16 lg:py-14">
-        <div className="grid gap-14 lg:grid-cols-[1fr_0.95fr] lg:items-center">
-          <div>
+        <div className="grid items-center gap-14 lg:grid-cols-2">
+          <div className="flex flex-col justify-center">
             <p className="editorial-kicker !text-white/78">Plataforma Nathi Faria</p>
-            <h1 className="mt-5 max-w-xl font-serif text-[4rem] leading-[0.92] text-white sm:text-[5.6rem]">
+            <h1 className="mt-5 max-w-2xl font-serif text-[4rem] leading-[1.05] text-white sm:text-[5.2rem]">
               Transforme seu lar. Inspire sua familia. Viva com proposito.
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-9 text-white/86">
+            <p className="mt-8 max-w-lg text-lg leading-9 text-white/86">
               Uma comunidade feita para mulheres que desejam viver com mais amor, equilibrio e proposito dentro do seu lar.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -30,8 +30,8 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="relative min-h-[520px] overflow-hidden border-4 border-white/70 bg-white/15">
+          <div className="relative lg:ml-auto lg:w-full lg:max-w-[580px]">
+            <div className="relative min-h-[480px] overflow-hidden border-4 border-white/70 bg-white/15 md:min-h-[540px]">
               <Image
                 src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"
                 alt="Retrato editorial feminino"
@@ -85,8 +85,8 @@ export function PillarsSection() {
 
       <div className="mt-16 grid gap-6 md:grid-cols-3">
         {pillars.map((pillar) => (
-          <EditorialPanel key={pillar.title} className="min-h-[280px] p-10">
-            <div className="mb-10 flex h-14 w-14 items-center justify-center border border-primary-900/12 bg-primary-50 text-primary-800">
+          <EditorialPanel key={pillar.title} className="flex min-h-[320px] flex-col items-center p-10 text-center">
+            <div className="mb-10 flex h-16 w-16 items-center justify-center border border-primary-900/12 bg-primary-50 text-primary-800">
               {pillar.icon}
             </div>
             <h3 className="text-3xl text-primary-900">{pillar.title}</h3>
@@ -143,28 +143,27 @@ export function NewsSection() {
 export function CtaSection() {
   return (
     <PageSection className="py-24">
-      <div className="grid gap-8 border border-primary-900/10 bg-white px-8 py-12 lg:grid-cols-[1.2fr_0.8fr] lg:px-12">
-        <div>
-          <p className="editorial-kicker">Pronta para comecar?</p>
-          <h2 className="mt-4 text-5xl leading-none text-primary-900 sm:text-6xl">
-            Um novo ritmo para a casa, para a familia e para a sua presenca.
-          </h2>
-          <p className="mt-6 max-w-2xl text-lg leading-9 text-primary-900/72">
-            Entre na plataforma e encontre trilhas organizadas, materiais de apoio e uma experiencia mais serena, madura e intencional.
-          </p>
-        </div>
+      <div className="mx-auto flex max-w-5xl flex-col items-center border border-primary-900/10 bg-white px-8 py-16 text-center lg:px-20">
+        <p className="editorial-kicker">Pronta para comecar?</p>
+        <h2 className="mt-6 text-5xl leading-tight text-primary-900 sm:text-6xl">
+          Um novo ritmo para a casa, para a familia e para a sua presenca.
+        </h2>
+        <p className="mt-8 max-w-2xl text-lg leading-9 text-primary-900/72">
+          Entre na plataforma e encontre trilhas organizadas, materiais de apoio e uma experiencia mais serena, madura e intencional.
+        </p>
 
-        <div className="flex flex-col justify-end gap-4">
-          <EditorialButtonLink href="/cadastro">
+        <div className="mt-12 flex flex-col items-center justify-center gap-5 sm:flex-row">
+          <EditorialButtonLink href="/cadastro" className="!min-w-[240px]">
             Criar minha conta
           </EditorialButtonLink>
-          <EditorialButtonLink href="/trilhas" variant="secondary" className="border-primary-900/20 !text-primary-900">
+          <EditorialButtonLink href="/trilhas" variant="secondary" className="border-primary-900/20 !min-w-[240px] !text-primary-900">
             Explorar aprendizado
           </EditorialButtonLink>
-          <Link href="/sobre" className="text-sm font-extrabold uppercase tracking-[0.24em] text-primary-900/68">
-            Conhecer a visao da marca
-          </Link>
         </div>
+        
+        <Link href="/sobre" className="mt-8 text-sm font-extrabold uppercase tracking-[0.24em] text-primary-900/68 hover:text-primary-900">
+          Conhecer a visao da marca
+        </Link>
       </div>
     </PageSection>
   );

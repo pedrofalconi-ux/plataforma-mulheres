@@ -18,6 +18,7 @@ import {
   Image as ImageIcon,
   Zap
 } from 'lucide-react';
+import ImageCropper from '@/components/admin/ImageCropper';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -27,6 +28,8 @@ export default function ProfilePage() {
   const [phone, setPhone] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [pendingAvatar, setPendingAvatar] = useState<File | null>(null);
+  const [showAvatarCropper, setShowAvatarCropper] = useState(false);
   const [regionId, setRegionId] = useState('');
   const [userSkills, setUserSkills] = useState<string[]>([]);
   
@@ -34,6 +37,7 @@ export default function ProfilePage() {
   const [availableSkills, setAvailableSkills] = useState<any[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -97,6 +101,44 @@ export default function ProfilePage() {
       fetchProfileData();
     }
   }, [user]);
+
+  const parseResponse = async (response: Response) => {
+    const rawText = await response.text();
+
+    try {
+      return rawText ? JSON.parse(rawText) : {};
+    } catch {
+      return { error: rawText || 'Resposta invalida da API.' };
+    }
+  };
+
+  const handleAvatarUpload = async (file: File | null) => {
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/profile/upload-avatar', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await parseResponse(response);
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao enviar foto de perfil.');
+      }
+
+      setAvatarUrl(result.url || '');
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Erro ao enviar foto de perfil.' });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,16 +369,54 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-stone-700 mb-2">Avatar URL (Opcional)</label>
-                    <div className="relative">
-                      <ImageIcon className="absolute left-3 top-3 text-stone-400" size={18} />
-                      <input
-                        type="url"
-                        value={avatarUrl}
-                        onChange={(e) => setAvatarUrl(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none transition-all"
-                        placeholder="https://..."
-                      />
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Foto de Perfil</label>
+                    <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                          {avatarUrl ? (
+                            <div className="relative h-20 w-20 overflow-hidden rounded-full border border-stone-200 bg-white">
+                              <Image src={avatarUrl} alt="Preview do avatar" fill sizes="80px" className="object-cover" />
+                            </div>
+                          ) : (
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-400">
+                              <ImageIcon size={24} />
+                            </div>
+                          )}
+                          <div className="text-sm text-stone-500">
+                            Envie uma imagem e ajuste o enquadramento antes de salvar o perfil.
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-primary-700">
+                            {isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}
+                            {isUploadingAvatar ? 'Enviando...' : 'Enviar foto'}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/gif"
+                              className="hidden"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] || null;
+                                if (file) {
+                                  setPendingAvatar(file);
+                                  setShowAvatarCropper(true);
+                                }
+                                event.currentTarget.value = '';
+                              }}
+                            />
+                          </label>
+
+                          {avatarUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => setAvatarUrl('')}
+                              className="rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-bold text-stone-600 transition hover:bg-stone-100"
+                            >
+                              Remover
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -440,6 +520,23 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {showAvatarCropper && pendingAvatar ? (
+        <ImageCropper
+          imageFile={pendingAvatar}
+          aspectRatio={1}
+          maxWidth={800}
+          onCrop={(croppedFile) => {
+            setShowAvatarCropper(false);
+            setPendingAvatar(null);
+            void handleAvatarUpload(croppedFile);
+          }}
+          onCancel={() => {
+            setShowAvatarCropper(false);
+            setPendingAvatar(null);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -9,6 +9,25 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/observatorio',
+        destination: '/trilhas',
+        permanent: true,
+      },
+      {
+        source: '/carrinho',
+        destination: '/trilhas',
+        permanent: true,
+      },
+      {
+        source: '/checkout',
+        destination: '/trilhas',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -42,11 +42,12 @@ export const CourseSchema = z.object({
   price: z.number().nonnegative().default(0),
 });
 
-export const CreateCourseSchema = CourseSchema.omit({ id: true });
+export const CreateCourseSchema = CourseSchema.omit({ id: true, slug: true });
 export const UpdateCourseSchema = CourseSchema.pick({
   id: true,
   title: true,
   description: true,
+  slug: true,
   level: true,
   thumbnail_url: true,
   is_published: true,

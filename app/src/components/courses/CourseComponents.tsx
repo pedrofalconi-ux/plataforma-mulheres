@@ -158,10 +158,12 @@ export function LearningHub() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 pb-16">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mx-auto max-w-7xl px-4 py-12 pb-24">
+      <div className="flex flex-wrap justify-center gap-8">
         {courses.map((course) => (
-          <CourseCard key={course.id} course={course} />
+          <div key={course.id} className="w-full max-w-[400px]">
+            <CourseCard course={course} />
+          </div>
         ))}
       </div>
     </div>

@@ -40,7 +40,7 @@ export function SectionIntro({
   return (
     <div className={clsx(align === 'center' ? 'text-center' : 'text-left', className)}>
       {eyebrow ? <p className="editorial-kicker">{eyebrow}</p> : null}
-      <h2 className="mt-4 max-w-4xl text-4xl leading-none text-primary-900 sm:text-5xl">{title}</h2>
+      <h2 className={clsx("mt-4 max-w-4xl text-4xl leading-[1.15] text-primary-900 sm:text-5xl", align === 'center' && "mx-auto")}>{title}</h2>
       {description ? (
         <p
           className={clsx(
