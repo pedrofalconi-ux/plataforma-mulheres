@@ -41,6 +41,26 @@ type RecentSale = {
   profiles: { full_name: string; display_name: string | null } | null;
 };
 
+function normalizeProfileJoin(
+  value: { full_name?: string; display_name?: string | null } | { full_name?: string; display_name?: string | null }[] | null,
+) {
+  if (Array.isArray(value)) {
+    return value[0]
+      ? {
+          full_name: value[0].full_name || '',
+          display_name: value[0].display_name ?? null,
+        }
+      : null;
+  }
+
+  if (!value) return null;
+
+  return {
+    full_name: value.full_name || '',
+    display_name: value.display_name ?? null,
+  };
+}
+
 function StatCard({
   title,
   value,
@@ -53,13 +73,13 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="flex items-center space-x-4 rounded-xl border border-stone-100 bg-white p-6 shadow-sm">
-      <div className={`rounded-full p-3 ${color}`}>
+    <div className="flex items-center gap-4 rounded-2xl border border-stone-100 bg-white p-5 shadow-sm sm:p-6">
+      <div className={`rounded-2xl p-3 ${color}`}>
         <Icon size={24} className="text-white" />
       </div>
-      <div>
+      <div className="min-w-0">
         <p className="text-sm font-medium text-stone-500">{title}</p>
-        <p className="text-2xl font-bold text-stone-800">{value}</p>
+        <p className="break-words text-xl font-bold text-stone-800 sm:text-2xl">{value}</p>
       </div>
     </div>
   );
@@ -138,17 +158,18 @@ export default function AdminDashboard() {
           approvedProjectsRes,
           profileRowsRes,
           completedRowsRes,
-          ordersRes
+          ordersRes,
         ] = await Promise.all([
           supabase.from('profiles').select('*', { count: 'exact', head: true }),
           supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
           supabase.from('observatory_projects').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
           supabase.from('profiles').select('created_at').order('created_at', { ascending: false }),
           supabase.from('enrollments').select('completed_at').eq('status', 'completed').not('completed_at', 'is', null),
-          supabase.from('checkout_orders')
+          supabase
+            .from('checkout_orders')
             .select('id, total_cents, created_at, status, profiles:profile_id (full_name, display_name)')
             .in('status', ['confirmed', 'completed', 'paid'])
-            .order('created_at', { ascending: false })
+            .order('created_at', { ascending: false }),
         ]);
 
         if (usersCountRes.error) throw usersCountRes.error;
@@ -160,10 +181,10 @@ export default function AdminDashboard() {
 
         const allOrders = ordersRes.data || [];
         const totalRevenue = allOrders.reduce((acc, curr) => acc + (curr.total_cents || 0), 0);
-        
+
         const now = new Date();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const ordersThisMonth = allOrders.filter(o => new Date(o.created_at) >= firstDayOfMonth);
+        const ordersThisMonth = allOrders.filter((order) => new Date(order.created_at) >= firstDayOfMonth);
 
         setStats({
           totalUsuarios: usersCountRes.count || 0,
@@ -173,27 +194,36 @@ export default function AdminDashboard() {
           vendasNoMes: ordersThisMonth.length,
         });
 
-        setRecentSales(allOrders.slice(0, 5) as any);
+        setRecentSales(
+          allOrders.slice(0, 5).map((order) => ({
+            id: order.id,
+            total_cents: order.total_cents || 0,
+            created_at: order.created_at,
+            profiles: normalizeProfileJoin(order.profiles as any),
+          })),
+        );
 
-        // Processar Faturamento Mensal
         const monthlySales = new Map<string, number>();
-        for (let i = 5; i >= 0; i--) {
-          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        for (let index = 5; index >= 0; index -= 1) {
+          const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           monthlySales.set(key, 0);
         }
 
-        allOrders.forEach(order => {
-          const d = new Date(order.created_at);
-          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        allOrders.forEach((order) => {
+          const date = new Date(order.created_at);
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
           if (monthlySales.has(key)) {
-            monthlySales.set(key, (monthlySales.get(key) || 0) + (order.total_cents / 100));
+            monthlySales.set(key, (monthlySales.get(key) || 0) + order.total_cents / 100);
           }
         });
 
         const salesChart = Array.from(monthlySales.entries()).map(([key, value]) => {
-          const [yr, mo] = key.split('-');
-          const label = new Date(parseInt(yr), parseInt(mo) - 1).toLocaleDateString('pt-BR', { month: 'short' });
+          const [year, month] = key.split('-');
+          const label = new Date(parseInt(year, 10), parseInt(month, 10) - 1).toLocaleDateString('pt-BR', {
+            month: 'short',
+          });
+
           return { name: label, value };
         });
         setSalesData(salesChart);
@@ -209,18 +239,23 @@ export default function AdminDashboard() {
         setChartData(buildLastSixMonthsSeries(profileDates, completedDates));
       } catch (err: any) {
         console.error(err);
-        setError(err.message || 'Não foi possível carregar o painel.');
+        setError(err.message || 'Nao foi possivel carregar o painel.');
       } finally {
         setLoading(false);
       }
     }
 
-    loadDashboard();
+    void loadDashboard();
   }, [supabase]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-8 font-serif text-2xl font-bold text-stone-900">Painel Administrativo</h1>
+    <div className="mx-auto max-w-7xl py-2 sm:py-4">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="font-serif text-2xl font-bold text-stone-900 sm:text-3xl">Painel Administrativo</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-500 sm:text-base">
+          Acompanhe crescimento, faturamento e atividade recente com leitura mais confortavel em telas pequenas.
+        </p>
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-16 text-stone-400">
@@ -230,10 +265,10 @@ export default function AdminDashboard() {
         <div className="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
       ) : (
         <>
-          <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard title="Total de usuários" value={String(stats.totalUsuarios)} icon={Users} color="bg-blue-500" />
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <StatCard title="Total de usuarios" value={String(stats.totalUsuarios)} icon={Users} color="bg-blue-500" />
             <StatCard
-              title="Matrículas ativas"
+              title="Matriculas ativas"
               value={String(stats.matriculasAtivas)}
               icon={BookOpen}
               color="bg-green-500"
@@ -245,17 +280,17 @@ export default function AdminDashboard() {
               color="bg-primary-500"
             />
             <StatCard
-              title="Vendas (Mês)"
+              title="Vendas no Mes"
               value={String(stats.vendasNoMes)}
               icon={AlertCircle}
               color="bg-amber-500"
             />
           </div>
 
-          <div className="mb-8 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-xl border border-stone-100 bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-lg font-bold text-stone-800">Crescimento de Usuários</h3>
-              <div className="h-64">
+          <div className="mb-8 grid gap-4 sm:gap-6 lg:grid-cols-2">
+            <div className="rounded-2xl border border-stone-100 bg-white p-4 shadow-sm sm:p-6">
+              <h3 className="mb-4 text-lg font-bold text-stone-800">Crescimento de Usuarios</h3>
+              <div className="h-56 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData}>
                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
@@ -267,16 +302,16 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-stone-100 bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-stone-100 bg-white p-4 shadow-sm sm:p-6">
               <h3 className="mb-4 text-lg font-bold text-stone-800">Faturamento Mensal (R$)</h3>
-              <div className="h-64">
+              <div className="h-56 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={salesData}>
                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                    <Tooltip 
-                      formatter={(value: any) => [`R$ ${Number(value || 0).toFixed(2)}`, 'Faturamento']}
-                      cursor={{ fill: 'transparent' }} 
+                    <Tooltip
+                      formatter={(value) => [`R$ ${Number(value || 0).toFixed(2)}`, 'Faturamento']}
+                      cursor={{ fill: 'transparent' }}
                     />
                     <Bar dataKey="value" fill="#7f432d" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -285,8 +320,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-xl border border-stone-100 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-stone-100 p-6">
+          <div className="overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-sm">
+            <div className="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <h3 className="text-lg font-bold text-stone-800">Vendas Recentes</h3>
               <Link href="/admin/cursos" className="text-sm font-medium text-primary-600 hover:underline">
                 Gerenciar Cursos
@@ -296,32 +331,54 @@ export default function AdminDashboard() {
             {recentSales.length === 0 ? (
               <div className="p-6 text-sm text-stone-500">Nenhuma venda registrada ainda.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-stone-50 text-xs uppercase text-stone-500">
-                    <tr>
-                      <th className="px-6 py-3">Aluno</th>
-                      <th className="px-6 py-3">Valor</th>
-                      <th className="px-6 py-3">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentSales.map((sale) => (
-                      <tr key={sale.id} className="border-b hover:bg-stone-50">
-                        <td className="px-6 py-4 font-medium text-stone-900">
-                          {sale.profiles?.display_name || sale.profiles?.full_name || 'Usuário'}
-                        </td>
-                        <td className="px-6 py-4 text-stone-600 font-bold">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.total_cents / 100)}
-                        </td>
-                        <td className="px-6 py-4 text-stone-600">
-                          {new Date(sale.created_at).toLocaleDateString('pt-BR')}
-                        </td>
+              <>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-stone-50 text-xs uppercase text-stone-500">
+                      <tr>
+                        <th className="px-6 py-3">Aluno</th>
+                        <th className="px-6 py-3">Valor</th>
+                        <th className="px-6 py-3">Data</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {recentSales.map((sale) => (
+                        <tr key={sale.id} className="border-b hover:bg-stone-50">
+                          <td className="px-6 py-4 font-medium text-stone-900">
+                            {sale.profiles?.display_name || sale.profiles?.full_name || 'Usuario'}
+                          </td>
+                          <td className="px-6 py-4 font-bold text-stone-600">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.total_cents / 100)}
+                          </td>
+                          <td className="px-6 py-4 text-stone-600">
+                            {new Date(sale.created_at).toLocaleDateString('pt-BR')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="grid gap-3 p-4 md:hidden">
+                  {recentSales.map((sale) => (
+                    <article key={sale.id} className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <h4 className="truncate font-semibold text-stone-900">
+                            {sale.profiles?.display_name || sale.profiles?.full_name || 'Usuario'}
+                          </h4>
+                          <p className="mt-1 text-xs text-stone-500">
+                            {new Date(sale.created_at).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-primary-700">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(sale.total_cents / 100)}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </>
