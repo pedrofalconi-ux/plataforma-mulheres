@@ -3,24 +3,24 @@ import { z } from 'zod';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 
 const InstitutionalSchema = z.object({
-  hero_title: z.string().min(8, 'Titulo principal muito curto').max(140),
-  hero_subtitle: z.string().min(12, 'Subtitulo muito curto').max(280),
+  hero_title: z.string().min(8, 'Título principal muito curto').max(140),
+  hero_subtitle: z.string().min(12, 'Subtítulo muito curto').max(280),
   about_summary: z.string().min(20, 'Resumo institucional muito curto').max(1200),
-  mission: z.string().min(12, 'Missao muito curta').max(1200),
-  vision: z.string().min(12, 'Visao muito curta').max(1200),
+  mission: z.string().min(12, 'Missão muito curta').max(1200),
+  vision: z.string().min(12, 'Visão muito curta').max(1200),
   values: z.array(z.string().min(2)).min(3).max(10),
 });
 
 const fallbackContent = {
   hero_title: 'Nathi Faria',
-  hero_subtitle: 'Aprendizagem viva, casa com direcao e uma presenca mais intencional no cotidiano.',
+  hero_subtitle: 'Transformando a sua casa num lar.',
   about_summary:
-    'A plataforma conecta formacao, presenca e conteudo com uma linguagem mais serena, madura e feminina.',
+    'O ambiente familiar da residência define o destino daqueles que ali moram.',
   mission:
-    'Cultivar jornadas de aprendizagem que fortalecam o lar, a presenca e a clareza na vida cotidiana.',
+    'Fortalecer atitudes e práticas que transformam a casa em um lar onde o coração se forma.',
   vision:
-    'Ser uma referencia em formacao feminina com estetica, profundidade e direcao.',
-  values: ['Clareza', 'Cuidado', 'Presenca', 'Responsabilidade', 'Beleza'],
+    'Ver mulheres construindo lares com sabedoria, entendimento e vínculos saudáveis.',
+  values: ['Sabedoria', 'Entendimento', 'Vínculos', 'Cuidado', 'Propósito'],
 };
 
 const institutionalMissingMessage =
@@ -33,7 +33,7 @@ async function requireAdmin() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: NextResponse.json({ error: 'Nao autorizado' }, { status: 401 }) };
+    return { error: NextResponse.json({ error: 'Não autorizado' }, { status: 401 }) };
   }
 
   const { data: profile } = await supabase
@@ -75,7 +75,7 @@ export async function GET() {
         ...fallbackContent,
         warning: details.includes('institutional_content')
           ? institutionalMissingMessage
-          : 'Falha ao carregar conteudo institucional do banco.',
+          : 'Falha ao carregar conteúdo institucional do banco.',
         details,
       },
       { status: 200 },
@@ -112,12 +112,12 @@ export async function PUT(request: NextRequest) {
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Dados invalidos', details: error.flatten() },
+        { error: 'Dados inválidos', details: error.flatten() },
         { status: 400 },
       );
     }
 
-    const details = error?.message || 'Falha ao atualizar conteudo institucional';
+    const details = error?.message || 'Falha ao atualizar conteúdo institucional';
     if (details.includes('institutional_content')) {
       return NextResponse.json(
         { error: institutionalMissingMessage, details },

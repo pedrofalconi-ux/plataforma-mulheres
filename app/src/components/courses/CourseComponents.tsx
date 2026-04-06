@@ -86,7 +86,7 @@ function CourseCard({ course }: { course: LearningCourse }) {
         <p className="line-clamp-3 text-sm leading-7 text-primary-900/72">{course.description}</p>
 
         <div className="flex items-center justify-between border-t border-primary-900/10 pt-4 text-sm text-primary-900/68">
-          <span>{course.totalModules || 0} modulos</span>
+          <span>{course.totalModules || 0} módulos</span>
           <span>{formatDuration(course.durationMinutes)}</span>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function LearningHub() {
         setCourses(mappedCourses);
       } catch (err) {
         console.error('Fetch Error:', err);
-        setError('Nao foi possivel carregar as trilhas agora.');
+        setError('Não foi possível carregar as trilhas agora.');
       } finally {
         setLoading(false);
       }

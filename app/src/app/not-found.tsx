@@ -1,19 +1,18 @@
 import Link from 'next/link';
 
-export default function NotFoundPage() {
+export default function NotFound() {
   return (
-    <div className="min-h-[70vh] bg-stone-50 flex items-center justify-center px-4 py-16">
-      <div className="max-w-2xl rounded-3xl border border-stone-200 bg-white p-10 shadow-sm text-center">
-        <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary-600 mb-3">404</p>
-        <h1 className="text-4xl font-serif font-bold text-stone-900 mb-4">PÃ¡gina nÃ£o encontrada</h1>
-        <p className="text-stone-600 mb-8">
-          O caminho acessado nÃ£o existe ou foi movido. VocÃª pode voltar ao inÃ­cio e continuar navegando normalmente.
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
+      <div className="max-w-2xl rounded-3xl border border-stone-200 bg-white p-10 text-center shadow-sm">
+        <h1 className="mb-4 font-serif text-4xl font-bold text-stone-900">Página não encontrada</h1>
+        <p className="text-stone-600">
+          O caminho acessado não existe ou foi movido. Você pode voltar ao início e continuar navegando normalmente.
         </p>
         <Link
           href="/"
-          className="inline-flex rounded-full bg-primary-600 px-5 py-2.5 font-bold text-white hover:bg-primary-700 transition"
+          className="mt-8 inline-flex rounded-xl bg-primary-600 px-6 py-3 font-bold text-white transition hover:bg-primary-700"
         >
-          Ir para a home
+          Voltar ao início
         </Link>
       </div>
     </div>

@@ -4,48 +4,40 @@ import { createAdminClient } from '@/lib/supabase/server';
 
 export const metadata = {
   title: 'Sobre | Nathi Faria',
-  description:
-    'Conheca a visao, a linguagem e a proposta da plataforma Nathi Faria.',
+  description: 'Conheça a visão, a linguagem e a proposta da plataforma Nathi Faria.',
 };
 
 const timeline = [
   {
     year: '2026',
     title: 'Refinamento da marca',
-    text: 'A plataforma assume uma linguagem mais editorial, mais feminina e mais silenciosa visualmente.',
+    text: 'A plataforma assume uma linguagem mais conectada ao valor espiritual, afetivo e formativo do lar.',
   },
   {
     year: 'Fase atual',
-    title: 'Plataforma em consolidacao',
-    text: 'A experiencia evolui com jornadas de aprendizagem, blog, perfis e uma navegacao mais clara.',
+    title: 'Plataforma em consolidação',
+    text: 'A casa se torna um lar quando nela as pessoas usam o tempo para formar vínculos.',
   },
   {
-    year: 'Proximas entregas',
+    year: 'Próximas entregas',
     title: 'Cuidado e servicos expandidos',
-    text: 'Novas experiencias de acompanhamento e suporte serao incorporadas em ciclos, com foco em utilidade real.',
+    text: 'Novas experiências de acompanhamento e suporte serão incorporadas em ciclos, com foco em utilidade real.',
   },
 ];
 
 const fallback = {
   hero_title: 'Nathi Faria',
-  hero_subtitle: 'Aprendizagem viva, casa com direcao e uma presenca mais intencional no cotidiano.',
-  about_summary:
-    'A plataforma conecta formacao, presenca e conteudo com uma linguagem mais serena, madura e feminina.',
-  mission:
-    'Cultivar jornadas de aprendizagem que fortaleçam o lar, a presenca e a clareza na vida cotidiana.',
-  vision:
-    'Ser uma referencia em formacao feminina com estetica, profundidade e direcao.',
-  values: ['Clareza', 'Cuidado', 'Presenca', 'Responsabilidade', 'Beleza'],
+  hero_subtitle: 'Transformando a sua casa num lar.',
+  about_summary: 'O ambiente familiar da residência define o destino daqueles que ali moram.',
+  mission: 'Fortalecer atitudes e práticas que transformam a casa em um lar onde o coração se forma.',
+  vision: 'Ver mulheres construindo lares com sabedoria, entendimento e vínculos saudáveis.',
+  values: ['Sabedoria', 'Entendimento', 'Vínculos', 'Cuidado', 'Propósito'],
 };
 
 async function getInstitutionalContent() {
   try {
     const adminClient = await createAdminClient();
-    const { data } = await adminClient
-      .from('institutional_content')
-      .select('*')
-      .eq('id', true)
-      .maybeSingle();
+    const { data } = await adminClient.from('institutional_content').select('*').eq('id', true).maybeSingle();
 
     if (!data) return fallback;
 
@@ -66,8 +58,8 @@ export default async function SobrePage() {
   const content = await getInstitutionalContent();
 
   const pillars = [
-    { title: 'Missao', text: content.mission, icon: HeartHandshake },
-    { title: 'Visao', text: content.vision, icon: Sparkles },
+    { title: 'Missão', text: content.mission, icon: HeartHandshake },
+    { title: 'Visão', text: content.vision, icon: Sparkles },
     { title: 'Valores', text: content.values.join(', '), icon: ShieldCheck },
   ];
 
@@ -101,7 +93,7 @@ export default async function SobrePage() {
       <section className="mx-auto mt-8 max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="border border-primary-900/10 bg-white p-8">
-            <h2 className="text-4xl leading-none text-primary-900">A historia que estamos construindo</h2>
+            <h2 className="text-4xl leading-none text-primary-900">A história que estamos construindo</h2>
             <p className="mt-4 max-w-2xl leading-8 text-primary-900/72">{content.about_summary}</p>
 
             <div className="mt-8 space-y-4">
@@ -121,12 +113,12 @@ export default async function SobrePage() {
             </div>
             <h2 className="mt-6 text-4xl leading-none">Feita para gente real</h2>
             <p className="mt-4 leading-8 text-white/76">
-              A plataforma foi desenhada para quem aprende, serve, organiza, cuida e deseja uma experiencia mais respiravel e coerente.
+              Até mesmo uma tenda pode se tornar um lar quando as pessoas que ali vivem se dedicam ao desenvolvimento mútuo de relacionamentos saudáveis.
             </p>
             <div className="mt-8 border border-white/10 bg-white/5 p-5">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-200">Proximo passo</p>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-200">Próximo passo</p>
               <p className="mt-3 text-lg font-semibold">
-                Se voce quer sentir o novo fluxo da plataforma, comece pela area de aprendizado.
+                Você é o conjunto das suas atitudes e práticas que exerce dentro do seu lar.
               </p>
               <Link
                 href="/trilhas"

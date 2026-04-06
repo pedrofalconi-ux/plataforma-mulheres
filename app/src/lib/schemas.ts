@@ -28,7 +28,7 @@ export const UpdateProfileSchema = ProfileSchema.pick({
 export const CourseSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres'),
-  description: z.string().min(10, 'DescriÃ§Ã£o deve ter no mÃ­nimo 10 caracteres').nullable().optional(),
+  description: z.string().min(10, 'Descrição deve ter no mínimo 10 caracteres').nullable().optional(),
   slug: z.string().min(3),
   thumbnail_url: z.string().url().nullable().optional(),
   level: z.string().default('Iniciante'),

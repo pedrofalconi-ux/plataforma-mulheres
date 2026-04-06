@@ -7,22 +7,23 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  console.error(error);
+
   return (
     <html lang="pt-BR">
-      <body className="bg-stone-950 text-white">
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <div className="max-w-xl w-full rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-primary-300 mb-3">Falha CrÃ­tica</p>
-            <h1 className="text-3xl font-serif font-bold mb-3">NÃ£o foi possÃ­vel continuar</h1>
-            <p className="text-stone-300 mb-8">
-              Ocorreu um erro global na aplicaÃ§Ã£o. Tente recarregar a experiÃªncia.
+      <body>
+        <div className="flex min-h-screen items-center justify-center bg-primary-950 px-4 text-white">
+          <div className="max-w-xl rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur">
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-primary-300">Falha crítica</p>
+            <h1 className="mb-3 font-serif text-3xl font-bold">Não foi possível continuar</h1>
+            <p className="text-white/75">
+              Ocorreu um erro global na aplicação. Tente recarregar a experiência.
             </p>
-            {error?.digest ? <p className="text-xs text-stone-400 mb-6">Ref.: {error.digest}</p> : null}
             <button
-              onClick={reset}
-              className="rounded-full bg-white px-5 py-2.5 font-bold text-stone-950 hover:bg-stone-200 transition"
+              onClick={() => reset()}
+              className="mt-8 rounded-xl bg-white px-6 py-3 font-bold text-primary-950 transition hover:bg-stone-100"
             >
-              Recarregar
+              Recarregar aplicação
             </button>
           </div>
         </div>

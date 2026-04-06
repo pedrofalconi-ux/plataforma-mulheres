@@ -19,7 +19,7 @@ export default function Footer() {
               <BrandMark />
             </div>
             <p className="max-w-sm text-sm leading-7 text-primary-900/75">
-              {BRAND_TAGLINE}. Uma plataforma de formacao, presenca e clareza para mulheres que desejam servir com beleza e direcao.
+              {BRAND_TAGLINE}. Lugar onde criamos vínculos e cultivamos atitudes que transformam a casa em um lar.
             </p>
           </div>
 
@@ -45,7 +45,7 @@ export default function Footer() {
             <h4 className="mb-4 text-xs font-extrabold uppercase tracking-[0.28em] text-primary-900/55">Contato</h4>
             <p className="mb-3 text-sm text-primary-900">{BRAND_EMAIL}</p>
             <p className="text-sm leading-7 text-primary-900/70">
-              Uma presenca editorial, afetuosa e intencional em cada detalhe da jornada.
+              O modo como você vive na sua casa revela o que é verdadeiramente importante para você.
             </p>
             <div className="mt-5 flex gap-3">
               <div className="border border-primary-900/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em]">IG</div>

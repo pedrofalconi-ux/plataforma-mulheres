@@ -5,8 +5,8 @@ import { z } from 'zod';
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PostCommentSchema = z.object({
-  content: z.string().trim().min(1, 'O comentario nao pode ser vazio.'),
-  parentId: z.string().regex(uuidRegex, 'ID invalido').nullable().optional(),
+  content: z.string().trim().min(1, 'O comentário não pode ser vazio.'),
+  parentId: z.string().regex(uuidRegex, 'ID inválido').nullable().optional(),
 });
 
 export async function GET(
@@ -18,7 +18,7 @@ export async function GET(
     const { id: lessonId } = await params;
 
     if (!lessonId) {
-      return NextResponse.json({ error: 'Lesson ID nao fornecido' }, { status: 400 });
+      return NextResponse.json({ error: 'ID da aula não fornecido.' }, { status: 400 });
     }
 
     const { data: comments, error } = await supabase
@@ -61,12 +61,12 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Nao autorizado' }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
     const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
     if (!profile) {
-      return NextResponse.json({ error: 'Perfil nao encontrado' }, { status: 404 });
+      return NextResponse.json({ error: 'Perfil não encontrado.' }, { status: 404 });
     }
 
     const { id: lessonId } = await params;
@@ -103,7 +103,7 @@ export async function POST(
     return NextResponse.json({ comment: data });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Dados invalidos', details: error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: 'Dados inválidos.', details: error.flatten() }, { status: 400 });
     }
 
     console.error('[POST comments] crash:', error);

@@ -33,7 +33,7 @@ function formatLessonMeta(lesson: any) {
   if (materialsCount > 0) {
     return `${materialsCount} material(is)`;
   }
-  return lesson.type === 'video' ? 'Video' : 'Leitura';
+  return lesson.type === 'video' ? 'Vídeo' : 'Leitura';
 }
 
 export default function CoursePlayer({ courseId }: { courseId: string }) {
@@ -113,7 +113,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 text-white">
           <FileText size={48} className="text-stone-600" />
-          <p>Nenhum conteudo principal disponivel para esta aula.</p>
+          <p>Nenhum conteúdo principal disponível para esta aula.</p>
         </div>
       );
     }
@@ -211,7 +211,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                       }`}
                     >
                       <BookOpen size={16} />
-                      <span>Conteudo da Aula</span>
+                      <span>Conteúdo da Aula</span>
                     </button>
                     <button
                       type="button"
@@ -236,7 +236,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                       }`}
                     >
                       <MessageCircle size={16} />
-                      <span>Discussao</span>
+                      <span>Discussão</span>
                     </button>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                 {activeTab === 'content' ? (
                   <div className="rounded-[28px] border border-primary-900/8 bg-white p-6 shadow-sm">
                     <p className="text-lg leading-relaxed text-stone-600">
-                      {currentLesson.description || 'Esta aula ainda nao possui uma descricao detalhada.'}
+                      {currentLesson.description || 'Esta aula ainda não possui uma descrição detalhada.'}
                     </p>
                   </div>
                 ) : null}
@@ -291,7 +291,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                     </div>
                   ) : (
                     <div className="motion-card mt-5 rounded-2xl border border-dashed border-stone-200 bg-stone-50 px-4 py-8 text-center text-sm text-stone-500">
-                      Esta aula ainda nao possui materiais complementares cadastrados.
+                      Esta aula ainda não possui materiais complementares cadastrados.
                     </div>
                   )}
                 </div>
@@ -304,7 +304,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                   </div>
                 ) : (
                   <div className="motion-card mt-10 rounded-[28px] border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
-                    Entre com sua conta apenas se quiser participar da discussao. O acesso ao conteudo continua aberto mesmo sem login.
+                    Entre com sua conta apenas se quiser participar da discussão. O acesso ao conteúdo continua aberto mesmo sem login.
                   </div>
                 )
               ) : null}
@@ -319,14 +319,14 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
       <div className="relative z-10 flex h-auto w-full flex-shrink-0 flex-col border-t border-stone-200 bg-white lg:h-full lg:w-[400px] lg:border-l lg:border-t-0">
         <div className="border-b border-stone-200 p-6">
-          <h2 className="text-xl font-bold text-stone-900">Conteudo do Bloco</h2>
+          <h2 className="text-xl font-bold text-stone-900">Conteúdo do Bloco</h2>
         </div>
 
         <div className="motion-list flex-1 overflow-y-auto">
           {modules.map((module, moduleIndex) => (
             <div key={module.id} className="border-b border-stone-100">
               <div className="bg-stone-50 p-4 text-sm font-bold uppercase tracking-wide text-stone-800">
-                Modulo {moduleIndex + 1}: {module.title}
+                Módulo {moduleIndex + 1}: {module.title}
               </div>
               <div className="flex flex-col">
                 {module.lessons.map((lesson: any, lessonIndex: number) => {

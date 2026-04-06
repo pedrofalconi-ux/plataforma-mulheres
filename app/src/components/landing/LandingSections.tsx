@@ -15,14 +15,14 @@ export function HeroSection() {
           <div className="flex flex-col justify-center">
             <p className="editorial-kicker !text-white/78">Plataforma Nathi Faria</p>
             <h1 className="mt-5 max-w-2xl font-serif text-[4rem] leading-[1.05] text-white sm:text-[5.2rem]">
-              Transforme seu lar. Inspire sua familia. Viva com proposito.
+              Transformando a sua casa num lar.
             </h1>
             <p className="mt-8 max-w-lg text-lg leading-9 text-white/86">
-              Uma comunidade feita para mulheres que desejam viver com mais amor, equilibrio e proposito dentro do seu lar.
+              A casa se torna um lar quando nela as pessoas usam o tempo para formar vínculos.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <EditorialButtonLink href="/cadastro" className="!min-w-[260px]">
-                Comece sua transformacao <ArrowRight size={18} />
+                Comece sua transformação <ArrowRight size={18} />
               </EditorialButtonLink>
               <EditorialButtonLink href="/trilhas" variant="secondary" className="!min-w-[220px] border-white/55 !text-white">
                 Ver aulas e materiais
@@ -43,7 +43,7 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 border-t border-white/18 bg-black/35 px-5 py-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between text-sm text-white/92">
-                  <span>Manifesto de casa, ordem e presenca</span>
+                  <span>Manifesto de casa, ordem e presença</span>
                   <span>01:12</span>
                 </div>
               </div>
@@ -60,17 +60,17 @@ export function PillarsSection() {
     {
       icon: <BookOpen size={32} />,
       title: 'Aprendizado',
-      desc: 'Trilhas para orientar o cotidiano com mais ordem, clareza e delicadeza.',
+      desc: 'O planejamento da sua casa deve ter propósito intencional, e isso também pode ser aprendido.',
     },
     {
       icon: <Sparkles size={32} />,
-      title: 'Presenca',
-      desc: 'Uma linguagem mais serena para sustentar rotina, identidade e vocacao.',
+      title: 'Presença',
+      desc: 'O modo como você vive na sua casa revela o que é verdadeiramente importante para você.',
     },
     {
       icon: <HeartHandshake size={32} />,
       title: 'Comunidade',
-      desc: 'Troca entre mulheres que compartilham desafios, valores e referencias em comum.',
+      desc: 'Lugar onde criamos vínculos e nos dedicamos ao desenvolvimento mútuo de relacionamentos saudáveis.',
     },
   ];
 
@@ -78,8 +78,8 @@ export function PillarsSection() {
     <PageSection className="py-24">
         <SectionIntro
           eyebrow="Um aprendizado que transforma"
-          title="Aprendizado, presenca e clareza para o lar e o coracao."
-          description="Cada trilha foi pensada para reunir aulas, materiais em PDF e uma sequencia clara para sustentar uma transformacao real."
+          title="Lar onde o coração se forma."
+          description="Cada trilha foi pensada para fortalecer atitudes e práticas que você exerce dentro do seu lar."
           align="center"
         />
 
@@ -105,12 +105,12 @@ export function NewsSection() {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionIntro
             eyebrow="Papelaria"
-            title="Textos, reflexoes e materiais para sustentar a sua jornada."
-            description="Um espaco editorial para quem deseja estudar com profundidade e aplicar com delicadeza."
+            title="Textos, reflexões e materiais para sustentar a sua jornada."
+            description="Um espaço editorial para quem deseja estudar com profundidade e aplicar com delicadeza."
             className="max-w-3xl"
           />
           <EditorialButtonLink href="/blog" variant="secondary" className="border-white/40 !text-white">
-            Ver todos os conteudos
+            Ver todos os conteúdos
           </EditorialButtonLink>
         </div>
 
@@ -129,7 +129,7 @@ export function NewsSection() {
                 <h3 className="mt-4 text-3xl leading-none text-white">{news.title}</h3>
                 <p className="mt-4 line-clamp-3 text-sm leading-7 text-white/72">{news.summary}</p>
                 <div className="mt-8 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.24em] text-white">
-                  Ler atualizacao
+                  Ler atualização
                 </div>
               </div>
             </article>
@@ -144,12 +144,12 @@ export function CtaSection() {
   return (
     <PageSection className="py-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center border border-primary-900/10 bg-white px-8 py-16 text-center lg:px-20">
-        <p className="editorial-kicker">Pronta para comecar?</p>
+        <p className="editorial-kicker">Pronta para começar?</p>
         <h2 className="mt-6 text-5xl leading-tight text-primary-900 sm:text-6xl">
-          Um novo ritmo para a casa, para a familia e para a sua presenca.
+          Com sabedoria se constrói a casa, e com entendimento ela se estabelece.
         </h2>
         <p className="mt-8 max-w-2xl text-lg leading-9 text-primary-900/72">
-          Entre na plataforma e encontre trilhas organizadas, materiais de apoio e uma experiencia mais serena, madura e intencional.
+          A organização do seu lar e o que você faz nele determinarão o resultado da vida construída dentro dele.
         </p>
 
         <div className="mt-12 flex flex-col items-center justify-center gap-5 sm:flex-row">
@@ -162,7 +162,7 @@ export function CtaSection() {
         </div>
         
         <Link href="/sobre" className="mt-8 text-sm font-extrabold uppercase tracking-[0.24em] text-primary-900/68 hover:text-primary-900">
-          Conhecer a visao da marca
+          Conhecer a visão da marca
         </Link>
       </div>
     </PageSection>

@@ -36,7 +36,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
         setComments(data || []);
       }
     } catch (err) {
-      console.error('Erro ao buscar duvidas:', err);
+      console.error('Erro ao buscar dúvidas:', err);
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
 
       if (!res.ok) {
         const result = await res.json().catch(() => null);
-        throw new Error(result?.error || 'Nao foi possivel publicar seu comentario.');
+        throw new Error(result?.error || 'Não foi possível publicar seu comentário.');
       }
 
       const { comment } = await res.json();
@@ -81,8 +81,8 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
       setNewComment('');
       setReplyTo(null);
     } catch (err) {
-      console.error('Erro ao postar duvida:', err);
-      setSubmitError(err instanceof Error ? err.message : 'Nao foi possivel publicar seu comentario.');
+      console.error('Erro ao postar dúvida:', err);
+      setSubmitError(err instanceof Error ? err.message : 'Não foi possível publicar seu comentário.');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,13 +102,13 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
   return (
     <div className="mt-6 rounded-xl border border-stone-100 bg-white p-6 shadow-sm">
       <h3 className="mb-6 flex items-center gap-2 text-xl font-bold text-stone-900">
-        <MessageCircle size={24} className="text-primary-600" /> Duvidas e Discussao
+        <MessageCircle size={24} className="text-primary-600" /> Dúvidas e Discussão
       </h3>
 
       <div className="mb-8 space-y-6">
         {rootComments.length === 0 ? (
           <p className="rounded-lg bg-stone-50 py-6 text-center text-stone-500">
-            Nenhuma duvida enviada ainda. Seja o primeiro a perguntar!
+            Nenhuma dúvida enviada ainda. Seja a primeira a perguntar!
           </p>
         ) : (
           rootComments.map((comment) => (
@@ -128,7 +128,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
                         {comment.profiles.full_name}
                         {comment.profiles.role?.toLowerCase() === 'admin' ? (
                           <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] uppercase tracking-wider text-primary-800">
-                            Professor
+                            Professora
                           </span>
                         ) : null}
                       </span>
@@ -179,7 +179,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
                         type="text"
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder={`Respondendo ${comment.profiles.full_name}...`}
+                        placeholder={`Respondendo a ${comment.profiles.full_name}...`}
                         className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary-500"
                       />
                       <button
@@ -225,7 +225,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
               <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Ficou com alguma duvida nesta aula? Envie aqui..."
+                placeholder="Ficou com alguma dúvida nesta aula? Envie aqui..."
                 className="min-h-[100px] w-full resize-none rounded-xl border border-stone-200 bg-stone-50 p-4 pr-12 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-primary-500"
                 disabled={isSubmitting}
               />
@@ -241,7 +241,7 @@ export default function LessonQA({ lessonId }: { lessonId: string }) {
         ) : null
       ) : (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center">
-          <p className="text-sm font-medium text-amber-800">Voce precisa estar logado para enviar duvidas.</p>
+          <p className="text-sm font-medium text-amber-800">Você precisa estar logada para enviar dúvidas.</p>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import { Course, NewsItem, ForumPost } from './types';
 
 export const BRAND_NAME = 'Nathi Faria';
-export const BRAND_TAGLINE = 'É no lar onde tudo começa';
+export const BRAND_TAGLINE = 'Lar onde o coração se forma';
 export const BRAND_EMAIL = 'contato@nathifaria.com.br';
 
 export const MOCK_NEWS: NewsItem[] = [
@@ -11,7 +11,7 @@ export const MOCK_NEWS: NewsItem[] = [
     summary: 'Uma trilha pensada para fortalecer o repertório interior e a presença intencional no cotidiano do lar.',
     date: '24 Out 2023',
     imageUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800',
-    source: 'Blog'
+    source: 'Blog',
   },
   {
     id: '2',
@@ -19,16 +19,16 @@ export const MOCK_NEWS: NewsItem[] = [
     summary: 'Veja como alunas estão aplicando os conceitos de ordem e paz em suas rotinas familiares.',
     date: '22 Out 2023',
     imageUrl: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=800',
-    source: 'Instagram'
+    source: 'Instagram',
   },
   {
     id: '3',
     title: 'Novo artigo: A importância da clareza na educação dos filhos',
-    summary: 'Publicagem de um conteúdo especial sobre como unir autoridade e doçura no processo educativo.',
+    summary: 'Publicação de um conteúdo especial sobre como unir autoridade e doçura no processo educativo.',
     date: '20 Out 2023',
     imageUrl: 'https://images.unsplash.com/photo-1502086223501-7ea2962254de?q=80&w=800',
-    source: 'Portal'
-  }
+    source: 'Portal',
+  },
 ];
 
 export const MOCK_COURSES: Course[] = [
@@ -39,16 +39,16 @@ export const MOCK_COURSES: Course[] = [
     level: 'Essencial',
     thumbnail: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800',
     progress: 0,
-    totalModules: 8
+    totalModules: 8,
   },
   {
     id: 'c2',
     title: 'Liderança Afetiva',
-    description: 'Construindo autoridade através da empatia, escuta ativa e presença intencional.',
+    description: 'Construindo autoridade por meio da empatia, da escuta ativa e da presença intencional.',
     level: 'Intermediário',
     thumbnail: 'https://images.unsplash.com/photo-1502086223501-7ea2962254de?q=80&w=800',
     progress: 45,
-    totalModules: 10
+    totalModules: 10,
   },
   {
     id: 'c3',
@@ -57,10 +57,9 @@ export const MOCK_COURSES: Course[] = [
     level: 'Avançado',
     thumbnail: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800',
     progress: 10,
-    totalModules: 12
-  }
+    totalModules: 12,
+  },
 ];
-
 
 export const MOCK_FORUM_POSTS: ForumPost[] = [
   {
@@ -70,7 +69,7 @@ export const MOCK_FORUM_POSTS: ForumPost[] = [
     category: 'Vida Prática',
     replies: 12,
     views: 340,
-    lastActivity: '2 horas atrás'
+    lastActivity: '2 horas atrás',
   },
   {
     id: 'f2',
@@ -79,6 +78,6 @@ export const MOCK_FORUM_POSTS: ForumPost[] = [
     category: 'Formação',
     replies: 8,
     views: 156,
-    lastActivity: '1 dia atrás'
-  }
+    lastActivity: '1 dia atrás',
+  },
 ];
