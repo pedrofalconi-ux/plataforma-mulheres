@@ -1,11 +1,16 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import CourseOverview from "@/components/courses/CourseOverview";
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function CourseOverviewPage() {
   const params = useParams();
+  const router = useRouter();
   const courseId = params.id as string;
 
-  return <CourseOverview courseId={courseId} />;
+  useEffect(() => {
+    router.replace(`/trilhas/${courseId}/aula`);
+  }, [courseId, router]);
+
+  return null;
 }

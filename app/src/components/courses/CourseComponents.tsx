@@ -61,7 +61,7 @@ function formatDuration(durationMinutes: number) {
 function CourseCard({ course }: { course: LearningCourse }) {
   return (
     <Link
-      href={`/trilhas/${course.id}`}
+      href={`/trilhas/${course.id}/aula`}
       className="group block overflow-hidden border border-primary-900/10 bg-white transition-colors hover:border-primary-900/30"
     >
       <div className="relative h-64 overflow-hidden border-b border-primary-900/10">

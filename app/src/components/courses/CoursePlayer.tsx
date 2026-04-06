@@ -170,7 +170,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
     <div className="motion-shell flex min-h-[calc(100vh-80px)] flex-col lg:h-[calc(100vh-80px)] lg:flex-row">
       <div className="flex-1 overflow-y-auto bg-stone-50">
         <div className="sticky top-0 z-20 flex items-center gap-4 border-b border-stone-200 bg-white/92 px-6 py-4 backdrop-blur">
-          <Link href={`/trilhas/${courseId}`} className="text-stone-400 transition-colors hover:text-stone-800">
+          <Link href="/trilhas" className="text-stone-400 transition-colors hover:text-stone-800">
             <ChevronRight size={20} className="rotate-180" />
           </Link>
           <div className="flex-1">
