@@ -71,10 +71,7 @@ export default function Navbar() {
               <Link href="/login" className="header-link" data-active={isActive('/login')}>
                 Entrar
               </Link>
-              <Link href="/cadastro/admin" className="header-link" data-active={isActive('/cadastro/admin')}>
-                Cadastro admin
-              </Link>
-              <Link href="/cadastro" className="button-primary">
+              <Link href="/login" className="button-primary">
                 Acessar plataforma
               </Link>
             </div>
@@ -129,10 +126,7 @@ export default function Navbar() {
                 <Link href="/login" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
                   Entrar
                 </Link>
-                <Link href="/cadastro/admin" onClick={() => setIsOpen(false)} className="button-secondary border border-primary-900/20 !justify-center !text-primary-900">
-                  Cadastro admin
-                </Link>
-                <Link href="/cadastro" onClick={() => setIsOpen(false)} className="button-primary !justify-center">
+                <Link href="/login" onClick={() => setIsOpen(false)} className="button-primary !justify-center">
                   Acessar plataforma
                 </Link>
               </div>

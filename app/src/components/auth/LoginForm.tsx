@@ -301,27 +301,21 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
             </form>
 
             <div className="mt-8 text-center">
-              <p className="text-[#422523]/60 text-sm">
-                {mode === 'login' ? 'Ainda nao faz parte?' : 'Ja tem uma conta?'}{' '}
-                <Link
-                  href={mode === 'login' ? '/cadastro' : '/login'}
-                  className="text-[#DBA1A2] font-bold hover:underline underline-offset-4"
-                >
-                  {mode === 'login' ? 'Inscreva-se aqui' : 'Faca login'}
-                </Link>
-              </p>
-
               {mode === 'login' ? (
-                <p className="mt-3 text-[#422523]/60 text-sm">
-                  Precisa entrar como administradora?{' '}
+                <p className="text-[#422523]/60 text-sm">
+                  O acesso Ã plataforma Ã© permitido apenas para contas jÃ¡ cadastradas e liberadas.
+                </p>
+              ) : (
+                <p className="text-[#422523]/60 text-sm">
+                  JÃ¡ tem uma conta?{' '}
                   <Link
-                    href="/cadastro/admin"
+                    href="/login"
                     className="text-[#DBA1A2] font-bold hover:underline underline-offset-4"
                   >
-                    Criar acesso admin
+                    FaÃ§a login
                   </Link>
                 </p>
-              ) : null}
+              )}
             </div>
           </div>
         </div>

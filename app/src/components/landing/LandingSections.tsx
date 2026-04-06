@@ -21,11 +21,8 @@ export function HeroSection() {
               A casa se torna um lar quando nela as pessoas usam o tempo para formar vínculos.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <EditorialButtonLink href="/cadastro" className="!min-w-[260px]">
-                Comece sua transformação <ArrowRight size={18} />
-              </EditorialButtonLink>
-              <EditorialButtonLink href="/trilhas" variant="secondary" className="!min-w-[220px] border-white/55 !text-white">
-                Ver aulas e materiais
+              <EditorialButtonLink href="/login" className="!min-w-[260px]">
+                Entrar na plataforma <ArrowRight size={18} />
               </EditorialButtonLink>
             </div>
           </div>
@@ -144,26 +141,19 @@ export function CtaSection() {
   return (
     <PageSection className="py-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center border border-primary-900/10 bg-white px-8 py-16 text-center lg:px-20">
-        <p className="editorial-kicker">Pronta para começar?</p>
+        <p className="editorial-kicker">Acesso exclusivo para alunas</p>
         <h2 className="mt-6 text-5xl leading-tight text-primary-900 sm:text-6xl">
           Com sabedoria se constrói a casa, e com entendimento ela se estabelece.
         </h2>
         <p className="mt-8 max-w-2xl text-lg leading-9 text-primary-900/72">
-          A organização do seu lar e o que você faz nele determinarão o resultado da vida construída dentro dele.
+          O acesso à plataforma é reservado para quem já possui conta criada e aprovada no ambiente de aprendizagem.
         </p>
 
-        <div className="mt-12 flex flex-col items-center justify-center gap-5 sm:flex-row">
-          <EditorialButtonLink href="/cadastro" className="!min-w-[240px]">
-            Criar minha conta
-          </EditorialButtonLink>
-          <EditorialButtonLink href="/trilhas" variant="secondary" className="border-primary-900/20 !min-w-[240px] !text-primary-900">
-            Explorar aprendizado
+        <div className="mt-12">
+          <EditorialButtonLink href="/login" className="!min-w-[260px]">
+            Entrar com minha conta
           </EditorialButtonLink>
         </div>
-        
-        <Link href="/sobre" className="mt-8 text-sm font-extrabold uppercase tracking-[0.24em] text-primary-900/68 hover:text-primary-900">
-          Conhecer a visão da marca
-        </Link>
       </div>
     </PageSection>
   );
