@@ -73,12 +73,12 @@ export function PillarsSection() {
 
   return (
     <PageSection className="py-24">
-        <SectionIntro
-          eyebrow="Um aprendizado que transforma"
-          title="Lar onde o coração se forma."
-          description="Cada trilha foi pensada para fortalecer atitudes e práticas que você exerce dentro do seu lar."
-          align="center"
-        />
+      <SectionIntro
+        eyebrow="Um aprendizado que transforma"
+        title="Lar onde o coração se forma."
+        description="Cada trilha foi pensada para fortalecer atitudes e práticas que você exerce dentro do seu lar."
+        align="center"
+      />
 
       <div className="mt-16 grid gap-6 md:grid-cols-3">
         {pillars.map((pillar) => (
@@ -139,22 +139,27 @@ export function NewsSection() {
 
 export function CtaSection() {
   return (
-    <PageSection className="py-24">
-      <div className="mx-auto flex max-w-5xl flex-col items-center border border-primary-900/10 bg-white px-8 py-16 text-center lg:px-20">
-        <p className="editorial-kicker">Acesso exclusivo para alunas</p>
-        <h2 className="mt-6 text-5xl leading-tight text-primary-900 sm:text-6xl">
-          Com sabedoria se constrói a casa, e com entendimento ela se estabelece.
-        </h2>
-        <p className="mt-8 max-w-2xl text-lg leading-9 text-primary-900/72">
-          O acesso à plataforma é reservado para quem já possui conta criada e aprovada no ambiente de aprendizagem.
-        </p>
+    <div className="bg-primary-900 py-24 text-white">
+      <PageSection>
+        <div className="mx-auto flex max-w-5xl flex-col items-center border border-white/12 bg-white/[0.04] px-8 py-16 text-center lg:px-20">
+          <p className="editorial-kicker !text-white/72">Acesso exclusivo para alunas</p>
+          <h2 className="mt-6 text-5xl leading-tight text-white sm:text-6xl">
+            Com sabedoria se constrói a casa, e com entendimento ela se estabelece.
+          </h2>
+          <p className="mt-8 max-w-2xl text-lg leading-9 text-white/78">
+            O acesso à plataforma é reservado para quem já possui conta criada e aprovada no ambiente de aprendizagem.
+          </p>
 
-        <div className="mt-12">
-          <EditorialButtonLink href="/login" className="!min-w-[260px]">
-            Entrar com minha conta
-          </EditorialButtonLink>
+          <div className="mt-12">
+            <EditorialButtonLink
+              href="/login"
+              className="!min-w-[260px] bg-white !text-primary-900 hover:!bg-stone-100"
+            >
+              Entrar com minha conta
+            </EditorialButtonLink>
+          </div>
         </div>
-      </div>
-    </PageSection>
+      </PageSection>
+    </div>
   );
 }

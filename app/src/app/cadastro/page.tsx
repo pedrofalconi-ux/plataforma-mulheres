@@ -1,10 +1,10 @@
-import LoginForm from "@/components/auth/LoginForm";
+import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: "Criar Conta | Nathi Faria",
-  description: "Torne-se parte da nossa comunidade. Comece sua jornada de formação e autoconhecimento hoje.",
+  title: 'Login | Nathi Faria',
+  description: 'O acesso à plataforma é exclusivo para contas já cadastradas e liberadas.',
 };
 
 export default function CadastroPage() {
-  return <LoginForm mode="register" />;
+  redirect('/login');
 }

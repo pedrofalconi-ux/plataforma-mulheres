@@ -1,10 +1,10 @@
-import LoginForm from '@/components/auth/LoginForm';
+import { redirect } from 'next/navigation';
 
 export const metadata = {
-  title: 'Cadastro Admin | Nathi Faria',
-  description: 'Crie uma conta administrativa e acesse o painel da plataforma.',
+  title: 'Login | Nathi Faria',
+  description: 'O acesso administrativo é liberado apenas para contas existentes com permissão.',
 };
 
 export default function AdminRegisterPage() {
-  return <LoginForm mode="admin-register" />;
+  redirect('/login');
 }

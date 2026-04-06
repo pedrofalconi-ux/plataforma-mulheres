@@ -74,7 +74,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           throw new Error('A chave admin e obrigatoria');
         }
 
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -135,43 +135,43 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F2ED] flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-[40px] shadow-2xl overflow-hidden border border-[#E7D8D8]">
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#422523] to-[#5D3A38] text-[#F7F2ED]">
+    <div className="flex min-h-screen items-center justify-center bg-[#F7F2ED] p-4">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-[40px] border border-[#E7D8D8] bg-white shadow-2xl lg:grid-cols-2">
+        <div className="hidden flex-col justify-between bg-gradient-to-br from-[#422523] to-[#5D3A38] p-12 text-[#F7F2ED] lg:flex">
           <div>
             <BrandMark />
             <div className="mt-12">
-              <span className="text-[#DBA1A2] text-sm font-bold tracking-widest uppercase">Boas-vindas</span>
+              <span className="text-sm font-bold uppercase tracking-widest text-[#DBA1A2]">Boas-vindas</span>
               <h1 className="mt-4 text-5xl font-serif font-medium leading-tight">
                 Plataforma <br />
                 {BRAND_NAME}
               </h1>
-              <p className="mt-6 text-lg text-[#E7D8D8]/80 leading-relaxed max-w-sm">
+              <p className="mt-6 max-w-sm text-lg leading-relaxed text-[#E7D8D8]/80">
                 Um espaco de aprendizado, clareza e direcao para mulheres que desejam uma rotina mais intencional.
               </p>
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
             <p className="text-sm italic text-[#E7D8D8]/60">
               &quot;Honrar sua historia e o primeiro passo para construir seu legado.&quot;
             </p>
           </div>
         </div>
 
-        <div className="p-8 md:p-16 flex flex-col justify-center">
-          <div className="w-full max-w-sm mx-auto">
-            <div className="lg:hidden mb-8">
+        <div className="flex flex-col justify-center p-8 md:p-16">
+          <div className="mx-auto w-full max-w-sm">
+            <div className="mb-8 lg:hidden">
               <BrandMark />
             </div>
 
             {mode === 'register' && isBought ? (
-              <div className="mb-8 p-6 bg-[#DBA1A2]/10 border border-[#DBA1A2]/20 rounded-3xl animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="flex items-center gap-3 text-[#DBA1A2] mb-2">
+              <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
+                <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
                   <CheckCircle2 size={24} />
-                  <span className="font-bold text-lg">Parabens pela sua compra!</span>
+                  <span className="text-lg font-bold">Parabens pela sua compra!</span>
                 </div>
-                <p className="text-[#422523]/70 text-sm leading-relaxed">
+                <p className="text-sm leading-relaxed text-[#422523]/70">
                   Finalize seu cadastro abaixo para acessar suas trilhas agora mesmo.
                 </p>
               </div>
@@ -200,7 +200,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
             ) : null}
 
             {error ? (
-              <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm">
+              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
                 <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
@@ -209,17 +209,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
             <form onSubmit={handleSubmit} className="mt-10 space-y-6">
               {mode !== 'login' ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#422523]/80 ml-1">Nome completo</label>
-                  <div className="relative group">
+                  <label className="ml-1 text-sm font-medium text-[#422523]/80">Nome completo</label>
+                  <div className="group relative">
                     <UserIcon
                       size={20}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
                     />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                      className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
                       placeholder="Como voce prefere ser chamada?"
                       required
                     />
@@ -228,17 +228,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               ) : null}
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#422523]/80 ml-1">Seu melhor e-mail</label>
-                <div className="relative group">
+                <label className="ml-1 text-sm font-medium text-[#422523]/80">Seu melhor e-mail</label>
+                <div className="group relative">
                   <Mail
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
                   />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                    className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
                     placeholder="email@exemplo.com"
                     required
                   />
@@ -246,17 +246,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#422523]/80 ml-1">Sua senha</label>
-                <div className="relative group">
+                <label className="ml-1 text-sm font-medium text-[#422523]/80">Sua senha</label>
+                <div className="group relative">
                   <Lock
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
                   />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                    className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
                     placeholder="Digite sua senha"
                     required
                   />
@@ -265,17 +265,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
               {isAdminRegister ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[#422523]/80 ml-1">Chave admin</label>
-                  <div className="relative group">
+                  <label className="ml-1 text-sm font-medium text-[#422523]/80">Chave admin</label>
+                  <div className="group relative">
                     <ShieldCheck
                       size={20}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 group-focus-within:text-[#DBA1A2] transition-colors"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
                     />
                     <input
                       type="password"
                       value={secretKey}
                       onChange={(e) => setSecretKey(e.target.value)}
-                      className="w-full bg-[#F7F2ED]/50 border border-[#E7D8D8] rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10 transition-all text-[#422523]"
+                      className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
                       placeholder="Digite a chave de admin"
                       required
                     />
@@ -286,7 +286,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#DBA1A2] hover:bg-[#D48F90] text-white font-bold py-4 rounded-2xl shadow-lg shadow-[#DBA1A2]/30 transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#DBA1A2] py-4 font-bold text-white shadow-lg shadow-[#DBA1A2]/30 transition-all active:scale-[0.98] hover:bg-[#D48F90] disabled:opacity-70"
               >
                 {loading ? (
                   <Loader2 size={24} className="animate-spin" />
@@ -302,17 +302,14 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
             <div className="mt-8 text-center">
               {mode === 'login' ? (
-                <p className="text-[#422523]/60 text-sm">
-                  O acesso Ã plataforma Ã© permitido apenas para contas jÃ¡ cadastradas e liberadas.
+                <p className="text-sm text-[#422523]/60">
+                  O acesso à plataforma é permitido apenas para contas já cadastradas e liberadas.
                 </p>
               ) : (
-                <p className="text-[#422523]/60 text-sm">
-                  JÃ¡ tem uma conta?{' '}
-                  <Link
-                    href="/login"
-                    className="text-[#DBA1A2] font-bold hover:underline underline-offset-4"
-                  >
-                    FaÃ§a login
+                <p className="text-sm text-[#422523]/60">
+                  Já tem uma conta?{' '}
+                  <Link href="/login" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
+                    Faça login
                   </Link>
                 </p>
               )}
@@ -327,7 +324,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 export default function LoginForm({ mode = 'login' }: { mode?: LoginMode }) {
   return (
     <Suspense
-      fallback={<div className="min-h-screen bg-[#F7F2ED] flex items-center justify-center">Carregando...</div>}
+      fallback={<div className="flex min-h-screen items-center justify-center bg-[#F7F2ED]">Carregando...</div>}
     >
       <FormContent mode={mode} />
     </Suspense>
