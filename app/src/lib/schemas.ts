@@ -98,6 +98,11 @@ export const LessonSchema = z.object({
       kind: z.enum(['pdf', 'link', 'download']).default('link'),
     })
   ).nullable().optional(),
+  activity_questions: z.array(
+    z.object({
+      prompt: z.string().min(3, 'A pergunta da atividade precisa ter pelo menos 3 caracteres'),
+    }),
+  ).nullable().optional(),
   duration_minutes: z.number().int().default(0),
   order_index: z.number().int().default(0),
 });
@@ -112,6 +117,7 @@ export const UpdateLessonSchema = LessonSchema.pick({
   content_url: true,
   content_text: true,
   materials: true,
+  activity_questions: true,
   duration_minutes: true,
   order_index: true,
 }).partial().extend({
