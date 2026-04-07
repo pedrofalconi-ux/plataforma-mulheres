@@ -2,13 +2,32 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, ChevronRight, ExternalLink, FileText, Files, Loader2, MessageCircle, Play } from 'lucide-react';
+import { BookOpen, ChevronRight, ClipboardList, ExternalLink, FileText, Files, Loader2, MessageCircle, Play } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import LessonQA from './LessonQA';
+import LessonActivity from './LessonActivity';
 
 function getLessonMaterials(lesson: any) {
   return Array.isArray(lesson?.materials) ? lesson.materials : [];
+}
+
+function getLessonActivityQuestions(lesson: any) {
+  if (!Array.isArray(lesson?.activity_questions)) return [];
+
+  return lesson.activity_questions
+    .map((item: unknown) => {
+      if (typeof item === 'string') {
+        const prompt = item.trim();
+        return prompt ? { prompt } : null;
+      }
+
+      if (!item || typeof item !== 'object') return null;
+
+      const prompt = String((item as Record<string, unknown>).prompt || '').trim();
+      return prompt ? { prompt } : null;
+    })
+    .filter((item: { prompt: string } | null): item is { prompt: string } => Boolean(item));
 }
 
 function isPdfUrl(url?: string | null) {
@@ -44,7 +63,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   const [modules, setModules] = useState<any[]>([]);
   const [currentLesson, setCurrentLesson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'content' | 'materials' | 'discussion'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'materials' | 'activity' | 'discussion'>('content');
 
   useEffect(() => {
     async function loadCourseData() {
@@ -54,7 +73,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
           .select(`
             id, title, order_index,
             lessons (
-              id, title, description, content_url, type, duration_minutes, order_index, materials
+              id, title, description, content_url, type, duration_minutes, order_index, materials, activity_questions
             )
           `)
           .eq('course_id', courseId)
@@ -66,7 +85,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
               .select(`
                 id, title, order_index,
                 lessons (
-                  id, title, description, content_url, type, duration_minutes, order_index
+                  id, title, description, content_url, type, duration_minutes, order_index, activity_questions
                 )
               `)
               .eq('course_id', courseId)
@@ -107,6 +126,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
   const flattenedLessons = useMemo(() => modules.flatMap((module) => module.lessons || []), [modules]);
   const currentLessonIndex = flattenedLessons.findIndex((lesson) => lesson.id === currentLesson?.id);
+  const currentLessonQuestions = getLessonActivityQuestions(currentLesson);
 
   const renderLessonMedia = () => {
     if (!currentLesson?.content_url) {
@@ -228,6 +248,21 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                         </span>
                       ) : null}
                     </button>
+                    {currentLessonQuestions.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('activity')}
+                        className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                          activeTab === 'activity' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
+                        }`}
+                      >
+                        <ClipboardList size={16} />
+                        <span>Atividade</span>
+                        <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
+                          {currentLessonQuestions.length}
+                        </span>
+                      </button>
+                    ) : null}
                     <button
                       type="button"
                       onClick={() => setActiveTab('discussion')}
@@ -295,6 +330,18 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                     </div>
                   )}
                 </div>
+              ) : null}
+
+              {activeTab === 'activity' ? (
+                user ? (
+                  <div className="motion-card mt-10">
+                    <LessonActivity lessonId={currentLesson.id} initialQuestions={currentLessonQuestions} />
+                  </div>
+                ) : (
+                  <div className="motion-card mt-10 rounded-[28px] border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
+                    Entre com sua conta para responder a atividade desta aula.
+                  </div>
+                )
               ) : null}
 
               {activeTab === 'discussion' ? (
