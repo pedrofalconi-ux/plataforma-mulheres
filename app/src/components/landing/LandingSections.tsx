@@ -1,13 +1,47 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MOCK_NEWS } from '@/lib/constants';
-import { ArrowRight, BookOpen, ExternalLink, HeartHandshake, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  ExternalLink,
+  HeartHandshake,
+  Sparkles,
+} from 'lucide-react';
 import { EditorialButtonLink, EditorialPanel, PageSection, SectionIntro } from '@/components/brand/Editorial';
 
+const HERO_SLIDES = [
+  {
+    src: '/hero/hero-1.jpeg',
+    alt: 'Criancas assistindo a uma atividade em familia',
+    label: 'Rotinas que aproximam a familia',
+  },
+  {
+    src: '/hero/hero-2.jpeg',
+    alt: 'Familia reunida em um momento de celebracao',
+    label: 'Memorias construidas com presenca',
+  },
+  {
+    src: '/hero/hero-3.jpeg',
+    alt: 'Mulher em um ambiente de acolhimento e celebracao',
+    label: 'Feminilidade, casa e intencao',
+  },
+];
+
 export function HeroSection() {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }, 4500);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <PageSection className="pt-10">
       <div className="hero-sheen border border-primary-900/8 px-8 py-10 text-white sm:px-10 lg:px-16 lg:py-14">
@@ -21,27 +55,36 @@ export function HeroSection() {
               A casa se torna um lar quando nela as pessoas usam o tempo para formar vínculos.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <EditorialButtonLink href="/login" className="!min-w-[260px]">
-                Entrar na plataforma <ArrowRight size={18} />
+              <EditorialButtonLink href="/trilhas" className="!min-w-[260px]">
+                Acessar meu aprendizado <ArrowRight size={18} />
               </EditorialButtonLink>
             </div>
           </div>
 
           <div className="relative lg:ml-auto lg:w-full lg:max-w-[580px]">
             <div className="relative min-h-[480px] overflow-hidden border-4 border-white/70 bg-white/15 md:min-h-[540px]">
-              <Image
-                src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop"
-                alt="Retrato editorial feminino"
-                fill
-                priority
-                unoptimized
-                className="object-cover"
-              />
+              {HERO_SLIDES.map((slide, index) => (
+                <div
+                  key={slide.src}
+                  className={`absolute inset-0 transition-opacity duration-700 ${
+                    index === activeSlide ? 'opacity-100' : 'pointer-events-none opacity-0'
+                  }`}
+                >
+                  <Image
+                    src={slide.src}
+                    alt={slide.alt}
+                    fill
+                    priority={index === 0}
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+
               <div className="absolute bottom-0 left-0 right-0 border-t border-white/18 bg-black/35 px-5 py-4 backdrop-blur-sm">
-                <div className="flex items-center justify-between text-sm text-white/92">
-                  <span>Manifesto de casa, ordem e presença</span>
-                  <span>01:12</span>
+                <div className="text-sm text-white/92">
+                  <span>{HERO_SLIDES[activeSlide]?.label}</span>
                 </div>
               </div>
             </div>
@@ -151,12 +194,12 @@ export function CtaSection() {
           </p>
 
           <div className="mt-12">
-            <EditorialButtonLink
+            <Link
               href="/login"
-              className="!min-w-[260px] bg-white !text-primary-900 hover:!bg-stone-100"
+              className="inline-flex min-w-[260px] items-center justify-center border border-white bg-white px-6 py-4 text-[0.82rem] font-extrabold uppercase tracking-[0.08em] text-primary-900 transition hover:border-stone-100 hover:bg-stone-100"
             >
               Entrar com minha conta
-            </EditorialButtonLink>
+            </Link>
           </div>
         </div>
       </PageSection>
