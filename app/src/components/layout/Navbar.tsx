@@ -37,18 +37,20 @@ export default function Navbar() {
           <BrandMark />
         </Link>
 
-        <div className="hidden items-center gap-8 lg:flex">
-          {navLinks.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="header-link"
-              data-active={isActive(item.href)}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+        {user ? (
+          <div className="hidden items-center gap-8 lg:flex">
+            {navLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="header-link"
+                data-active={isActive(item.href)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
 
         <div className="flex items-center gap-2">
           {user ? (
@@ -91,16 +93,18 @@ export default function Navbar() {
       {isOpen ? (
         <div className="border-t border-primary-900/10 bg-[#f7f1ec] px-4 py-5 lg:hidden">
           <div className="mx-auto grid max-w-7xl gap-4">
-            {navLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsOpen(false)}
-                className="border-b border-primary-900/8 pb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary-900"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {user
+              ? navLinks.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="border-b border-primary-900/8 pb-3 text-sm font-extrabold uppercase tracking-[0.22em] text-primary-900"
+                  >
+                    {item.label}
+                  </Link>
+                ))
+              : null}
 
             {user ? (
               <div className="grid gap-3 pt-3">
