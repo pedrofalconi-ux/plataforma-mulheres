@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { CreateCourseSchema, UpdateCourseSchema } from '@/lib/schemas';
 import { emptyStringToNull, filterExistingColumns, logAuditEvent, requireAdmin, sanitizeText } from '@/lib/admin-api';
+import { ensureAllStudentsEnrolledInCourse } from '@/lib/universal-enrollment';
 
 function slugify(text: string) {
   return text
@@ -57,6 +58,8 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !data) throw error || new Error('Falha ao criar curso');
+
+    await ensureAllStudentsEnrolledInCourse(adminContext.adminClient, data.id);
 
     await logAuditEvent({
       adminClient: adminContext.adminClient,
