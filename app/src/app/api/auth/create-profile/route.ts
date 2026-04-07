@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { ensureProfileEnrolledInAllCourses } from '@/lib/universal-enrollment';
 
 export async function POST(request: Request) {
   try {
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
         .single();
 
       if (updateError) throw updateError;
+      await ensureProfileEnrolledInAllCourses(adminClient, userId);
       return NextResponse.json(updated);
     }
 
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
       .single();
 
     if (error) throw error;
+    await ensureProfileEnrolledInAllCourses(adminClient, userId);
     return NextResponse.json(data);
   } catch (error: any) {
     console.error('Erro ao criar perfil:', error);
