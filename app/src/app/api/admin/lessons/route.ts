@@ -34,11 +34,16 @@ async function getYouTubeDurationMinutes(url: string | null | undefined) {
   if (!response.ok) return null;
 
   const html = await response.text();
-  const match = html.match(/"lengthSeconds":"(\d+)"/) || html.match(/"approxDurationMs":"(\d+)"/);
-  if (!match?.[1]) return null;
+  const secondMatches = Array.from(html.matchAll(/"lengthSeconds":"(\d+)"/g))
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const milliMatches = Array.from(html.matchAll(/"approxDurationMs":"(\d+)"/g))
+    .map((match) => Math.round(Number(match[1]) / 1000))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const durationCandidates = [...secondMatches, ...milliMatches];
+  if (durationCandidates.length === 0) return null;
 
-  const rawValue = Number(match[1]);
-  const seconds = html.includes('"approxDurationMs"') ? Math.round(rawValue / 1000) : rawValue;
+  const seconds = Math.max(...durationCandidates);
   return Math.max(1, Math.ceil(seconds / 60));
 }
 
@@ -72,6 +77,21 @@ function sanitizeMaterials(materials: unknown) {
     .filter((item): item is { title: string; url: string; kind: string } => Boolean(item?.title) && Boolean(item?.url));
 }
 
+function sanitizeActivityQuestions(questions: unknown) {
+  if (!Array.isArray(questions)) return questions;
+
+  return questions
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null;
+      const question = item as Record<string, unknown>;
+
+      return {
+        prompt: sanitizeText(typeof question.prompt === 'string' ? question.prompt : ''),
+      };
+    })
+    .filter((item): item is { prompt: string } => Boolean(item?.prompt));
+}
+
 export async function POST(request: Request) {
   try {
     const adminContext = await requireAdmin();
@@ -86,6 +106,7 @@ export async function POST(request: Request) {
       content_url: sanitizeText(payload.content_url),
       content_text: sanitizeHtml(payload.content_text),
       materials: sanitizeMaterials(payload.materials),
+      activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
 
     if (!parsed.success) {
@@ -135,6 +156,7 @@ export async function PATCH(request: Request) {
       content_url: sanitizeText(payload.content_url),
       content_text: sanitizeHtml(payload.content_text),
       materials: sanitizeMaterials(payload.materials),
+      activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
 
     if (!parsed.success) {
