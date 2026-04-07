@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useMemo, useRef, useState } from 'react';
+import React, { use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, FileText, Image as ImageIcon, Link as LinkIcon, Loader2, Paperclip, Play, Plus, Save, Settings, Trash2, Upload, Video, X } from 'lucide-react';
@@ -11,9 +11,15 @@ const YOUTUBE_URL_PATTERN =
   /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/;
 
 type LessonMaterial = {
+  clientId: string;
   title: string;
   url: string;
   kind: 'pdf' | 'link' | 'download';
+};
+
+type ActivityQuestion = {
+  clientId: string;
+  prompt: string;
 };
 
 type LessonDraft = {
@@ -23,7 +29,32 @@ type LessonDraft = {
   content_url: string;
   duration_minutes: number;
   materials: LessonMaterial[];
+  activity_questions: ActivityQuestion[];
 };
+
+function makeClientId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function normalizeLessonMaterials(materials: any[] = []): LessonMaterial[] {
+  return materials.map((material) => ({
+    clientId: makeClientId(),
+    title: material?.title || '',
+    url: material?.url || '',
+    kind: material?.kind === 'pdf' || material?.kind === 'download' ? material.kind : 'link',
+  }));
+}
+
+function normalizeActivityQuestions(questions: any[] = []): ActivityQuestion[] {
+  return questions.map((question) => ({
+    clientId: makeClientId(),
+    prompt: question?.prompt || '',
+  }));
+}
 
 const emptyLessonDraft = (): LessonDraft => ({
   title: '',
@@ -32,49 +63,8 @@ const emptyLessonDraft = (): LessonDraft => ({
   content_url: '',
   duration_minutes: 0,
   materials: [],
+  activity_questions: [],
 });
-
-function extractYouTubeVideoId(url: string) {
-  const match = url.match(YOUTUBE_URL_PATTERN);
-  return match?.[1] || null;
-}
-
-async function loadYouTubeIframeApi() {
-  if (typeof window === 'undefined') {
-    throw new Error('YouTube API indisponivel.');
-  }
-
-  if ((window as any).YT?.Player) {
-    return (window as any).YT;
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    const existingScript = document.querySelector('script[data-youtube-iframe-api="true"]');
-
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.src = 'https://www.youtube.com/iframe_api';
-      script.async = true;
-      script.dataset.youtubeIframeApi = 'true';
-      script.onerror = () => reject(new Error('Nao foi possivel carregar a API do YouTube.'));
-      document.head.appendChild(script);
-    }
-
-    const previousReady = (window as any).onYouTubeIframeAPIReady;
-    (window as any).onYouTubeIframeAPIReady = () => {
-      previousReady?.();
-      resolve();
-    };
-
-    window.setTimeout(() => {
-      if ((window as any).YT?.Player) {
-        resolve();
-      }
-    }, 300);
-  });
-
-  return (window as any).YT;
-}
 
 export default function CourseBuilderPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -102,6 +92,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [moduleTitle, setModuleTitle] = useState('');
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [lessonData, setLessonData] = useState<LessonDraft>(emptyLessonDraft);
 
   const [isSavingCourse, setIsSavingCourse] = useState(false);
@@ -117,8 +108,6 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   const [pendingImage, setPendingImage] = useState<File | null>(null);
   const [showCropper, setShowCropper] = useState(false);
   const [cropperTarget, setCropperTarget] = useState<'thumbnail' | 'instructor'>('thumbnail');
-
-  const youtubeDurationPlayerRef = useRef<any>(null);
 
   const isYouTubeLessonUrl = useMemo(
     () => lessonData.type === 'video' && YOUTUBE_URL_PATTERN.test(lessonData.content_url),
@@ -201,6 +190,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
         materials: [
           ...current.materials,
           {
+            clientId: makeClientId(),
             title: file.name.replace(/\.[^.]+$/, '') || 'Material complementar',
             url: uploadedUrl,
             kind: extension === 'pdf' ? 'pdf' : 'download',
@@ -214,27 +204,71 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const updateLessonMaterialTitle = (index: number, title: string) => {
+  const updateLessonMaterialTitle = (clientId: string, title: string) => {
     setLessonData((current) => ({
       ...current,
-      materials: current.materials.map((material, materialIndex) =>
-        materialIndex === index ? { ...material, title } : material,
+      materials: current.materials.map((material) =>
+        material.clientId === clientId ? { ...material, title } : material,
       ),
     }));
   };
 
-  const removeLessonMaterial = (index: number) => {
+  const removeLessonMaterial = (clientId: string) => {
     setLessonData((current) => ({
       ...current,
-      materials: current.materials.filter((_, materialIndex) => materialIndex !== index),
+      materials: current.materials.filter((material) => material.clientId !== clientId),
     }));
   };
 
   const resetLessonModal = () => {
     setLessonData(emptyLessonDraft());
     setLessonDurationStatus('');
-    youtubeDurationPlayerRef.current?.destroy?.();
-    youtubeDurationPlayerRef.current = null;
+    setEditingLessonId(null);
+  };
+
+  const addLessonQuestion = () => {
+    setLessonData((current) => ({
+      ...current,
+      activity_questions: [...current.activity_questions, { clientId: makeClientId(), prompt: '' }],
+    }));
+  };
+
+  const updateLessonQuestion = (clientId: string, prompt: string) => {
+    setLessonData((current) => ({
+      ...current,
+      activity_questions: current.activity_questions.map((question) =>
+        question.clientId === clientId ? { ...question, prompt } : question,
+      ),
+    }));
+  };
+
+  const removeLessonQuestion = (clientId: string) => {
+    setLessonData((current) => ({
+      ...current,
+      activity_questions: current.activity_questions.filter((question) => question.clientId !== clientId),
+    }));
+  };
+
+  const openCreateLessonModal = (moduleId: string) => {
+    setActiveModuleId(moduleId);
+    resetLessonModal();
+    setShowLessonModal(true);
+  };
+
+  const openEditLessonModal = (moduleId: string, lesson: any) => {
+    setActiveModuleId(moduleId);
+    setEditingLessonId(lesson.id);
+    setLessonData({
+      title: lesson.title || '',
+      description: lesson.description || '',
+      type: lesson.type === 'text' ? 'text' : 'video',
+      content_url: lesson.content_url || '',
+      duration_minutes: lesson.duration_minutes || 0,
+      materials: normalizeLessonMaterials(getLessonMaterials(lesson)),
+      activity_questions: normalizeActivityQuestions(Array.isArray(lesson.activity_questions) ? lesson.activity_questions : []),
+    });
+    setLessonDurationStatus('');
+    setShowLessonModal(true);
   };
 
   const fetchCourseData = async () => {
@@ -264,14 +298,14 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
     const modulesWithMaterials = await supabase
       .from('modules')
-      .select('id, title, order_index, lessons(id, title, type, content_url, duration_minutes, order_index, materials)')
+      .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, order_index, materials, activity_questions)')
       .eq('course_id', courseId)
       .order('order_index', { ascending: true });
 
     const { data: loadedModules } = modulesWithMaterials.error
       ? await supabase
           .from('modules')
-          .select('id, title, order_index, lessons(id, title, type, content_url, duration_minutes, order_index)')
+          .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, order_index, activity_questions)')
           .eq('course_id', courseId)
           .order('order_index', { ascending: true })
       : modulesWithMaterials;
@@ -300,58 +334,28 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     const trimmedUrl = lessonData.content_url.trim();
     if (lessonData.type !== 'video' || !trimmedUrl || !YOUTUBE_URL_PATTERN.test(trimmedUrl)) {
       setIsDetectingLessonDuration(false);
+      setLessonDurationStatus('');
       return;
     }
-
-    const videoId = extractYouTubeVideoId(trimmedUrl);
-    if (!videoId) return;
 
     const timer = window.setTimeout(async () => {
       try {
         setIsDetectingLessonDuration(true);
         setLessonDurationStatus('Detectando duracao do video...');
-        const YT = await loadYouTubeIframeApi();
 
-        youtubeDurationPlayerRef.current?.destroy?.();
+        const response = await fetch(`/api/admin/youtube-metadata?url=${encodeURIComponent(trimmedUrl)}`);
+        const result = await parseResponse(response);
+        if (!response.ok) {
+          throw new Error(result.error || 'Nao foi possivel detectar a duracao automaticamente.');
+        }
 
-        await new Promise<void>((resolve, reject) => {
-          const player = new YT.Player('youtube-duration-probe', {
-            height: '0',
-            width: '0',
-            videoId,
-            playerVars: { autoplay: 0, controls: 0, rel: 0 },
-            events: {
-              onReady: (event: any) => {
-                let attempts = 0;
-
-                const pollDuration = () => {
-                  attempts += 1;
-                  const durationSeconds = Number(event.target.getDuration?.() || 0);
-
-                  if (durationSeconds > 0) {
-                    const durationMinutes = Math.max(1, Math.ceil(durationSeconds / 60));
-                    setLessonData((current) => ({ ...current, duration_minutes: durationMinutes }));
-                    setLessonDurationStatus(`Duracao detectada automaticamente: ${durationMinutes} min`);
-                    resolve();
-                    return;
-                  }
-
-                  if (attempts >= 25) {
-                    reject(new Error('O YouTube nao retornou a duracao deste video.'));
-                    return;
-                  }
-
-                  window.setTimeout(pollDuration, 250);
-                };
-
-                pollDuration();
-              },
-              onError: () => reject(new Error('O YouTube nao permitiu ler este video automaticamente.')),
-            },
-          });
-
-          youtubeDurationPlayerRef.current = player;
-        });
+        const durationMinutes = Number(result.duration_minutes || 0);
+        if (durationMinutes > 0) {
+          setLessonData((current) => ({ ...current, duration_minutes: durationMinutes }));
+          setLessonDurationStatus(`Duracao detectada automaticamente: ${durationMinutes} min`);
+        } else {
+          throw new Error('O YouTube nao retornou a duracao deste video.');
+        }
       } catch (error) {
         setLessonDurationStatus(
           error instanceof Error ? error.message : 'Nao foi possivel detectar a duracao automaticamente.',
@@ -363,8 +367,6 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
     return () => {
       window.clearTimeout(timer);
-      youtubeDurationPlayerRef.current?.destroy?.();
-      youtubeDurationPlayerRef.current = null;
     };
   }, [lessonData.content_url, lessonData.type, showLessonModal]);
 
@@ -455,7 +457,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  const handleCreateLesson = async (event: React.FormEvent) => {
+  const handleSaveLesson = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!lessonData.title || !activeModuleId || isSavingLesson) return;
 
@@ -473,27 +475,35 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
     try {
       const targetModule = modules.find((module) => module.id === activeModuleId);
-      const newOrderIndex = targetModule ? targetModule.lessons.length : 0;
+      const existingLesson = targetModule?.lessons.find((lesson: any) => lesson.id === editingLessonId);
+      const lessonOrderIndex = existingLesson?.order_index ?? (targetModule ? targetModule.lessons.length : 0);
+      const cleanQuestions = lessonData.activity_questions
+        .map((question) => ({ prompt: question.prompt.trim() }))
+        .filter((question) => question.prompt.length > 0);
+
+      const cleanMaterials = lessonData.materials.map(({ clientId, ...material }) => material);
 
       const response = await fetch('/api/admin/lessons', {
-        method: 'POST',
+        method: editingLessonId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          ...(editingLessonId ? { id: editingLessonId } : {}),
           module_id: activeModuleId,
           title: lessonData.title,
           description: lessonData.description,
           type: lessonData.type,
           content_url: lessonData.content_url,
-          materials: lessonData.materials,
+          materials: cleanMaterials,
+          activity_questions: cleanQuestions,
           duration_minutes: lessonData.duration_minutes || 0,
-          order_index: newOrderIndex,
+          order_index: lessonOrderIndex,
         }),
       });
 
       const data = await parseResponse(response);
-      if (!response.ok) throw new Error(data.error || 'Erro ao criar aula');
+      if (!response.ok) throw new Error(data.error || 'Erro ao salvar aula');
 
-      void fetchCourseData();
+      await fetchCourseData();
       setShowLessonModal(false);
       resetLessonModal();
     } catch (error: any) {
@@ -559,7 +569,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <h1 className="text-2xl font-serif font-bold text-stone-900">{course?.title}</h1>
               <span className="rounded bg-stone-200 px-2 py-0.5 text-xs font-bold uppercase text-stone-600">{course?.level}</span>
             </div>
-            <p className="mt-1 text-sm text-stone-500">Configure modulos, aulas e materiais deste bloco.</p>
+            <p className="mt-1 text-sm text-stone-500">Configure modulos, aulas, atividades e materiais deste bloco.</p>
           </div>
         </div>
 
@@ -705,7 +715,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                     </h3>
                     <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                       <button onClick={() => deleteModule(module.id)} className="flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-bold text-red-500"><Trash2 size={14} /> Apagar</button>
-                      <button onClick={() => { setActiveModuleId(module.id); resetLessonModal(); setShowLessonModal(true); }} className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-sm font-bold text-stone-600"><Plus size={14} /> Adicionar Aula</button>
+                      <button onClick={() => openCreateLessonModal(module.id)} className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-sm font-bold text-stone-600"><Plus size={14} /> Adicionar Aula</button>
                     </div>
                   </div>
                   <div className="divide-y divide-stone-100">
@@ -722,11 +732,16 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                               <div className="text-sm font-bold text-stone-800">{lessonIndex + 1}. {lesson.title}</div>
                               <div className="text-xs text-stone-500">
                                 {lesson.duration_minutes > 0 ? `${lesson.duration_minutes} min • ` : ''}
-                                {getLessonMaterials(lesson).length > 0 ? `${getLessonMaterials(lesson).length} material(is) complementar(es)` : lesson.content_url || 'Sem material anexado'}
+                                {getLessonMaterials(lesson).length > 0
+                                  ? `${getLessonMaterials(lesson).length} material(is) complementar(es)`
+                                  : Array.isArray(lesson.activity_questions) && lesson.activity_questions.length > 0
+                                    ? `${lesson.activity_questions.length} pergunta(s) de atividade`
+                                    : lesson.content_url || 'Sem material anexado'}
                               </div>
                             </div>
                           </div>
-                          <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                          <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button onClick={() => openEditLessonModal(module.id, lesson)} className="rounded p-2 text-stone-500 hover:bg-stone-100"><Settings size={16} /></button>
                             <button onClick={() => deleteLesson(lesson.id)} className="rounded p-2 text-red-500 hover:bg-red-50"><Trash2 size={16} /></button>
                           </div>
                         </div>
@@ -754,10 +769,10 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       ) : null}
 
       {showLessonModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <form onSubmit={handleCreateLesson} className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="mb-6 text-xl font-bold">Nova Aula</h2>
-            <div className="space-y-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 p-4">
+          <form onSubmit={handleSaveLesson} className="mx-auto my-6 flex max-h-[calc(100vh-3rem)] w-full max-w-2xl flex-col rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 className="mb-6 text-xl font-bold">{editingLessonId ? 'Editar Aula' : 'Nova Aula'}</h2>
+            <div className="space-y-4 overflow-y-auto pr-1">
               <div>
                 <label className="mb-1 block text-sm font-bold text-stone-700">Titulo da Aula</label>
                 <input value={lessonData.title} onChange={(event) => setLessonData({ ...lessonData, title: event.target.value })} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
@@ -807,7 +822,6 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   {lessonData.type !== 'video' ? (lessonData.content_url ? 'Arquivo principal anexado a esta aula.' : 'Envie o arquivo principal desta aula nesta tela.') : lessonData.duration_minutes > 0 ? `${lessonData.duration_minutes} min detectados automaticamente` : 'Cole o link do YouTube para a plataforma detectar a duracao automaticamente.'}
                 </p>
                 {lessonDurationStatus ? <p className={`mt-2 text-xs font-medium ${lessonDurationStatus.includes('automaticamente') ? 'text-primary-700' : 'text-amber-700'}`}>{isDetectingLessonDuration ? 'Detectando duracao do video...' : lessonDurationStatus}</p> : null}
-                <div id="youtube-duration-probe" className="hidden" />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-bold text-stone-700">Materiais Complementares</label>
@@ -823,17 +837,17 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   {lessonData.materials.length > 0 ? (
                     <div className="mt-4 space-y-3">
                       {lessonData.materials.map((material, index) => (
-                        <div key={`${material.url}-${index}`} className="rounded-xl border border-stone-200 bg-white p-3">
+                        <div key={material.clientId} className="rounded-xl border border-stone-200 bg-white p-3">
                           <div className="flex items-start gap-3">
                             <div className="mt-2 text-stone-400">{material.kind === 'pdf' ? <FileText size={16} /> : <Paperclip size={16} />}</div>
                             <div className="flex-1 space-y-2">
-                              <input type="text" value={material.title} onChange={(event) => updateLessonMaterialTitle(index, event.target.value)} className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Titulo do material" />
+                              <input type="text" value={material.title} onChange={(event) => updateLessonMaterialTitle(material.clientId, event.target.value)} className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Titulo do material" />
                               <div className="flex items-center gap-2 text-xs text-stone-500">
                                 <LinkIcon size={12} />
                                 <span className="truncate">{material.url}</span>
                               </div>
                             </div>
-                            <button type="button" onClick={() => removeLessonMaterial(index)} className="rounded-lg p-2 text-red-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={14} /></button>
+                            <button type="button" onClick={() => removeLessonMaterial(material.clientId)} className="rounded-lg p-2 text-red-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={14} /></button>
                           </div>
                         </div>
                       ))}
@@ -841,12 +855,57 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   ) : <p className="mt-3 text-xs text-stone-500">Nenhum material complementar anexado ainda.</p>}
                 </div>
               </div>
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="block text-sm font-bold text-stone-700">Perguntas da atividade</label>
+                  <button
+                    type="button"
+                    onClick={addLessonQuestion}
+                    className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-bold text-stone-700"
+                  >
+                    <Plus size={14} />
+                    Adicionar pergunta
+                  </button>
+                </div>
+                <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4">
+                  {lessonData.activity_questions.length > 0 ? (
+                    <div className="space-y-3">
+                      {lessonData.activity_questions.map((question, index) => (
+                        <div key={question.clientId} className="rounded-xl border border-stone-200 bg-white p-3">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <span className="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">
+                              Pergunta {index + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => removeLessonQuestion(question.clientId)}
+                              className="rounded-lg p-2 text-red-500 hover:bg-red-50"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <textarea
+                            value={question.prompt}
+                            onChange={(event) => updateLessonQuestion(question.clientId, event.target.value)}
+                            className="min-h-[96px] w-full rounded-xl border border-stone-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="Escreva a pergunta que a aluna deve responder nesta aula..."
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-stone-500">
+                      Se quiser transformar esta aula em atividade escrita, adicione uma ou mais perguntas aqui.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
             <div className="mt-8 flex justify-end gap-3 border-t border-stone-100 pt-4">
               <button type="button" onClick={() => { setShowLessonModal(false); resetLessonModal(); }} className="rounded-xl px-5 py-2.5 font-bold text-stone-500 hover:bg-stone-100">Cancelar</button>
               <button type="submit" disabled={isSavingLesson || isDetectingLessonDuration} className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 font-bold text-white disabled:opacity-50">
                 <Save size={18} />
-                {isSavingLesson ? 'Salvando...' : isDetectingLessonDuration ? 'Lendo duracao...' : 'Salvar Aula'}
+                {isSavingLesson ? 'Salvando...' : isDetectingLessonDuration ? 'Lendo duracao...' : editingLessonId ? 'Salvar Alteracoes' : 'Salvar Aula'}
               </button>
             </div>
           </form>
