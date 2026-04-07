@@ -20,7 +20,7 @@ const timeline = [
   },
   {
     year: 'Próximas entregas',
-    title: 'Cuidado e servicos expandidos',
+    title: 'Cuidado e serviços expandidos',
     text: 'Novas experiências de acompanhamento e suporte serão incorporadas em ciclos, com foco em utilidade real.',
   },
 ];
@@ -33,6 +33,8 @@ const fallback = {
   vision: 'Ver mulheres construindo lares com sabedoria, entendimento e vínculos saudáveis.',
   values: ['Sabedoria', 'Entendimento', 'Vínculos', 'Cuidado', 'Propósito'],
 };
+
+const ABOUT_DRIVE_PREVIEW_URL = 'https://drive.google.com/file/d/1LyDPdnXepA6Hyed0pAfFToj8XwXv_agh/preview';
 
 async function getInstitutionalContent() {
   try {
@@ -66,10 +68,18 @@ export default async function SobrePage() {
   return (
     <div className="px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <section className="mx-auto max-w-7xl border border-primary-900/10 bg-white px-8 py-12">
-        <div className="max-w-3xl">
-          <span className="editorial-kicker">Sobre a marca</span>
-          <h1 className="mt-5 text-6xl leading-none text-primary-900">{content.hero_title}</h1>
-          <p className="mt-6 text-lg leading-9 text-primary-900/72">{content.hero_subtitle}</p>
+        <div className="overflow-hidden border border-primary-900/10 bg-stone-100 shadow-sm">
+          <div className="mb-6">
+            <span className="editorial-kicker">É no lar onde tudo começa</span>
+          </div>
+          <div className="aspect-video w-full bg-black">
+            <iframe
+              src={ABOUT_DRIVE_PREVIEW_URL}
+              title="Manifesto - É no lar onde tudo começa"
+              allow="autoplay; fullscreen"
+              className="h-full w-full border-0"
+            />
+          </div>
         </div>
       </section>
 
@@ -113,7 +123,8 @@ export default async function SobrePage() {
             </div>
             <h2 className="mt-6 text-4xl leading-none">Feita para gente real</h2>
             <p className="mt-4 leading-8 text-white/76">
-              Até mesmo uma tenda pode se tornar um lar quando as pessoas que ali vivem se dedicam ao desenvolvimento mútuo de relacionamentos saudáveis.
+              Até mesmo uma tenda pode se tornar um lar quando as pessoas que ali vivem se dedicam ao desenvolvimento
+              mútuo de relacionamentos saudáveis.
             </p>
             <div className="mt-8 border border-white/10 bg-white/5 p-5">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary-200">Próximo passo</p>
