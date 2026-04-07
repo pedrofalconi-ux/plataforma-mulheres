@@ -30,14 +30,19 @@ async function fetchYouTubeDurationMinutes(videoId: string) {
   }
 
   const html = await response.text();
-  const match = html.match(/"lengthSeconds":"(\d+)"/) || html.match(/"approxDurationMs":"(\d+)"/);
+  const secondMatches = Array.from(html.matchAll(/"lengthSeconds":"(\d+)"/g))
+    .map((match) => Number(match[1]))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const milliMatches = Array.from(html.matchAll(/"approxDurationMs":"(\d+)"/g))
+    .map((match) => Math.round(Number(match[1]) / 1000))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const durationCandidates = [...secondMatches, ...milliMatches];
 
-  if (!match?.[1]) {
+  if (durationCandidates.length === 0) {
     throw new Error('Nao foi possivel identificar a duracao do video.');
   }
 
-  const rawValue = Number(match[1]);
-  const seconds = html.includes('"approxDurationMs"') ? Math.round(rawValue / 1000) : rawValue;
+  const seconds = Math.max(...durationCandidates);
   return Math.max(1, Math.ceil(seconds / 60));
 }
 
