@@ -4,7 +4,9 @@ import { BRAND_EMAIL, BRAND_NAME, BRAND_TAGLINE } from '@/lib/constants';
 function BrandMark() {
   return (
     <div className="flex items-center gap-2">
-      <span className="font-serif text-[2.2rem] font-semibold leading-none tracking-tight text-primary-900">{BRAND_NAME}</span>
+      <span className="font-serif text-[2.2rem] font-semibold leading-none tracking-tight text-primary-900">
+        {BRAND_NAME}
+      </span>
     </div>
   );
 }
@@ -24,20 +26,18 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-4 text-xs font-extrabold uppercase tracking-[0.28em] text-primary-900/55">Navegacao</h4>
+            <h4 className="mb-4 text-xs font-extrabold uppercase tracking-[0.28em] text-primary-900/55">Navegação</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/" className="hover:text-primary-900 transition-colors">Inicio</Link></li>
-              <li><Link href="/sobre" className="hover:text-primary-900 transition-colors">Sobre</Link></li>
-              <li><Link href="/trilhas" className="hover:text-primary-900 transition-colors">Aprendizado</Link></li>
+              <li><Link href="/" className="transition-colors hover:text-primary-900">Início</Link></li>
+              <li><Link href="/sobre" className="transition-colors hover:text-primary-900">Sobre</Link></li>
+              <li><Link href="/trilhas" className="transition-colors hover:text-primary-900">Aprendizado</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-4 text-xs font-extrabold uppercase tracking-[0.28em] text-primary-900/55">Conteudo</h4>
+            <h4 className="mb-4 text-xs font-extrabold uppercase tracking-[0.28em] text-primary-900/55">Conteúdo</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/blog" className="hover:text-primary-900 transition-colors">Papelaria</Link></li>
-              <li><Link href="/forum" className="hover:text-primary-900 transition-colors">Comunidade</Link></li>
-              <li><Link href="/privacidade" className="hover:text-primary-900 transition-colors">Privacidade</Link></li>
+              <li><Link href="/privacidade" className="transition-colors hover:text-primary-900">Privacidade</Link></li>
             </ul>
           </div>
 
@@ -48,8 +48,24 @@ export default function Footer() {
               O modo como você vive na sua casa revela o que é verdadeiramente importante para você.
             </p>
             <div className="mt-5 flex gap-3">
-              <div className="border border-primary-900/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em]">IG</div>
-              <div className="border border-primary-900/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em]">YT</div>
+              <a
+                href="https://www.instagram.com/nathifaria/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram da Nathi Faria"
+                className="border border-primary-900/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] transition-colors hover:bg-primary-900 hover:text-white"
+              >
+                IG
+              </a>
+              <a
+                href="https://www.youtube.com/@NathiFariaenolarondetudocomeca"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="YouTube da Nathi Faria"
+                className="border border-primary-900/15 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] transition-colors hover:bg-primary-900 hover:text-white"
+              >
+                YT
+              </a>
             </div>
           </div>
         </div>
