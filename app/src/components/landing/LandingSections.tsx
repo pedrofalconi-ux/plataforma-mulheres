@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { EditorialButtonLink, EditorialPanel, PageSection, SectionIntro } from '@/components/brand/Editorial';
+import { useAuth } from '@/hooks/useAuth';
 
 const HERO_SLIDES = [
   {
@@ -181,6 +182,12 @@ export function NewsSection() {
 }
 
 export function CtaSection() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading || isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="bg-primary-900 py-24 text-white">
       <PageSection>
