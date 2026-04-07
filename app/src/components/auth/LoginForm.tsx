@@ -165,14 +165,32 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               <BrandMark />
             </div>
 
+            {mode === 'login' && isBought ? (
+              <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
+                <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
+                  <CheckCircle2 size={24} />
+                  <span className="text-lg font-bold">Parabens, bem-vinda!</span>
+                </div>
+                <p className="text-sm leading-relaxed text-[#422523]/70">
+                  Bem-vinda a uma das maiores comunidades femininas da Paraiba. Se este for seu primeiro acesso, finalize seu cadastro para entrar na plataforma.
+                </p>
+                <Link
+                  href="/cadastro?bought=true"
+                  className="mt-5 flex w-full items-center justify-center rounded-2xl border border-[#422523]/12 bg-white px-4 py-3 text-sm font-bold text-[#422523] transition-all hover:border-[#DBA1A2]/30 hover:text-[#DBA1A2]"
+                >
+                  Fazer cadastro
+                </Link>
+              </div>
+            ) : null}
+
             {mode === 'register' && isBought ? (
               <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
                 <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
                   <CheckCircle2 size={24} />
-                  <span className="text-lg font-bold">Parabens pela sua compra!</span>
+                  <span className="text-lg font-bold">Parabens, bem-vinda!</span>
                 </div>
                 <p className="text-sm leading-relaxed text-[#422523]/70">
-                  Finalize seu cadastro abaixo para acessar suas trilhas agora mesmo.
+                  Bem-vinda a uma das maiores comunidades femininas da Paraiba. Finalize seu cadastro abaixo para acessar sua plataforma.
                 </p>
               </div>
             ) : null}
@@ -182,7 +200,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                 ? 'Entrar na area da aluna'
                 : isAdminRegister
                   ? 'Criar acesso administrativo'
-                  : 'Comecar minha jornada'}
+                  : 'Crie sua conta e entre na comunidade'}
             </h2>
 
             <p className="mt-3 text-[#422523]/60">
@@ -190,7 +208,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                 ? 'Retome seu progresso e conecte-se com a comunidade.'
                 : isAdminRegister
                   ? 'Crie sua conta admin e valide a chave mestra para liberar o painel.'
-                  : 'Crie sua conta e acesse os cursos e materiais em PDF.'}
+                  : 'Parabens pela sua inscricao. Complete seus dados para acessar os cursos, materiais e encontros da plataforma.'}
             </p>
 
             {isAdminRegister ? (

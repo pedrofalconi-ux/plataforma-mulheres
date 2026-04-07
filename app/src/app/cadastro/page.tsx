@@ -1,10 +1,21 @@
 import { redirect } from 'next/navigation';
+import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: 'Login | Nathi Faria',
-  description: 'O acesso à plataforma é exclusivo para contas já cadastradas e liberadas.',
+  title: 'Cadastro | Nathi Faria',
+  description: 'Finalize seu cadastro para acessar a plataforma após a confirmação do pagamento.',
 };
 
-export default function CadastroPage() {
-  redirect('/login');
+export default async function CadastroPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ bought?: string }>;
+}) {
+  const params = await searchParams;
+
+  if (params.bought !== 'true') {
+    redirect('/login');
+  }
+
+  return <LoginForm mode="register" />;
 }

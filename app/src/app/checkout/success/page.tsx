@@ -19,10 +19,10 @@ export default function CheckoutSuccessPage() {
         </p>
         <div className="grid gap-4">
           <Link
-            href="/trilhas"
+            href="/login?bought=true"
             className="flex items-center justify-center gap-2 rounded-xl bg-stone-900 px-6 py-3 font-bold text-white transition-all hover:bg-stone-800"
           >
-            Ir para meu aprendizado <ArrowRight size={18} />
+            Ir para a plataforma <ArrowRight size={18} />
           </Link>
           <Link
             href="/"
