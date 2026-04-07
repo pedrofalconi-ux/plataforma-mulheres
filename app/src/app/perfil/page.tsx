@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useEffectEvent } from 'react';
+import React, { useState, useEffect, useEffectEvent, useRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { createClient } from '@/lib/supabase/client';
@@ -9,7 +9,6 @@ import {
   Mail, 
   Phone, 
   FileText, 
-  Save, 
   Loader2, 
   CheckCircle2,
   Award,
@@ -42,6 +41,17 @@ export default function ProfilePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [stats, setStats] = useState({ courses: 0, certificates: 0 });
+  const profileReadyRef = useRef(false);
+  const lastSavedPayloadRef = useRef('');
+
+  const buildProfilePayload = useEffectEvent(() => ({
+    full_name: fullName,
+    phone,
+    bio,
+    avatar_url: avatarUrl,
+    region_id: regionId,
+    skills: [...userSkills].sort(),
+  }));
 
   const fetchProfileData = useEffectEvent(async () => {
     if (!user) return;
@@ -90,6 +100,16 @@ export default function ProfilePage() {
       setAvailableSkills(options.skills || []);
     }
 
+    lastSavedPayloadRef.current = JSON.stringify({
+      full_name: user.name || '',
+      phone: profile?.phone || '',
+      bio: profile?.bio || '',
+      avatar_url: profile?.avatar_url || '',
+      region_id: profile?.region_id || '',
+      skills: (pSkills?.map((s: any) => s.skill_id) || []).sort(),
+    });
+    profileReadyRef.current = true;
+
     setStats({
       courses: coursesCount || 0,
       certificates: certsCount || 0
@@ -98,6 +118,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user) {
+      profileReadyRef.current = false;
       setFullName(user.name || '');
       fetchProfileData();
     }
@@ -112,6 +133,48 @@ export default function ProfilePage() {
       return { error: rawText || 'Resposta invalida da API.' };
     }
   };
+
+  const saveProfile = useEffectEvent(async () => {
+    if (!user) return false;
+
+    const payload = buildProfilePayload();
+    const serializedPayload = JSON.stringify(payload);
+
+    if (serializedPayload === lastSavedPayloadRef.current) {
+      return true;
+    }
+
+    setIsSaving(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const response = await fetch('/api/profile/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: serializedPayload,
+      });
+
+      const result = await parseResponse(response);
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao atualizar perfil');
+      }
+
+      lastSavedPayloadRef.current = serializedPayload;
+      setMessage({ type: 'success', text: 'Alterações salvas automaticamente.' });
+      window.setTimeout(() => {
+        setMessage((current) => (current.type === 'success' ? { type: '', text: '' } : current));
+      }, 3000);
+      return true;
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Erro ao salvar perfil.' });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  });
 
   const handleAvatarUpload = async (file: File | null) => {
     if (!file) return;
@@ -138,45 +201,6 @@ export default function ProfilePage() {
       setMessage({ type: 'error', text: err.message || 'Erro ao enviar foto de perfil.' });
     } finally {
       setIsUploadingAvatar(false);
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-
-    setIsSaving(true);
-    setMessage({ type: '', text: '' });
-
-    try {
-      const response = await fetch('/api/profile/update', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          full_name: fullName,
-          phone: phone,
-          bio: bio,
-          avatar_url: avatarUrl,
-          region_id: regionId,
-          skills: userSkills
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Erro ao atualizar perfil');
-      }
-
-      setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
-      // Clear message after 3 seconds
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Erro ao salvar perfil.' });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -237,6 +261,22 @@ export default function ProfilePage() {
       setIsDeleting(false);
     }
   };
+
+  useEffect(() => {
+    if (!profileReadyRef.current) return;
+    if (isUploadingAvatar) return;
+
+    const serializedPayload = JSON.stringify(buildProfilePayload());
+    if (serializedPayload === lastSavedPayloadRef.current) return;
+
+    const timer = window.setTimeout(async () => {
+      await saveProfile();
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [avatarUrl, bio, buildProfilePayload, fullName, isUploadingAvatar, phone, regionId, saveProfile, userSkills]);
 
   if (authLoading) {
     return (
@@ -314,7 +354,7 @@ export default function ProfilePage() {
           {/* Form Column */}
           <div className="md:col-span-2">
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-stone-200">
-              <form onSubmit={handleSave} className="space-y-6">
+              <form className="space-y-6">
                 {message.text && (
                   <div className={`p-4 rounded-xl text-sm font-medium flex items-center gap-2 ${
                     message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
@@ -384,7 +424,7 @@ export default function ProfilePage() {
                             </div>
                           )}
                           <div className="text-sm text-stone-500">
-                            Envie uma imagem e ajuste o enquadramento antes de salvar o perfil.
+                            Envie uma imagem e ajuste o enquadramento. O perfil salva automaticamente.
                           </div>
                         </div>
 
@@ -481,14 +521,10 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="pt-4 border-t border-stone-100 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={isSaving}
-                    className="bg-primary-600 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-primary-700 shadow-lg shadow-primary-600/20 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                    Salvar Alterações
-                  </button>
+                  <div className="flex items-center gap-2 text-sm font-medium text-stone-500">
+                    {isSaving ? <Loader2 size={16} className="animate-spin text-primary-600" /> : <CheckCircle2 size={16} className="text-green-600" />}
+                    {isSaving ? 'Salvando alterações...' : 'Salvamento automático ativado'}
+                  </div>
                 </div>
               </form>
             </div>
