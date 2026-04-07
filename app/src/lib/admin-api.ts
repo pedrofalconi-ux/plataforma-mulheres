@@ -168,12 +168,15 @@ export async function filterExistingColumns<T extends Record<string, any>>(
       const cacheKey = `column:${table}.${column}`;
 
       if (schemaCache.has(cacheKey)) {
-        return schemaCache.get(cacheKey) ? [column, value] : null;
+        if (schemaCache.get(cacheKey)) {
+          return [column, value];
+        }
+        // Revalida colunas que antes nao existiam para nao travar depois de migrations aplicadas.
       }
 
       const { error } = await adminClient.from(table).select(column).limit(1);
       if (error && isMissingColumnError(error, table, column)) {
-        schemaCache.set(cacheKey, false);
+        schemaCache.delete(cacheKey);
         return null;
       }
 
