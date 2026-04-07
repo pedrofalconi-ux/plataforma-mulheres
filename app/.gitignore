@@ -43,3 +43,5 @@ next-env.d.ts
 
 .vercel
 .env*.local
+/public/videos/about-manifesto.mp4
+/supabase/.temp
