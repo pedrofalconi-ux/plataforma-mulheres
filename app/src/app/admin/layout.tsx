@@ -12,6 +12,7 @@ import {
   FileText,
   Newspaper,
   Menu,
+  ClipboardList,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLinks: AdminLink[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/cursos', label: 'Gestao de Trilhas', icon: BookOpen },
+    { href: '/admin/atividades', label: 'Atividades', icon: ClipboardList },
     { href: '/admin/blog', label: 'Blog Engine', icon: Newspaper },
     { href: '/admin/talentos', label: 'Banco de Talentos', icon: Users },
     { href: '/admin/institucional', label: 'Painel Institucional', icon: FileText },
