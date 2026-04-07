@@ -45,13 +45,33 @@ export default function ProfilePage() {
 
   const fetchProfileData = useEffectEvent(async () => {
     if (!user) return;
-    
-    // Fetch detailed profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('phone, bio, avatar_url, region_id')
-      .eq('id', user.id)
-      .single();
+
+    const [
+      { data: profile },
+      { data: pSkills },
+      optionsResponse,
+      { count: coursesCount },
+      { count: certsCount },
+    ] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('phone, bio, avatar_url, region_id')
+        .eq('id', user.id)
+        .single(),
+      supabase
+        .from('profile_skills')
+        .select('skill_id')
+        .eq('profile_id', user.id),
+      fetch('/api/profile/options', { cache: 'no-store' }),
+      supabase
+        .from('enrollments')
+        .select('*', { count: 'exact', head: true })
+        .eq('profile_id', user.id),
+      supabase
+        .from('certificates')
+        .select('*', { count: 'exact', head: true })
+        .eq('profile_id', user.id),
+    ]);
 
     if (profile) {
       setPhone(profile.phone || '');
@@ -60,34 +80,15 @@ export default function ProfilePage() {
       setRegionId(profile.region_id || '');
     }
 
-    // Fetch user skills
-    const { data: pSkills } = await supabase
-      .from('profile_skills')
-      .select('skill_id')
-      .eq('profile_id', user.id);
-      
     if (pSkills) {
       setUserSkills(pSkills.map((s: any) => s.skill_id));
     }
-    
-    // Fetch all regions
-    const { data: regions } = await supabase.from('regions').select('*').order('name');
-    if (regions) setAvailableRegions(regions);
-    
-    // Fetch all skills
-    const { data: skills } = await supabase.from('skills').select('*').order('name');
-    if (skills) setAvailableSkills(skills);
 
-    // Fetch stats
-    const { count: coursesCount } = await supabase
-      .from('enrollments')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', user.id);
-
-    const { count: certsCount } = await supabase
-      .from('certificates')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', user.id);
+    if (optionsResponse.ok) {
+      const options = await optionsResponse.json();
+      setAvailableRegions(options.regions || []);
+      setAvailableSkills(options.skills || []);
+    }
 
     setStats({
       courses: coursesCount || 0,
@@ -433,7 +434,9 @@ export default function ProfilePage() {
                     >
                       <option value="">Selecione um estado...</option>
                       {availableRegions.map(region => (
-                        <option key={region.id} value={region.id}>{region.name}</option>
+                        <option key={region.id} value={region.id}>
+                          {region.state ? `${region.state} - ${region.name}` : region.name}
+                        </option>
                       ))}
                     </select>
                   </div>
