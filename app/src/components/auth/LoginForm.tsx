@@ -165,6 +165,39 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               <BrandMark />
             </div>
 
+            <div className="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Link
+                href="/login"
+                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
+                  mode === 'login'
+                    ? 'border-[#422523] bg-[#422523] text-white'
+                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
+                }`}
+              >
+                Entrar
+              </Link>
+              <Link
+                href="/cadastro?bought=true"
+                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
+                  mode === 'register'
+                    ? 'border-[#422523] bg-[#422523] text-white'
+                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
+                }`}
+              >
+                Cadastrar-se
+              </Link>
+              <Link
+                href="/cadastro/admin?bought=true"
+                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
+                  mode === 'admin-register'
+                    ? 'border-[#422523] bg-[#422523] text-white'
+                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
+                }`}
+              >
+                Chave admin
+              </Link>
+            </div>
+
             {mode === 'login' && isBought ? (
               <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
                 <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
@@ -183,14 +216,14 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               </div>
             ) : null}
 
-            {mode === 'register' && isBought ? (
+            {mode !== 'login' && isBought ? (
               <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
                 <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
                   <CheckCircle2 size={24} />
                   <span className="text-lg font-bold">Parabens, bem-vinda!</span>
                 </div>
                 <p className="text-sm leading-relaxed text-[#422523]/70">
-                  Bem-vinda a uma das maiores comunidades femininas da Paraiba. Finalize seu cadastro abaixo para acessar sua plataforma.
+                  Finalize seu cadastro abaixo para acessar a plataforma com os dados da sua compra aprovada.
                 </p>
               </div>
             ) : null}
@@ -205,10 +238,10 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
             <p className="mt-3 text-[#422523]/60">
               {mode === 'login'
-                ? 'Retome seu progresso e conecte-se com a comunidade.'
+                ? 'Entre com seus dados para retomar o progresso e acessar seus conteudos.'
                 : isAdminRegister
                   ? 'Crie sua conta admin e valide a chave mestra para liberar o painel.'
-                  : 'Parabens pela sua inscricao. Complete seus dados para acessar os cursos, materiais e encontros da plataforma.'}
+                  : 'Complete seus dados para acessar cursos, materiais e encontros da plataforma.'}
             </p>
 
             {isAdminRegister ? (
@@ -320,9 +353,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
             <div className="mt-8 text-center">
               {mode === 'login' ? (
-                <p className="text-sm text-[#422523]/60">
-                  O acesso à plataforma é permitido apenas para contas já cadastradas e liberadas.
-                </p>
+                <div className="space-y-3 text-sm text-[#422523]/60">
+                  <p>Ainda não tem conta? Você pode se cadastrar agora.</p>
+                  <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <Link href="/cadastro?bought=true" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
+                      Criar conta
+                    </Link>
+                    <Link href="/cadastro/admin?bought=true" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
+                      Inserir chave de administrador
+                    </Link>
+                  </div>
+                </div>
               ) : (
                 <p className="text-sm text-[#422523]/60">
                   Já tem uma conta?{' '}
