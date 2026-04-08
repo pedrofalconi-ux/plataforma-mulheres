@@ -23,6 +23,8 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const isAdmin = user?.role?.toLowerCase() === 'admin';
   const firstName = user?.name?.split(' ')[0] || 'Conta';
+  const isAuthPage =
+    pathname === '/login' || pathname === '/cadastro' || pathname?.startsWith('/cadastro/');
 
   const navLinks = [
     { href: '/', label: 'Inicio' },
@@ -70,7 +72,7 @@ export default function Navbar() {
                 Sair
               </button>
             </div>
-          ) : (
+          ) : !isAuthPage ? (
             <div className="hidden items-center gap-2 lg:flex">
               <Link href="/login" className="header-link" data-active={isActive('/login')}>
                 Entrar
@@ -79,20 +81,22 @@ export default function Navbar() {
                 Acessar plataforma
               </Link>
             </div>
-          )}
+          ) : null}
 
-          <button
-            type="button"
-            onClick={() => setIsOpen((current) => !current)}
-            className="shrink-0 border border-primary-900/15 bg-white p-3 text-primary-900 lg:hidden"
-            aria-label="Abrir menu"
-          >
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {!isAuthPage ? (
+            <button
+              type="button"
+              onClick={() => setIsOpen((current) => !current)}
+              className="shrink-0 border border-primary-900/15 bg-white p-3 text-primary-900 lg:hidden"
+              aria-label="Abrir menu"
+            >
+              {isOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {isOpen ? (
+      {isOpen && !isAuthPage ? (
         <div className="border-t border-primary-900/10 bg-[#f7f1ec] px-4 py-5 lg:hidden">
           <div className="mx-auto grid max-w-7xl gap-4">
             {user
