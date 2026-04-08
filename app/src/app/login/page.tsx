@@ -1,8 +1,8 @@
-import LoginForm from "@/components/auth/LoginForm";
+import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata = {
-  title: "Entrar | Nathi Faria",
-  description: "Acesse sua jornada de transformação e reconexão na plataforma Nathi Faria.",
+  title: 'Entrar | É no lar onde tudo começa',
+  description: 'Acesse sua plataforma com tranquilidade e retome sua jornada.',
 };
 
 export default function LoginPage() {
