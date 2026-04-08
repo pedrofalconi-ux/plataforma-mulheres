@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -18,8 +18,8 @@ import { z } from 'zod';
 import { BRAND_NAME } from '@/lib/constants';
 
 const loginSchema = z.object({
-  email: z.string().email('E-mail invalido'),
-  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+  email: z.string().email('Digite um e-mail valido.'),
+  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
   name: z.string().optional(),
 });
 
@@ -39,14 +39,22 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
   const supabase = createClient();
 
   const isBought = searchParams.get('bought') === 'true';
-  const isAdminRegister = mode === 'admin-register';
 
+  const [activeMode, setActiveMode] = useState<LoginMode>(mode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    setActiveMode(mode);
+    setError('');
+  }, [mode]);
+
+  const isRegisterMode = activeMode === 'register' || activeMode === 'admin-register';
+  const isAdminRegister = activeMode === 'admin-register';
 
   async function upgradeToAdmin() {
     const adminRes = await fetch('/api/auth/admin-upgrade', {
@@ -56,40 +64,60 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
     });
 
     const adminData = await adminRes.json().catch(() => ({}));
+
     if (!adminRes.ok) {
-      throw new Error(adminData.error || 'Erro ao liberar acesso de administrador');
+      throw new Error(adminData.error || 'Nao foi possivel liberar o acesso administrativo.');
     }
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  function resetFormForMode(nextMode: LoginMode) {
+    setActiveMode(nextMode);
+    setError('');
+    setPassword('');
+    setSecretKey('');
+
+    if (nextMode === 'login') {
+      setName('');
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      if (mode === 'register' || isAdminRegister) {
+      if (isRegisterMode) {
         loginSchema.parse({ email, password, name });
-        if (!name.trim()) throw new Error('Nome e obrigatorio no cadastro');
+
+        if (!name.trim()) {
+          throw new Error('Preencha seu nome completo para continuar.');
+        }
+
         if (isAdminRegister && !secretKey.trim()) {
-          throw new Error('A chave admin e obrigatoria');
+          throw new Error('Digite a chave de administrador para concluir o cadastro.');
         }
 
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { full_name: name },
+            data: { full_name: name.trim() },
           },
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          throw signUpError;
+        }
 
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (signInError) throw signInError;
+        if (signInError) {
+          throw signInError;
+        }
 
         if (isAdminRegister) {
           await upgradeToAdmin();
@@ -107,7 +135,9 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
         password,
       });
 
-      if (signInError) throw signInError;
+      if (signInError) {
+        throw signInError;
+      }
 
       const {
         data: { user },
@@ -125,153 +155,110 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
       }
     } catch (err: any) {
       if (err instanceof z.ZodError) {
-        setError(err.issues[0]?.message || 'Dados invalidos');
+        setError(err.issues[0]?.message || 'Revise os dados informados.');
       } else {
-        setError(err?.message || 'Credenciais invalidas ou erro no sistema.');
+        setError(err?.message || 'Nao foi possivel concluir agora. Tente novamente.');
       }
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F7F2ED] p-4">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-[40px] border border-[#E7D8D8] bg-white shadow-2xl lg:grid-cols-2">
-        <div className="hidden flex-col justify-between bg-gradient-to-br from-[#422523] to-[#5D3A38] p-12 text-[#F7F2ED] lg:flex">
+    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-[#F7F2ED] px-4 py-6 sm:px-6 lg:px-8">
+      <div className="grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-[#E7D8D8] bg-white shadow-[0_24px_80px_rgba(66,37,35,0.10)] lg:grid-cols-[1.02fr_0.98fr]">
+        <div className="hidden flex-col justify-between bg-gradient-to-br from-[#422523] to-[#5D3A38] p-10 text-[#F7F2ED] lg:flex">
           <div>
             <BrandMark />
-            <div className="mt-12">
-              <span className="text-sm font-bold uppercase tracking-widest text-[#DBA1A2]">Boas-vindas</span>
-              <h1 className="mt-4 text-5xl font-serif font-medium leading-tight">
-                Plataforma <br />
-                {BRAND_NAME}
+            <div className="mt-10">
+              <span className="text-xs font-bold uppercase tracking-[0.32em] text-[#DBA1A2]">
+                Acesso da aluna
+              </span>
+              <h1 className="mt-4 text-5xl font-serif leading-tight">
+                Entre para viver a experiencia completa da plataforma.
               </h1>
-              <p className="mt-6 max-w-sm text-lg leading-relaxed text-[#E7D8D8]/80">
-                Um espaco de aprendizado, clareza e direcao para mulheres que desejam uma rotina mais intencional.
+              <p className="mt-6 max-w-md text-lg leading-relaxed text-[#F7F2ED]/78">
+                Conteudos, trilhas e encontros pensados para mulheres que desejam cultivar um lar
+                com mais intencao, equilibrio e proposito.
               </p>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-            <p className="text-sm italic text-[#E7D8D8]/60">
-              &quot;Honrar sua historia e o primeiro passo para construir seu legado.&quot;
+          <div className="rounded-[28px] border border-white/10 bg-white/6 p-6 backdrop-blur-sm">
+            <p className="text-sm leading-relaxed text-[#F7F2ED]/72">
+              Depois do pagamento aprovado, basta criar sua conta uma unica vez e seguir para a
+              plataforma.
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col justify-center p-8 md:p-16">
-          <div className="mx-auto w-full max-w-sm">
+        <div className="flex flex-col justify-center px-5 py-8 sm:px-8 sm:py-10 lg:px-14 lg:py-14">
+          <div className="mx-auto w-full max-w-md">
             <div className="mb-8 lg:hidden">
               <BrandMark />
             </div>
 
-            <div className="mb-8 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <Link
-                href="/login"
-                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
-                  mode === 'login'
-                    ? 'border-[#422523] bg-[#422523] text-white'
-                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
-                }`}
-              >
-                Entrar
-              </Link>
-              <Link
-                href="/cadastro?bought=true"
-                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
-                  mode === 'register'
-                    ? 'border-[#422523] bg-[#422523] text-white'
-                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
-                }`}
-              >
-                Cadastrar-se
-              </Link>
-              <Link
-                href="/cadastro/admin?bought=true"
-                className={`rounded-2xl border px-4 py-3 text-center text-[11px] font-bold uppercase tracking-[0.16em] transition-all ${
-                  mode === 'admin-register'
-                    ? 'border-[#422523] bg-[#422523] text-white'
-                    : 'border-[#E7D8D8] bg-white text-[#422523]/70 hover:border-[#DBA1A2] hover:text-[#422523]'
-                }`}
-              >
-                Chave admin
-              </Link>
-            </div>
-
-            {mode === 'login' && isBought ? (
-              <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
+            {isBought ? (
+              <div className="mb-6 rounded-[26px] border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-5">
                 <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
-                  <CheckCircle2 size={24} />
-                  <span className="text-lg font-bold">Parabens, bem-vinda!</span>
+                  <CheckCircle2 size={22} />
+                  <span className="text-base font-bold">Pagamento aprovado</span>
                 </div>
-                <p className="text-sm leading-relaxed text-[#422523]/70">
-                  Bem-vinda a uma das maiores comunidades femininas da Paraiba. Se este for seu primeiro acesso, finalize seu cadastro para entrar na plataforma.
-                </p>
-                <Link
-                  href="/cadastro?bought=true"
-                  className="mt-5 flex w-full items-center justify-center rounded-2xl border border-[#422523]/12 bg-white px-4 py-3 text-sm font-bold text-[#422523] transition-all hover:border-[#DBA1A2]/30 hover:text-[#DBA1A2]"
-                >
-                  Fazer cadastro
-                </Link>
-              </div>
-            ) : null}
-
-            {mode !== 'login' && isBought ? (
-              <div className="animate-in slide-in-from-top-4 mb-8 rounded-3xl border border-[#DBA1A2]/20 bg-[#DBA1A2]/10 p-6 duration-700 fade-in">
-                <div className="mb-2 flex items-center gap-3 text-[#DBA1A2]">
-                  <CheckCircle2 size={24} />
-                  <span className="text-lg font-bold">Parabens, bem-vinda!</span>
-                </div>
-                <p className="text-sm leading-relaxed text-[#422523]/70">
-                  Sua compra foi aprovada. Complete seu cadastro abaixo para acessar a plataforma com tranquilidade.
+                <p className="text-sm leading-relaxed text-[#422523]/72">
+                  Sua vaga esta confirmada. Entre com sua conta ou crie seu cadastro para seguir
+                  para a plataforma.
                 </p>
               </div>
             ) : null}
 
-            <h2 className="text-3xl font-serif font-medium text-[#422523]">
-              {mode === 'login'
-                ? 'Entrar na area da aluna'
-                : isAdminRegister
-                  ? 'Criar acesso administrativo'
-                  : 'Crie sua conta e entre na comunidade'}
+            <span className="text-xs font-bold uppercase tracking-[0.32em] text-[#DBA1A2]">
+              {isRegisterMode ? 'Criar cadastro' : 'Entrar'}
+            </span>
+
+            <h2 className="mt-3 text-[2.1rem] font-serif leading-[1.05] text-[#422523] sm:text-[2.6rem]">
+              {isAdminRegister
+                ? 'Crie seu acesso administrativo'
+                : isRegisterMode
+                  ? 'Crie sua conta e entre na plataforma'
+                  : 'Acesse sua plataforma'}
             </h2>
 
-            <p className="mt-3 text-[#422523]/60">
-              {mode === 'login'
-                ? 'Entre com seus dados para retomar seu progresso e acessar seus conteúdos.'
-                : isAdminRegister
-                  ? 'Crie sua conta admin e valide a chave mestra para liberar o painel.'
-                  : 'Complete seus dados para acessar cursos, materiais e encontros da plataforma.'}
+            <p className="mt-4 text-[15px] leading-7 text-[#422523]/68 sm:text-base">
+              {isAdminRegister
+                ? 'Preencha seus dados e valide a chave de administrador para liberar o painel.'
+                : isRegisterMode
+                  ? 'Informe seus dados para concluir o cadastro e seguir direto para a sua area.'
+                  : 'Entre com seu e-mail e senha para continuar sua jornada com tranquilidade.'}
             </p>
 
             {isAdminRegister ? (
-              <div className="mt-6 border border-[#422523]/12 bg-[#F7F2ED] px-4 py-4 text-sm text-[#422523]/72">
-                Esse acesso libera o painel administrativo da plataforma. Use a chave admin do projeto para concluir.
+              <div className="mt-6 rounded-[24px] border border-[#422523]/10 bg-[#F7F2ED] px-4 py-4 text-sm leading-6 text-[#422523]/72">
+                Este acesso e reservado para administracao da plataforma.
               </div>
             ) : null}
 
             {error ? (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-                <AlertCircle size={18} />
+              <div className="mt-6 flex items-start gap-3 rounded-[22px] border border-red-100 bg-red-50 p-4 text-sm text-red-600">
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             ) : null}
 
-            <form onSubmit={handleSubmit} className="mt-10 space-y-6">
-              {mode !== 'login' ? (
+            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              {isRegisterMode ? (
                 <div className="space-y-2">
                   <label className="ml-1 text-sm font-medium text-[#422523]/80">Nome completo</label>
                   <div className="group relative">
                     <UserIcon
                       size={20}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/28 transition-colors group-focus-within:text-[#DBA1A2]"
                     />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
-                      placeholder="Como voce prefere ser chamada?"
+                      className="w-full rounded-[22px] border border-[#E7D8D8] bg-[#F7F2ED]/55 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
+                      placeholder="Digite seu nome completo"
                       required
                     />
                   </div>
@@ -279,36 +266,36 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               ) : null}
 
               <div className="space-y-2">
-                <label className="ml-1 text-sm font-medium text-[#422523]/80">Seu melhor e-mail</label>
+                <label className="ml-1 text-sm font-medium text-[#422523]/80">E-mail</label>
                 <div className="group relative">
                   <Mail
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/28 transition-colors group-focus-within:text-[#DBA1A2]"
                   />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
-                    placeholder="email@exemplo.com"
+                    className="w-full rounded-[22px] border border-[#E7D8D8] bg-[#F7F2ED]/55 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
+                    placeholder="voce@email.com"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="ml-1 text-sm font-medium text-[#422523]/80">Sua senha</label>
+                <label className="ml-1 text-sm font-medium text-[#422523]/80">Senha</label>
                 <div className="group relative">
                   <Lock
                     size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/28 transition-colors group-focus-within:text-[#DBA1A2]"
                   />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
-                    placeholder="Digite sua senha"
+                    className="w-full rounded-[22px] border border-[#E7D8D8] bg-[#F7F2ED]/55 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
+                    placeholder={isRegisterMode ? 'Crie uma senha segura' : 'Digite sua senha'}
                     required
                   />
                 </div>
@@ -316,18 +303,20 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
               {isAdminRegister ? (
                 <div className="space-y-2">
-                  <label className="ml-1 text-sm font-medium text-[#422523]/80">Chave admin</label>
+                  <label className="ml-1 text-sm font-medium text-[#422523]/80">
+                    Chave de administrador
+                  </label>
                   <div className="group relative">
                     <ShieldCheck
                       size={20}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/30 transition-colors group-focus-within:text-[#DBA1A2]"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-[#422523]/28 transition-colors group-focus-within:text-[#DBA1A2]"
                     />
                     <input
                       type="password"
                       value={secretKey}
                       onChange={(e) => setSecretKey(e.target.value)}
-                      className="w-full rounded-2xl border border-[#E7D8D8] bg-[#F7F2ED]/50 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
-                      placeholder="Digite a chave de admin"
+                      className="w-full rounded-[22px] border border-[#E7D8D8] bg-[#F7F2ED]/55 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
+                      placeholder="Digite a chave de administrador"
                       required
                     />
                   </div>
@@ -337,41 +326,74 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#DBA1A2] py-4 font-bold text-white shadow-lg shadow-[#DBA1A2]/30 transition-all active:scale-[0.98] hover:bg-[#D48F90] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-[#DBA1A2] py-4 text-sm font-bold text-white shadow-lg shadow-[#DBA1A2]/30 transition-all hover:bg-[#D48F90] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? (
-                  <Loader2 size={24} className="animate-spin" />
-                ) : mode === 'login' ? (
-                  'Entrar agora'
+                  <Loader2 size={22} className="animate-spin" />
                 ) : isAdminRegister ? (
-                  'Criar conta admin'
+                  'Criar acesso administrativo'
+                ) : isRegisterMode ? (
+                  'Criar conta e continuar'
                 ) : (
-                  'Criar minha conta'
+                  'Entrar na plataforma'
                 )}
               </button>
             </form>
 
-            <div className="mt-8 text-center">
-              {mode === 'login' ? (
-                <div className="space-y-3 text-sm text-[#422523]/60">
-                  <p>Ainda não tem conta? Você pode se cadastrar agora.</p>
-                  <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                    <Link href="/cadastro?bought=true" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
-                      Criar conta
-                    </Link>
-                    <Link href="/cadastro/admin?bought=true" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
+            <div className="mt-7 space-y-3 text-center text-sm leading-6 text-[#422523]/64">
+              {!isRegisterMode ? (
+                <>
+                  <p>
+                    Ainda nao tem conta?{' '}
+                    <button
+                      type="button"
+                      onClick={() => resetFormForMode('register')}
+                      className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline"
+                    >
+                      Faca cadastro
+                    </button>
+                  </p>
+                  <p>
+                    Area administrativa?{' '}
+                    <button
+                      type="button"
+                      onClick={() => resetFormForMode('admin-register')}
+                      className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline"
+                    >
                       Inserir chave de administrador
-                    </Link>
-                  </div>
-                </div>
+                    </button>
+                  </p>
+                </>
               ) : (
-                <p className="text-sm text-[#422523]/60">
-                  Já tem uma conta?{' '}
-                  <Link href="/login" className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline">
-                    Faça login
-                  </Link>
+                <p>
+                  Ja tem uma conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => resetFormForMode('login')}
+                    className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline"
+                  >
+                    Entrar
+                  </button>
                 </p>
               )}
+
+              {activeMode !== mode ? (
+                <p>
+                  Preferir abrir em uma pagina separada?{' '}
+                  <Link
+                    href={
+                      activeMode === 'admin-register'
+                        ? '/cadastro/admin?bought=true'
+                        : activeMode === 'register'
+                          ? '/cadastro?bought=true'
+                          : '/login'
+                    }
+                    className="font-bold text-[#422523] underline-offset-4 hover:underline"
+                  >
+                    Abrir esta etapa
+                  </Link>
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
