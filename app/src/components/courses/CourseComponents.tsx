@@ -73,20 +73,18 @@ function CourseCard({ course }: { course: LearningCourse }) {
           sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
         />
       </div>
-      <div className="space-y-5 p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-3xl leading-none text-primary-900">{course.title}</h2>
-          </div>
-          <span className="border border-primary-900/10 px-3 py-2 text-[11px] font-extrabold uppercase tracking-[0.18em] text-primary-900/65">
-            {course.level}
-          </span>
+      <div className="space-y-6 p-6">
+        <div>
+          <h2 className="text-[2.35rem] font-medium leading-[1.02] tracking-[-0.03em] text-primary-900 sm:text-[2.65rem]">
+            {course.title}
+          </h2>
         </div>
 
-        <p className="line-clamp-3 text-sm leading-7 text-primary-900/72">{course.description}</p>
+        <p className="line-clamp-3 max-w-[28rem] text-[1.02rem] leading-8 text-primary-900/72">
+          {course.description}
+        </p>
 
-        <div className="flex items-center justify-between border-t border-primary-900/10 pt-4 text-sm text-primary-900/68">
-          <span>{course.totalModules || 0} módulos</span>
+        <div className="border-t border-primary-900/10 pt-4 text-sm text-primary-900/68">
           <span>{formatDuration(course.durationMinutes)}</span>
         </div>
       </div>
