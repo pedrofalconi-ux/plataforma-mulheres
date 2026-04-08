@@ -127,7 +127,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           await upgradeToAdmin();
         }
 
-        router.push(isAdminRegister ? '/admin' : '/trilhas');
+        router.push(isAdminRegister ? '/admin' : '/');
         router.refresh();
         return;
       }
@@ -154,7 +154,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           .eq('id', user.id)
           .single();
 
-        router.push(profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/trilhas');
+        router.push(profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/');
         router.refresh();
       }
     } catch (err: any) {
