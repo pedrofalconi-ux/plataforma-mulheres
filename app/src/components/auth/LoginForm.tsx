@@ -223,7 +223,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                   <span className="text-lg font-bold">Parabens, bem-vinda!</span>
                 </div>
                 <p className="text-sm leading-relaxed text-[#422523]/70">
-                  Finalize seu cadastro abaixo para acessar a plataforma com os dados da sua compra aprovada.
+                  Sua compra foi aprovada. Complete seu cadastro abaixo para acessar a plataforma com tranquilidade.
                 </p>
               </div>
             ) : null}
@@ -238,7 +238,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
             <p className="mt-3 text-[#422523]/60">
               {mode === 'login'
-                ? 'Entre com seus dados para retomar o progresso e acessar seus conteudos.'
+                ? 'Entre com seus dados para retomar seu progresso e acessar seus conteúdos.'
                 : isAdminRegister
                   ? 'Crie sua conta admin e valide a chave mestra para liberar o painel.'
                   : 'Complete seus dados para acessar cursos, materiais e encontros da plataforma.'}
