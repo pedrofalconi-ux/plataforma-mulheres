@@ -9,8 +9,10 @@ import { BRAND_NAME } from '@/lib/constants';
 
 function BrandMark() {
   return (
-    <div className="flex items-center gap-2">
-      <span className="font-serif text-[2.2rem] font-semibold leading-none tracking-tight text-primary-900">{BRAND_NAME}</span>
+    <div className="flex min-w-0 items-center gap-2">
+      <span className="line-clamp-2 font-serif text-[1.1rem] font-semibold leading-[0.95] tracking-tight text-primary-900 sm:text-[1.45rem] lg:text-[2.2rem]">
+        {BRAND_NAME}
+      </span>
     </div>
   );
 }
@@ -31,9 +33,9 @@ export default function Navbar() {
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`));
 
   return (
-    <nav className="site-header sticky top-0 z-50">
+    <nav className="site-header sticky top-0 z-50 max-w-full overflow-x-hidden">
       <div className="site-header-inner">
-        <Link href="/" className="flex min-w-0 items-center">
+        <Link href="/" className="flex min-w-0 flex-1 items-center pr-2 lg:flex-none">
           <BrandMark />
         </Link>
 
@@ -82,7 +84,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setIsOpen((current) => !current)}
-            className="border border-primary-900/15 bg-white p-3 text-primary-900 lg:hidden"
+            className="shrink-0 border border-primary-900/15 bg-white p-3 text-primary-900 lg:hidden"
             aria-label="Abrir menu"
           >
             {isOpen ? <X size={22} /> : <Menu size={22} />}

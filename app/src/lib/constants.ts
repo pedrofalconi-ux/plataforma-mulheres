@@ -1,6 +1,6 @@
 import { Course, NewsItem, ForumPost } from './types';
 
-export const BRAND_NAME = 'Nathi Faria';
+export const BRAND_NAME = 'É no lar onde tudo começa';
 export const BRAND_TAGLINE = 'Lar onde o coração se forma';
 export const BRAND_EMAIL = 'contato@nathifaria.com.br';
 

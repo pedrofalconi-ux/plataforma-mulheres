@@ -36,6 +36,9 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -43,6 +46,32 @@ body {
   background: linear-gradient(180deg, #f7f1ec 0%, #f8f2ee 100%);
   color: var(--foreground);
   font-family: 'Manrope', system-ui, sans-serif;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#__next,
+main,
+section,
+article,
+header,
+footer {
+  max-width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
 }
 
 body::selection {
@@ -89,6 +118,7 @@ h6 {
   margin: 0 auto;
   display: flex;
   max-width: 1320px;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
@@ -295,5 +325,12 @@ h6 {
 @media (max-width: 1024px) {
   .site-header-inner {
     padding: 0.9rem 1rem;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .site-header-inner {
+    padding: 0.85rem 0.9rem;
   }
 }

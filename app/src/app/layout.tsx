@@ -21,11 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="text-stone-900 antialiased">
+      <body className="overflow-x-hidden text-stone-900 antialiased">
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="flex min-h-screen max-w-full flex-col overflow-x-hidden">
             <Navbar />
-            <main className="motion-page flex-grow">
+            <main className="motion-page flex-grow overflow-x-hidden">
               {children}
             </main>
             <Footer />
