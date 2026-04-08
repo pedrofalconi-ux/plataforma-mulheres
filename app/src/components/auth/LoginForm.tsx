@@ -98,16 +98,20 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           throw new Error('Digite a chave de administrador para concluir o cadastro.');
         }
 
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: name.trim() },
-          },
+        const registerResponse = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName: name.trim(),
+          }),
         });
 
-        if (signUpError) {
-          throw signUpError;
+        const registerData = await registerResponse.json().catch(() => ({}));
+
+        if (!registerResponse.ok) {
+          throw new Error(registerData.error || 'Nao foi possivel criar sua conta agora.');
         }
 
         const { error: signInError } = await supabase.auth.signInWithPassword({
