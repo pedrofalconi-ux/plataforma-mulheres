@@ -84,7 +84,7 @@ export default function AdminDashboard() {
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          throw new Error(data.error || 'Nao foi possivel carregar o painel.');
+          throw new Error(data.error || 'Não foi possível carregar o painel.');
         }
 
         setStats(data.stats);
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
         setRecentSales(data.recentSales || []);
       } catch (err: any) {
         console.error(err);
-        setError(err.message || 'Nao foi possivel carregar o painel.');
+        setError(err.message || 'Não foi possível carregar o painel.');
       } finally {
         setLoading(false);
       }

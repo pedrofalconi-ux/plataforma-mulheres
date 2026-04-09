@@ -26,7 +26,7 @@ async function fetchYouTubeDurationMinutes(videoId: string) {
   });
 
   if (!response.ok) {
-    throw new Error('Nao foi possivel consultar o video no YouTube.');
+    throw new Error('Não foi possível consultar o vídeo no YouTube.');
   }
 
   const html = await response.text();
@@ -39,7 +39,7 @@ async function fetchYouTubeDurationMinutes(videoId: string) {
   const durationCandidates = [...secondMatches, ...milliMatches];
 
   if (durationCandidates.length === 0) {
-    throw new Error('Nao foi possivel identificar a duracao do video.');
+    throw new Error('Não foi possível identificar a duração do vídeo.');
   }
 
   const seconds = Math.max(...durationCandidates);

@@ -36,9 +36,9 @@ const ObservatoryMap = dynamic(() => import('./ObservatoryMap'), {
 });
 
 const CATEGORY_LABELS: Record<Project['category'], string> = {
-  alimentacao: 'Alimentacao',
+  alimentacao: 'Alimentação',
   saude: 'Saude',
-  educacao: 'Educacao',
+  educacao: 'Educação',
   espiritualidade: 'Espiritualidade',
   moradia: 'Moradia',
 };
@@ -91,7 +91,7 @@ export default function ObservatoryView() {
       setSelectedProjectId((current) => current || nextProjects[0]?.id || null);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Nao foi possivel carregar os projetos.');
+      setError(err.message || 'Não foi possível carregar os projetos.');
     } finally {
       setLoading(false);
     }
@@ -172,11 +172,11 @@ export default function ObservatoryView() {
               observatorio social
             </div>
             <h1 className="mt-5 max-w-4xl font-serif text-4xl font-bold leading-tight md:text-6xl">
-              Projetos sociais com contexto, localizacao e visibilidade publica.
+              Projetos sociais com contexto, localização e visibilidade pública.
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-8 text-primary-100 md:text-lg">
-              Mapeie iniciativas, visualize a distribuicao territorial das acoes e abra cada projeto para conhecer contatos,
-              descricao e endereco com mais clareza.
+              Mapeie iniciativas, visualize a distribuição territorial das ações e abra cada projeto para conhecer contatos,
+              descrição e endereço com mais clareza.
             </p>
           </div>
 
@@ -191,7 +191,7 @@ export default function ObservatoryView() {
             </div>
             <div className="motion-card rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-200">Abertura</p>
-              <p className="mt-2 text-lg font-semibold">Cada iniciativa pode ser acessada em pagina propria.</p>
+              <p className="mt-2 text-lg font-semibold">Cada iniciativa pode ser acessada em página própria.</p>
             </div>
           </div>
         </div>
@@ -201,12 +201,12 @@ export default function ObservatoryView() {
         <aside className="glass-panel motion-card overflow-hidden rounded-[30px]">
           <div className="border-b border-primary-900/8 p-6">
             <h2 className="font-serif text-2xl font-bold text-stone-900">Iniciativas</h2>
-            <p className="mt-2 text-sm text-stone-500">Filtre, navegue e abra os projetos cadastrados no observatorio.</p>
+            <p className="mt-2 text-sm text-stone-500">Filtre, navegue e abra os projetos cadastrados no observatório.</p>
 
             <div className="relative mt-5">
               <input
                 type="text"
-                placeholder="Buscar por nome, endereco ou contato..."
+                placeholder="Buscar por nome, endereço ou contato..."
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="w-full rounded-2xl border border-stone-300 bg-white py-3 pl-11 pr-4 outline-none focus:ring-2 focus:ring-primary-500"
@@ -241,7 +241,7 @@ export default function ObservatoryView() {
             <button
               onClick={() => {
                 if (!user) {
-                  alert('Voce precisa fazer login para cadastrar uma iniciativa.');
+                  alert('Você precisa fazer login para cadastrar uma iniciativa.');
                   return;
                 }
                 setShowSubmitModal(true);
@@ -283,10 +283,10 @@ export default function ObservatoryView() {
                       </span>
                     </div>
                     <p className="mt-3 line-clamp-3 text-sm leading-6 text-stone-600">
-                      {project.description || 'Sem descricao informada.'}
+                      {project.description || 'Sem descrição informada.'}
                     </p>
                     <p className="mt-3 flex items-center gap-1 text-xs text-stone-500">
-                      <MapPin size={12} /> {project.address || 'Endereco nao informado'}
+                      <MapPin size={12} /> {project.address || 'Endereço não informado'}
                     </p>
                     <div className="mt-4 flex items-center justify-between">
                       <span className="text-xs text-stone-400">
@@ -313,8 +313,8 @@ export default function ObservatoryView() {
           <div className="glass-panel motion-card overflow-hidden rounded-[30px]">
             <div className="flex items-center justify-between border-b border-primary-900/8 px-6 py-4">
               <div>
-                <h2 className="font-serif text-2xl font-bold text-stone-900">Mapa das acoes</h2>
-                <p className="text-sm text-stone-500">OpenStreetMap com marcacao dos locais aprovados.</p>
+                <h2 className="font-serif text-2xl font-bold text-stone-900">Mapa das ações</h2>
+                <p className="text-sm text-stone-500">OpenStreetMap com marcação dos locais aprovados.</p>
               </div>
               <div className="rounded-full bg-primary-50 px-3 py-1 text-xs font-bold text-primary-700">
                 {projectsWithCoordinates.length} ponto(s)
@@ -339,26 +339,26 @@ export default function ObservatoryView() {
                   </div>
                   <h3 className="font-serif text-3xl font-bold text-stone-900">{selectedProject.name}</h3>
                   <p className="mt-4 text-base leading-8 text-stone-600">
-                    {selectedProject.description || 'Esta iniciativa ainda nao possui descricao detalhada.'}
+                    {selectedProject.description || 'Esta iniciativa ainda não possui descrição detalhada.'}
                   </p>
                 </div>
 
                 <div className="motion-card rounded-[26px] border border-primary-900/8 bg-white p-5">
                   <div className="space-y-4 text-sm text-stone-600">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Endereco</p>
-                      <p className="mt-1">{selectedProject.address || 'Nao informado'}</p>
+                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Endereço</p>
+                      <p className="mt-1">{selectedProject.address || 'Não informado'}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Contato</p>
-                      <p className="mt-1">{selectedProject.contact || 'Nao informado'}</p>
+                      <p className="mt-1">{selectedProject.contact || 'Não informado'}</p>
                     </div>
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Mapa</p>
                       <p className="mt-1">
                         {typeof selectedProject.lat === 'number' && typeof selectedProject.lng === 'number'
                           ? `${selectedProject.lat.toFixed(5)}, ${selectedProject.lng.toFixed(5)}`
-                          : 'Coordenadas indisponiveis'}
+                          : 'Coordenadas indisponíveis'}
                       </p>
                     </div>
                   </div>
@@ -401,14 +401,14 @@ export default function ObservatoryView() {
               <>
                 <h3 className="mb-4 font-serif text-xl font-bold text-primary-900">Cadastrar iniciativa</h3>
                 <p className="mb-6 text-sm text-stone-600">
-                  O cadastro sera enviado para analise administrativa antes da publicacao.
+                  O cadastro será enviado para análise administrativa antes da publicação.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {submitError ? <div className="rounded bg-red-50 p-3 text-sm text-red-600">{submitError}</div> : null}
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-stone-700">Nome da instituicao</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Nome da instituição</label>
                     <input
                       required
                       type="text"
@@ -445,7 +445,7 @@ export default function ObservatoryView() {
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-stone-700">Endereco / Localizacao</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Endereço / Localização</label>
                     <input
                       required
                       type="text"
@@ -456,7 +456,7 @@ export default function ObservatoryView() {
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-stone-700">Descricao breve</label>
+                    <label className="mb-1 block text-sm font-medium text-stone-700">Descrição breve</label>
                     <textarea
                       rows={3}
                       value={formData.description}
@@ -478,7 +478,7 @@ export default function ObservatoryView() {
               <div className="py-8 text-center">
                 <CheckCircle size={48} className="mx-auto mb-4 text-green-500" />
                 <h3 className="text-xl font-bold text-stone-800">Enviado com sucesso</h3>
-                <p className="mt-2 text-stone-600">Sua iniciativa foi registrada e seguira para validacao.</p>
+                <p className="mt-2 text-stone-600">Sua iniciativa foi registrada e seguirá para validação.</p>
               </div>
             )}
           </div>

@@ -50,7 +50,7 @@ export default function AdminPermissoesPage() {
         setProfiles(data || []);
       } catch (err: any) {
         if (!active) return;
-        setError(err?.message || 'Nao foi possivel carregar as permissoes.');
+        setError(err?.message || 'Não foi possível carregar as permissões.');
       } finally {
         if (active) setLoading(false);
       }
@@ -99,14 +99,14 @@ export default function AdminPermissoesPage() {
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(data.error || 'Nao foi possivel atualizar a permissao.');
+        throw new Error(data.error || 'Não foi possível atualizar a permissão.');
       }
 
       setProfiles((current) =>
         current.map((item) => (item.id === profile.id ? { ...item, role: nextRole } : item))
       );
     } catch (err: any) {
-      alert(err?.message || 'Nao foi possivel atualizar a permissao.');
+      alert(err?.message || 'Não foi possível atualizar a permissão.');
     } finally {
       setUpdatingId(null);
     }
@@ -173,7 +173,7 @@ export default function AdminPermissoesPage() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
               <Users size={22} />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-stone-900">Nao foi possivel carregar as permissoes</h3>
+            <h3 className="mt-4 text-lg font-bold text-stone-900">Não foi possível carregar as permissões</h3>
             <p className="mt-2 text-sm text-stone-500">{error}</p>
           </div>
         ) : loading ? (

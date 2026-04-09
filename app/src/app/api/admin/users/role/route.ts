@@ -11,7 +11,7 @@ export async function PATCH(request: Request) {
     const role = String(body?.role || '').trim().toLowerCase();
 
     if (!profileId) {
-      return NextResponse.json({ error: 'Perfil nao informado.' }, { status: 400 });
+      return NextResponse.json({ error: 'Perfil não informado.' }, { status: 400 });
     }
 
     if (!['admin', 'student'].includes(role)) {
@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
 
     if (profileId === adminContext.user.id && role !== 'admin') {
       return NextResponse.json(
-        { error: 'Nao e permitido remover seu proprio acesso de administradora por aqui.' },
+        { error: 'Não é permitido remover seu próprio acesso de administradora por aqui.' },
         { status: 400 }
       );
     }
@@ -32,7 +32,7 @@ export async function PATCH(request: Request) {
       .single();
 
     if (previousError || !previousProfile) {
-      return NextResponse.json({ error: 'Perfil nao encontrado.' }, { status: 404 });
+      return NextResponse.json({ error: 'Perfil não encontrado.' }, { status: 404 });
     }
 
     const { data: updatedProfile, error: updateError } = await adminContext.adminClient

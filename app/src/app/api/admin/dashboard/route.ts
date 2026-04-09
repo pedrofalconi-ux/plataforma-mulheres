@@ -305,7 +305,7 @@ export async function GET() {
   } catch (error: any) {
     console.error('[ADMIN_DASHBOARD_GET]', error);
     return NextResponse.json(
-      { error: error?.message || 'Nao foi possivel carregar o painel.' },
+      { error: error?.message || 'Não foi possível carregar o painel.' },
       { status: 500 },
     );
   }

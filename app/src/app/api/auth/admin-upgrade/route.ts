@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!updatedProfile) {
-      return NextResponse.json({ error: 'Perfil nao encontrado para promover a administrador.' }, { status: 404 });
+      return NextResponse.json({ error: 'Perfil não encontrado para promover a administrador.' }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, message: 'Perfil promovido a Administrador com sucesso!' });

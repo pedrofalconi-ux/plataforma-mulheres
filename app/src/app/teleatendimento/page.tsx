@@ -4,7 +4,7 @@ import { Stethoscope, Clock3, ShieldCheck } from 'lucide-react';
 export const metadata = {
   title: 'Teleatendimento | Nathi Faria',
   description:
-    'Secao de teleatendimento prevista para fase futura da plataforma.',
+    'Seção de teleatendimento prevista para fase futura da plataforma.',
 };
 
 export default function TeleatendimentoPage() {
@@ -18,7 +18,7 @@ export default function TeleatendimentoPage() {
 
           <h1 className="font-serif text-3xl font-bold text-stone-900 md:text-4xl">Teleatendimento (Fase Futura)</h1>
           <p className="mt-4 text-lg text-stone-600">
-            Esta area esta reservada para implementacao posterior, mediante nova avaliacao e eventual aditivo contratual.
+            Esta área está reservada para implementação posterior, mediante nova avaliação e eventual aditivo contratual.
           </p>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">

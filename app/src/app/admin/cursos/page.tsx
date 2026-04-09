@@ -178,7 +178,7 @@ export default function AdminCursosPage() {
                     <th className="px-6 py-4">Bloco</th>
                     <th className="px-6 py-4">Nivel</th>
                     <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 text-right">Acoes</th>
+                    <th className="px-6 py-4 text-right">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
@@ -297,7 +297,7 @@ export default function AdminCursosPage() {
 
             <form onSubmit={handleCreateCourse} className="space-y-4 overflow-y-auto p-4 sm:p-6">
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Titulo do Bloco</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Título do Bloco</label>
                 <input
                   required
                   type="text"
@@ -309,7 +309,7 @@ export default function AdminCursosPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Descricao</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Descrição</label>
                 <textarea
                   required
                   minLength={10}

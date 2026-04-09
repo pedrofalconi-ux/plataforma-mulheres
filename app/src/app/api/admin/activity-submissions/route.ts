@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       },
       module: {
         id: item.lessons?.modules?.id,
-        title: item.lessons?.modules?.title || 'Modulo',
+        title: item.lessons?.modules?.title || 'Módulo',
       },
       lesson: {
         id: item.lessons?.id,
@@ -121,7 +121,7 @@ export async function PATCH(request: Request) {
     const adminReply = String(payload.adminReply || '').trim();
 
     if (!submissionId) {
-      return NextResponse.json({ error: 'Resposta da atividade nao informada.' }, { status: 400 });
+      return NextResponse.json({ error: 'Resposta da atividade não informada.' }, { status: 400 });
     }
 
     const { data, error } = await adminContext.adminClient
@@ -136,7 +136,7 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error || !data) {
-      throw error || new Error('Nao foi possivel salvar a devolutiva.');
+      throw error || new Error('Não foi possível salvar a devolutiva.');
     }
 
     return NextResponse.json({

@@ -100,7 +100,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
     const adminData = await adminRes.json().catch(() => ({}));
 
     if (!adminRes.ok) {
-      throw new Error(adminData.error || 'Nao foi possivel liberar o acesso administrativo.');
+      throw new Error(adminData.error || 'Não foi possível liberar o acesso administrativo.');
     }
   }
 
@@ -145,7 +145,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
         const registerData = await registerResponse.json().catch(() => ({}));
 
         if (!registerResponse.ok) {
-          throw new Error(registerData.error || 'Nao foi possivel criar sua conta agora.');
+          throw new Error(registerData.error || 'Não foi possível criar sua conta agora.');
         }
 
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -193,7 +193,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
       if (err instanceof z.ZodError) {
         setError(err.issues[0]?.message || 'Revise os dados informados.');
       } else {
-        setError(err?.message || 'Nao foi possivel concluir agora. Tente novamente.');
+        setError(err?.message || 'Não foi possível concluir agora. Tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -211,18 +211,18 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                 Acesso da aluna
               </span>
               <h1 className="mt-4 text-5xl font-serif leading-tight">
-                Entre para viver a experiencia completa da plataforma.
+                Entre para viver a experiência completa da plataforma.
               </h1>
               <p className="mt-6 max-w-md text-lg leading-relaxed text-[#F7F2ED]/78">
-                Conteudos, trilhas e encontros pensados para mulheres que desejam cultivar um lar
-                com mais intencao, equilibrio e proposito.
+                Conteúdos, trilhas e encontros pensados para mulheres que desejam cultivar um lar
+                com mais intenção, equilíbrio e propósito.
               </p>
             </div>
           </div>
 
           <div className="rounded-[28px] border border-white/10 bg-white/6 p-6 backdrop-blur-sm">
             <p className="text-sm leading-relaxed text-[#F7F2ED]/72">
-              Depois do pagamento aprovado, basta criar sua conta uma unica vez e seguir para a
+              Depois do pagamento aprovado, basta criar sua conta uma única vez e seguir para a
               plataforma.
             </p>
           </div>
@@ -241,7 +241,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                   <span className="text-base font-bold">Pagamento aprovado</span>
                 </div>
                 <p className="text-sm leading-relaxed text-[#422523]/72">
-                  Sua vaga esta confirmada. Entre com sua conta ou crie seu cadastro para seguir
+                  Sua vaga está confirmada. Entre com sua conta ou crie seu cadastro para seguir
                   para a plataforma.
                 </p>
               </div>
@@ -263,13 +263,13 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               {isAdminRegister
                 ? 'Preencha seus dados e valide a chave de administrador para liberar o painel.'
                 : isRegisterMode
-                  ? 'Informe seus dados para concluir o cadastro e seguir direto para a sua area.'
+                  ? 'Informe seus dados para concluir o cadastro e seguir direto para a sua área.'
                   : 'Entre com seu e-mail e senha para continuar sua jornada com tranquilidade.'}
             </p>
 
             {isAdminRegister ? (
               <div className="mt-6 rounded-[24px] border border-[#422523]/10 bg-[#F7F2ED] px-4 py-4 text-sm leading-6 text-[#422523]/72">
-                Este acesso e reservado para administracao da plataforma.
+                Este acesso é reservado para administração da plataforma.
               </div>
             ) : null}
 
@@ -313,7 +313,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-[22px] border border-[#E7D8D8] bg-[#F7F2ED]/55 py-4 pl-12 pr-4 text-[#422523] outline-none transition-all focus:border-[#DBA1A2] focus:ring-4 focus:ring-[#DBA1A2]/10"
-                    placeholder="voce@email.com"
+                    placeholder="você@email.com"
                     required
                   />
                 </div>
@@ -380,17 +380,17 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
               {!isRegisterMode ? (
                 <>
                   <p>
-                    Ainda nao tem conta?{' '}
+                    Ainda não tem conta?{' '}
                     <button
                       type="button"
                       onClick={() => resetFormForMode('register')}
                       className="font-bold text-[#DBA1A2] underline-offset-4 hover:underline"
                     >
-                      Faca cadastro
+                      Faça cadastro
                     </button>
                   </p>
                   <p>
-                    Area administrativa?{' '}
+                    Área administrativa?{' '}
                     <button
                       type="button"
                       onClick={() => resetFormForMode('admin-register')}
@@ -402,7 +402,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                 </>
               ) : (
                 <p>
-                  Ja tem uma conta?{' '}
+                  Já tem uma conta?{' '}
                   <button
                     type="button"
                     onClick={() => resetFormForMode('login')}
@@ -415,7 +415,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
               {activeMode !== mode ? (
                 <p>
-                  Preferir abrir em uma pagina separada?{' '}
+                  Preferir abrir em uma página separada?{' '}
                   <Link
                     href={
                       activeMode === 'admin-register'

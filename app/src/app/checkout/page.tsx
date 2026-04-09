@@ -56,7 +56,7 @@ function CheckoutContent() {
         setSelectedCourses(initialSelected);
       } catch (err) {
         console.error(err);
-        setError('Nao foi possivel carregar os itens do checkout.');
+        setError('Não foi possível carregar os itens do checkout.');
       } finally {
         setLoading(false);
       }

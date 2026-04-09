@@ -39,7 +39,7 @@ export default async function ObservatoryProjectPage({
             </div>
             <h1 className="mt-4 font-serif text-4xl font-bold md:text-5xl">{project.name}</h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-primary-100">
-              {project.description || 'Esta iniciativa ainda nao possui uma descricao detalhada cadastrada.'}
+              {project.description || 'Esta iniciativa ainda não possui uma descrição detalhada cadastrada.'}
             </p>
           </div>
 
@@ -47,17 +47,17 @@ export default async function ObservatoryProjectPage({
             <h2 className="font-serif text-2xl font-bold text-stone-900">Encaminhamentos</h2>
             <div className="mt-5 space-y-5 text-sm text-stone-600">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Local da acao</p>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Local da ação</p>
                 <p className="mt-1 flex items-start gap-2">
                   <MapPin size={16} className="mt-0.5 text-primary-700" />
-                  <span>{project.address || 'Endereco nao informado'}</span>
+                  <span>{project.address || 'Endereço não informado'}</span>
                 </p>
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary-600">Contato</p>
                 <p className="mt-1 flex items-start gap-2">
                   <Phone size={16} className="mt-0.5 text-primary-700" />
-                  <span>{project.contact || 'Contato nao informado'}</span>
+                  <span>{project.contact || 'Contato não informado'}</span>
                 </p>
               </div>
               <div>
@@ -86,7 +86,7 @@ export default async function ObservatoryProjectPage({
         <section className="glass-panel mt-6 overflow-hidden rounded-[34px]">
           <div className="border-b border-primary-900/8 px-6 py-4">
             <h2 className="font-serif text-2xl font-bold text-stone-900">Mapa do projeto</h2>
-            <p className="text-sm text-stone-500">Referencia geografica da acao usando OpenStreetMap.</p>
+            <p className="text-sm text-stone-500">Referência geográfica da ação usando OpenStreetMap.</p>
           </div>
           <div className="h-[520px]">
             <ObservatoryMap

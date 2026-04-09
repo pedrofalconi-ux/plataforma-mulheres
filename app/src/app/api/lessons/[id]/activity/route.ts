@@ -62,7 +62,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Nao autorizado.' }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
     const { data: lesson, error: lessonError } = await supabase
@@ -72,7 +72,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
       .single();
 
     if (lessonError || !lesson) {
-      return NextResponse.json({ error: 'Aula nao encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'Aula não encontrada.' }, { status: 404 });
     }
 
     const courseId = resolveCourseId(lesson.modules);
@@ -120,7 +120,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Nao autorizado.' }, { status: 401 });
+      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
     const { data: lesson, error: lessonError } = await supabase
@@ -130,7 +130,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       .single();
 
     if (lessonError || !lesson) {
-      return NextResponse.json({ error: 'Aula nao encontrada.' }, { status: 404 });
+      return NextResponse.json({ error: 'Aula não encontrada.' }, { status: 404 });
     }
 
     const courseId = resolveCourseId(lesson.modules);
@@ -141,7 +141,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
 
     const questions = normalizeQuestions(lesson.activity_questions);
     if (questions.length === 0) {
-      return NextResponse.json({ error: 'Esta aula ainda nao possui atividade cadastrada.' }, { status: 400 });
+      return NextResponse.json({ error: 'Esta aula ainda não possui atividade cadastrada.' }, { status: 400 });
     }
 
     const payload = ActivitySubmissionSchema.parse(await request.json());
@@ -162,7 +162,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       .single();
 
     if (error || !data) {
-      throw error || new Error('Nao foi possivel salvar a atividade.');
+      throw error || new Error('Não foi possível salvar a atividade.');
     }
 
     return NextResponse.json({

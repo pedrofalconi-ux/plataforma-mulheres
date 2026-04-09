@@ -94,7 +94,7 @@ export const LessonSchema = z.object({
   coming_soon_image_url: z.string().url().nullable().optional(),
   materials: z.array(
     z.object({
-      title: z.string().min(1, 'Titulo do material e obrigatorio'),
+      title: z.string().min(1, 'Título do material é obrigatório'),
       url: z.string().url('URL do material invalida'),
       kind: z.enum(['pdf', 'link', 'download']).default('link'),
     })

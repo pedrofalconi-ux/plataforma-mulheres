@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'Nao foi possivel criar a conta agora. Tente novamente.' },
+        { error: 'Não foi possível criar a conta agora. Tente novamente.' },
         { status: 500 }
       );
     }
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { error: error?.message || 'Nao foi possivel criar a conta agora.' },
+      { error: error?.message || 'Não foi possível criar a conta agora.' },
       { status: 500 }
     );
   }

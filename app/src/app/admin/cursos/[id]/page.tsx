@@ -299,7 +299,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
       let parsedBenefits =
         loadedCourse.benefits ||
-        '[\n  "Fundamentos teoricos e praticos aplicados.",\n  "Acesso a materiais complementares em PDF.",\n  "Organizacao clara por modulos e aulas.",\n  "Experiencia de aprendizado mais limpa."\n]';
+        '[\n  "Fundamentos teóricos e práticos aplicados.",\n  "Acesso a materiais complementares em PDF.",\n  "Organização clara por módulos e aulas.",\n  "Experiência de aprendizado mais limpa."\n]';
 
       if (typeof parsedBenefits !== 'string') {
         parsedBenefits = JSON.stringify(parsedBenefits, null, 2);
@@ -362,24 +362,24 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     const timer = window.setTimeout(async () => {
       try {
         setIsDetectingLessonDuration(true);
-        setLessonDurationStatus('Detectando duracao do video...');
+        setLessonDurationStatus('Detectando duração do vídeo...');
 
         const response = await fetch(`/api/admin/youtube-metadata?url=${encodeURIComponent(trimmedUrl)}`);
         const result = await parseResponse(response);
         if (!response.ok) {
-          throw new Error(result.error || 'Nao foi possivel detectar a duracao automaticamente.');
+          throw new Error(result.error || 'Não foi possível detectar a duração automaticamente.');
         }
 
         const durationMinutes = Number(result.duration_minutes || 0);
         if (durationMinutes > 0) {
           setLessonData((current) => ({ ...current, duration_minutes: durationMinutes }));
-          setLessonDurationStatus(`Duracao detectada automaticamente: ${durationMinutes} min`);
+          setLessonDurationStatus(`Duração detectada automaticamente: ${durationMinutes} min`);
         } else {
-          throw new Error('O YouTube nao retornou a duracao deste video.');
+          throw new Error('O YouTube não retornou a duração deste vídeo.');
         }
       } catch (error) {
         setLessonDurationStatus(
-          error instanceof Error ? error.message : 'Nao foi possivel detectar a duracao automaticamente.',
+          error instanceof Error ? error.message : 'Não foi possível detectar a duração automaticamente.',
         );
       } finally {
         setIsDetectingLessonDuration(false);
@@ -415,7 +415,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     try {
       finalBenefits = JSON.parse(courseForm.benefits || '[]');
     } catch {
-      alert('O campo de beneficios deve ser um JSON valido.');
+      alert('O campo de benefícios deve ser um JSON válido.');
       setIsSavingCourse(false);
       return;
     }
@@ -438,8 +438,8 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       });
 
       const data = await parseResponse(response);
-      if (!response.ok) throw new Error(data.error || 'Erro ao salvar as configuracoes.');
-      alert('Configuracoes do bloco salvas com sucesso.');
+      if (!response.ok) throw new Error(data.error || 'Erro ao salvar as configurações.');
+      alert('Configurações do bloco salvas com sucesso.');
       void fetchCourseData();
     } catch (error: any) {
       alert(error.message);
@@ -466,7 +466,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       });
 
       const data = await parseResponse(response);
-      if (!response.ok) throw new Error(data.error || 'Erro ao criar modulo');
+      if (!response.ok) throw new Error(data.error || 'Erro ao criar módulo');
 
       setModules((current) => [...current, { ...data, lessons: [] }]);
       setModuleTitle('');
@@ -483,7 +483,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     if (!lessonData.title || !activeModuleId || isSavingLesson) return;
 
     if (!lessonData.is_coming_soon && lessonData.type === 'video' && !lessonData.content_url.trim()) {
-      alert('Informe a URL do video no YouTube.');
+      alert('Informe a URL do vídeo no YouTube.');
       return;
     }
 
@@ -549,11 +549,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   };
 
   const deleteModule = async (id: string) => {
-    if (!confirm('Apagar este modulo e todas as suas aulas?')) return;
+    if (!confirm('Apagar este módulo e todas as suas aulas?')) return;
 
     try {
       const response = await fetch(`/api/admin/modules?id=${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Erro ao apagar modulo');
+      if (!response.ok) throw new Error('Erro ao apagar módulo');
       void fetchCourseData();
     } catch (error: any) {
       alert(error.message);
@@ -592,7 +592,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <h1 className="text-2xl font-serif font-bold text-stone-900">{course?.title}</h1>
               <span className="rounded bg-stone-200 px-2 py-0.5 text-xs font-bold uppercase text-stone-600">{course?.level}</span>
             </div>
-            <p className="mt-1 text-sm text-stone-500">Configure modulos, aulas, atividades e materiais deste bloco.</p>
+            <p className="mt-1 text-sm text-stone-500">Configure módulos, aulas, atividades e materiais deste bloco.</p>
           </div>
         </div>
 
@@ -614,11 +614,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
         <div className="flex border-b border-stone-200 bg-stone-50">
           <button onClick={() => setActiveTab('content')} className={`relative flex items-center gap-2 px-6 py-4 text-sm font-bold ${activeTab === 'content' ? 'text-primary-700' : 'text-stone-500'}`}>
-            <Video size={18} /> Conteudo e Aulas
+            <Video size={18} /> Conteúdo e Aulas
             {activeTab === 'content' ? <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary-600" /> : null}
           </button>
           <button onClick={() => setActiveTab('settings')} className={`relative flex items-center gap-2 px-6 py-4 text-sm font-bold ${activeTab === 'settings' ? 'text-primary-700' : 'text-stone-500'}`}>
-            <Settings size={18} /> Configuracoes
+            <Settings size={18} /> Configurações
             {activeTab === 'settings' ? <span className="absolute bottom-0 left-0 h-0.5 w-full bg-primary-600" /> : null}
           </button>
         </div>
@@ -626,20 +626,20 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
         {activeTab === 'settings' ? (
           <form onSubmit={handleSaveSettings} className="space-y-6 p-6">
             <div>
-              <label className="mb-1 block text-sm font-bold text-stone-700">Titulo do Bloco</label>
+              <label className="mb-1 block text-sm font-bold text-stone-700">Título do Bloco</label>
               <input value={courseForm.title} onChange={(event) => setCourseForm({ ...courseForm, title: event.target.value })} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-bold text-stone-700">Descricao</label>
+              <label className="mb-1 block text-sm font-bold text-stone-700">Descrição</label>
               <textarea value={courseForm.description} onChange={(event) => setCourseForm({ ...courseForm, description: event.target.value })} className="h-24 w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Nivel</label>
+              <label className="mb-1 block text-sm font-bold text-stone-700">Nível</label>
                 <select value={courseForm.level} onChange={(event) => setCourseForm({ ...courseForm, level: event.target.value })} className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500">
                   <option>Iniciante</option>
-                  <option>Intermediario</option>
-                  <option>Avancado</option>
+                  <option>Intermediário</option>
+                  <option>Avançado</option>
                 </select>
               </div>
               <div>
@@ -708,26 +708,26 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <textarea value={courseForm.instructor_description} onChange={(event) => setCourseForm({ ...courseForm, instructor_description: event.target.value })} className="h-20 w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-bold text-stone-700">Beneficios (JSON)</label>
+              <label className="mb-1 block text-sm font-bold text-stone-700">Benefícios (JSON)</label>
               <textarea value={courseForm.benefits} onChange={(event) => setCourseForm({ ...courseForm, benefits: event.target.value })} className="h-32 w-full rounded-xl border border-stone-200 px-4 py-2 font-mono text-xs outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div className="flex justify-end">
               <button type="submit" disabled={isSavingCourse} className="flex items-center gap-2 rounded-xl bg-primary-600 px-8 py-3 font-bold text-white disabled:opacity-50">
                 {isSavingCourse ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-                Salvar configuracoes
+                Salvar configurações
               </button>
             </div>
           </form>
         ) : (
           <div className="space-y-6 p-6">
             <div className="flex items-end justify-between border-b border-stone-100 pb-4">
-              <h2 className="text-xl font-bold text-stone-800">Modulos do bloco</h2>
+              <h2 className="text-xl font-bold text-stone-800">Módulos do bloco</h2>
               <button onClick={() => setShowModuleModal(true)} className="flex items-center gap-2 rounded-lg bg-primary-50 px-4 py-2 font-bold text-primary-600">
-                <Plus size={18} /> Novo Modulo
+                <Plus size={18} /> Novo Módulo
               </button>
             </div>
             {modules.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 py-12 text-center text-stone-500">Nenhum modulo cadastrado ainda.</div>
+              <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 py-12 text-center text-stone-500">Nenhum módulo cadastrado ainda.</div>
             ) : (
               modules.map((module, moduleIndex) => (
                 <div key={module.id} className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
@@ -743,7 +743,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   </div>
                   <div className="divide-y divide-stone-100">
                     {module.lessons.length === 0 ? (
-                      <div className="p-4 pl-16 text-sm italic text-stone-400">Sem aulas cadastradas neste modulo.</div>
+                      <div className="p-4 pl-16 text-sm italic text-stone-400">Sem aulas cadastradas neste módulo.</div>
                     ) : (
                       module.lessons.map((lesson: any, lessonIndex: number) => (
                         <div key={lesson.id} className="group flex items-center justify-between p-4 pl-16 hover:bg-stone-50">
@@ -781,7 +781,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       {showModuleModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <form onSubmit={handleCreateModule} className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="mb-4 text-xl font-bold">Novo Modulo</h2>
+            <h2 className="mb-4 text-xl font-bold">Novo Módulo</h2>
             <input autoFocus required value={moduleTitle} onChange={(event) => setModuleTitle(event.target.value)} className="mb-6 w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setShowModuleModal(false)} className="rounded-lg px-4 py-2 font-bold text-stone-500 hover:bg-stone-100">Cancelar</button>
@@ -797,23 +797,23 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
             <h2 className="mb-6 text-xl font-bold">{editingLessonId ? 'Editar Aula' : 'Nova Aula'}</h2>
             <div className="space-y-4 overflow-y-auto pr-1">
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Titulo da Aula</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Título da Aula</label>
                 <input value={lessonData.title} onChange={(event) => setLessonData({ ...lessonData, title: event.target.value })} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">Descricao</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">Descrição</label>
                 <textarea value={lessonData.description} onChange={(event) => setLessonData({ ...lessonData, description: event.target.value })} className="h-20 w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="mb-1 block text-sm font-bold text-stone-700">Tipo</label>
                   <select value={lessonData.type} onChange={(event) => setLessonData({ ...lessonData, type: event.target.value as 'video' | 'text', content_url: '', duration_minutes: 0 })} className="w-full rounded-xl border border-stone-200 bg-white px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500">
-                    <option value="video">Video</option>
+                    <option value="video">Vídeo</option>
                     <option value="text">Texto/Documento</option>
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-bold text-stone-700">Duracao (minutos)</label>
+                  <label className="mb-1 block text-sm font-bold text-stone-700">Duração (minutos)</label>
                   <input type="number" min="0" value={lessonData.duration_minutes} onChange={(event) => setLessonData({ ...lessonData, duration_minutes: parseInt(event.target.value, 10) || 0 })} readOnly={isYouTubeLessonUrl || lessonData.is_coming_soon} disabled={lessonData.is_coming_soon} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-stone-100" />
                 </div>
               </div>
@@ -832,7 +832,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   className="mt-1 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <div className="text-sm font-bold text-stone-700">Aula ainda nao gravada</div>
+                  <div className="text-sm font-bold text-stone-700">Aula ainda não gravada</div>
                   <p className="mt-1 text-xs text-stone-500">Marque para exibir essa aula em cinza, com cadeado e texto "Em breve" para as alunas.</p>
                 </div>
               </label>
@@ -888,10 +888,10 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                 </div>
               ) : null}
               <div>
-                <label className="mb-1 block text-sm font-bold text-stone-700">{lessonData.type === 'video' ? 'URL do video no YouTube' : 'Arquivo principal da aula'}</label>
+                <label className="mb-1 block text-sm font-bold text-stone-700">{lessonData.type === 'video' ? 'URL do vídeo no YouTube' : 'Arquivo principal da aula'}</label>
                 {lessonData.is_coming_soon ? (
                   <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4 text-sm text-stone-500">
-                    Esta aula aparecera apenas como "Em breve" ate voce liberar o conteudo.
+                    Esta aula aparecerá apenas como "Em breve" até você liberar o conteúdo.
                   </div>
                 ) : lessonData.type === 'video' ? (
                   <input value={lessonData.content_url} onChange={(event) => setLessonData({ ...lessonData, content_url: event.target.value })} type="url" className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://youtube.com/..." />
@@ -914,11 +914,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
               <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
-                <p className="text-sm font-bold text-stone-700">Duracao da aula</p>
+                <p className="text-sm font-bold text-stone-700">Duração da aula</p>
                 <p className="mt-1 text-sm text-stone-600">
-                  {lessonData.is_coming_soon ? 'Para as alunas, a duracao sera substituida por "Em breve".' : lessonData.type !== 'video' ? (lessonData.content_url ? 'Arquivo principal anexado a esta aula.' : 'Envie o arquivo principal desta aula nesta tela.') : lessonData.duration_minutes > 0 ? `${lessonData.duration_minutes} min detectados automaticamente` : 'Cole o link do YouTube para a plataforma detectar a duracao automaticamente.'}
+                  {lessonData.is_coming_soon ? 'Para as alunas, a duração será substituída por "Em breve".' : lessonData.type !== 'video' ? (lessonData.content_url ? 'Arquivo principal anexado a esta aula.' : 'Envie o arquivo principal desta aula nesta tela.') : lessonData.duration_minutes > 0 ? `${lessonData.duration_minutes} min detectados automaticamente` : 'Cole o link do YouTube para a plataforma detectar a duração automaticamente.'}
                 </p>
-                {lessonDurationStatus ? <p className={`mt-2 text-xs font-medium ${lessonDurationStatus.includes('automaticamente') ? 'text-primary-700' : 'text-amber-700'}`}>{isDetectingLessonDuration ? 'Detectando duracao do video...' : lessonDurationStatus}</p> : null}
+                {lessonDurationStatus ? <p className={`mt-2 text-xs font-medium ${lessonDurationStatus.includes('automaticamente') ? 'text-primary-700' : 'text-amber-700'}`}>{isDetectingLessonDuration ? 'Detectando duração do vídeo...' : lessonDurationStatus}</p> : null}
               </div>
               <div>
                 <label className="mb-1 block text-sm font-bold text-stone-700">Materiais Complementares</label>
@@ -929,7 +929,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                       {isUploadingLessonMaterial ? 'Enviando...' : 'Adicionar material'}
                       <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.mp3,.wav,.mp4,.zip" className="hidden" onChange={(event) => { const file = event.target.files?.[0] || null; void handleLessonMaterialUpload(file); event.currentTarget.value = ''; }} />
                     </label>
-                    <span className="text-xs text-stone-500">So o video do YouTube continua por URL. O resto entra por upload.</span>
+                    <span className="text-xs text-stone-500">Só o vídeo do YouTube continua por URL. O resto entra por upload.</span>
                   </div>
                   {lessonData.materials.length > 0 ? (
                     <div className="mt-4 space-y-3">
@@ -938,7 +938,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                           <div className="flex items-start gap-3">
                             <div className="mt-2 text-stone-400">{material.kind === 'pdf' ? <FileText size={16} /> : <Paperclip size={16} />}</div>
                             <div className="flex-1 space-y-2">
-                              <input type="text" value={material.title} onChange={(event) => updateLessonMaterialTitle(material.clientId, event.target.value)} className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Titulo do material" />
+                              <input type="text" value={material.title} onChange={(event) => updateLessonMaterialTitle(material.clientId, event.target.value)} className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Título do material" />
                               <div className="flex items-center gap-2 text-xs text-stone-500">
                                 <LinkIcon size={12} />
                                 <span className="truncate">{material.url}</span>
@@ -1002,7 +1002,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <button type="button" onClick={() => { setShowLessonModal(false); resetLessonModal(); }} className="rounded-xl px-5 py-2.5 font-bold text-stone-500 hover:bg-stone-100">Cancelar</button>
               <button type="submit" disabled={isSavingLesson || isDetectingLessonDuration} className="flex items-center gap-2 rounded-xl bg-primary-600 px-5 py-2.5 font-bold text-white disabled:opacity-50">
                 <Save size={18} />
-                {isSavingLesson ? 'Salvando...' : isDetectingLessonDuration ? 'Lendo duracao...' : editingLessonId ? 'Salvar Alteracoes' : 'Salvar Aula'}
+                {isSavingLesson ? 'Salvando...' : isDetectingLessonDuration ? 'Lendo duração...' : editingLessonId ? 'Salvar Alterações' : 'Salvar Aula'}
               </button>
             </div>
           </form>

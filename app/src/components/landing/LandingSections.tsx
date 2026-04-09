@@ -22,12 +22,12 @@ const HERO_SLIDES = [
   },
   {
     src: '/hero/hero-2.jpeg',
-    alt: 'Familia reunida em um momento de celebracao',
+    alt: 'Família reunida em um momento de celebração',
     label: 'Memorias construidas com presenca',
   },
   {
     src: '/hero/hero-3.jpeg',
-    alt: 'Mulher em um ambiente de acolhimento e celebracao',
+    alt: 'Mulher em um ambiente de acolhimento e celebração',
     label: 'Feminilidade, casa e intencao',
   },
 ];

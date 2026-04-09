@@ -17,10 +17,10 @@ import { createClient } from '@/lib/supabase/client';
 
 const FALLBACK_THUMBNAIL = 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80';
 const DEFAULT_BENEFITS = [
-  'Modulos e aulas organizados em uma sequencia clara.',
+  'Módulos e aulas organizados em uma sequência clara.',
   'Materiais complementares em PDF e arquivos de apoio.',
-  'Acesso direto ao conteudo publicado para todas as alunas.',
-  'Espaco flexivel para aprofundar a formacao da plataforma.',
+  'Acesso direto ao conteúdo publicado para todas as alunas.',
+  'Espaço flexível para aprofundar a formação da plataforma.',
 ];
 
 function formatDuration(mins: number) {
@@ -108,7 +108,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
   }
 
   if (!course) {
-    return <div className="p-8 text-center text-stone-500">Bloco nao encontrado.</div>;
+    return <div className="p-8 text-center text-stone-500">Bloco não encontrado.</div>;
   }
 
   const totalLessons = modules.reduce((acc, module) => acc + (module.lessons?.length || 0), 0);
@@ -152,13 +152,13 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
             </h1>
 
             <p className="mb-10 max-w-2xl text-xl font-light leading-relaxed text-stone-300">
-              {course.description || 'Este bloco foi preparado para concentrar aulas, modulos e materiais da experiencia da plataforma.'}
+              {course.description || 'Este bloco foi preparado para concentrar aulas, módulos e materiais da experiência da plataforma.'}
             </p>
 
             <div className="flex flex-wrap gap-8 text-sm font-bold uppercase tracking-widest text-stone-300">
               <div className="flex items-center gap-3">
                 <BookOpen size={20} className="text-[#DBA1A2]" />
-                <span>{modules.length} modulos</span>
+                <span>{modules.length} módulos</span>
               </div>
               <div className="flex items-center gap-3">
                 <PlayCircle size={20} className="text-[#DBA1A2]" />
@@ -195,16 +195,16 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
             <section>
               <div className="mb-10 flex items-end justify-between border-b border-[#E7D8D8] pb-6">
                 <div>
-                  <h2 className="font-serif text-3xl font-medium text-[#422523]">Modulos e aulas</h2>
+                  <h2 className="font-serif text-3xl font-medium text-[#422523]">Módulos e aulas</h2>
                   <p className="mt-2 text-sm font-bold uppercase tracking-widest text-[#422523]/40">
-                    {modules.length} modulos • {totalLessons} aulas • {formatDuration(totalDuration)}
+                    {modules.length} módulos • {totalLessons} aulas • {formatDuration(totalDuration)}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 {modules.length === 0 ? (
-                  <p className="py-10 text-center font-serif text-stone-500">Este bloco esta sendo preparado para voce.</p>
+                  <p className="py-10 text-center font-serif text-stone-500">Este bloco está sendo preparado para você.</p>
                 ) : (
                   modules.map((module, index) => {
                     const isOpen = openModules[module.id];
@@ -247,7 +247,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
                           <div className="bg-white px-8 pb-8 pt-2">
                             {moduleLessons.length === 0 ? (
                               <p className="py-4 text-center text-sm font-light text-stone-500">
-                                Nenhuma aula disponivel neste modulo.
+                                Nenhuma aula disponível neste módulo.
                               </p>
                             ) : (
                               <div className="space-y-2 border-t border-[#F7F2ED] pt-6">
@@ -333,7 +333,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
                   Bloco publicado
                 </p>
                 <h2 className="text-3xl font-serif font-medium leading-tight text-[#422523]">
-                  Conteudo aberto para as alunas da plataforma
+                  Conteúdo aberto para as alunas da plataforma
                 </h2>
                 <p className="mt-4 text-sm font-light italic text-[#422523]/50">
                   Aulas, PDFs e materiais reunidos em um fluxo mais simples.
@@ -352,11 +352,11 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
 
               <div className="mt-8 rounded-[32px] border border-[#E7D8D8] bg-[#F7F2ED]/50 p-6">
                 <div className="mb-4 text-[11px] font-black uppercase tracking-[0.2em] text-[#422523]/30">
-                  O que voce encontra aqui
+                  O que você encontra aqui
                 </div>
                 <div className="flex items-center gap-4 text-sm font-light text-[#422523]">
                   <PlayCircle size={18} className="text-[#DBA1A2] opacity-60" />
-                  <span className="flex-1">Aulas em video e encontros gravados</span>
+                  <span className="flex-1">Aulas em vídeo e encontros gravados</span>
                 </div>
                 <div className="mt-4 flex items-center gap-4 text-sm font-light text-[#422523]">
                   <FileText size={18} className="text-[#DBA1A2] opacity-60" />
@@ -364,7 +364,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
                 </div>
                 <div className="mt-4 flex items-center gap-4 text-sm font-light text-[#422523]">
                   <MessageSquareQuote size={18} className="text-[#DBA1A2] opacity-60" />
-                  <span className="flex-1">Espaco para aprofundar a experiencia da comunidade</span>
+                  <span className="flex-1">Espaço para aprofundar a experiência da comunidade</span>
                 </div>
               </div>
             </div>

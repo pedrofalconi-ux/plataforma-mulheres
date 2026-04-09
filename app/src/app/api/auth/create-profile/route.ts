@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Usuario ainda nao existe em auth.users. Tente novamente em instantes.' },
+        { error: 'Usuário ainda não existe em auth.users. Tente novamente em instantes.' },
         { status: 409 },
       );
     }
