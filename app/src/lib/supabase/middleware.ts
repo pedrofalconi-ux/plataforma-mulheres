@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
     if (profile?.role?.toLowerCase() !== 'admin') {
       const url = request.nextUrl.clone();
-      url.pathname = '/trilhas';
+      url.pathname = '/';
       return NextResponse.redirect(url);
     }
   }
