@@ -27,6 +27,7 @@ type LessonDraft = {
   description: string;
   type: 'video' | 'text';
   content_url: string;
+  coming_soon_image_url: string;
   duration_minutes: number;
   is_coming_soon: boolean;
   materials: LessonMaterial[];
@@ -62,6 +63,7 @@ const emptyLessonDraft = (): LessonDraft => ({
   description: '',
   type: 'video',
   content_url: '',
+  coming_soon_image_url: '',
   duration_minutes: 0,
   is_coming_soon: false,
   materials: [],
@@ -104,6 +106,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
   const [isUploadingInstructorAvatar, setIsUploadingInstructorAvatar] = useState(false);
   const [isUploadingLessonContent, setIsUploadingLessonContent] = useState(false);
   const [isUploadingLessonMaterial, setIsUploadingLessonMaterial] = useState(false);
+  const [isUploadingComingSoonImage, setIsUploadingComingSoonImage] = useState(false);
   const [isDetectingLessonDuration, setIsDetectingLessonDuration] = useState(false);
   const [lessonDurationStatus, setLessonDurationStatus] = useState('');
 
@@ -206,6 +209,20 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     }
   };
 
+  const handleComingSoonImageUpload = async (file: File | null) => {
+    if (!file) return;
+
+    try {
+      setIsUploadingComingSoonImage(true);
+      const uploadedUrl = await uploadCourseAsset(file, 'lesson-coming-soon');
+      setLessonData((current) => ({ ...current, coming_soon_image_url: uploadedUrl }));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Falha ao enviar imagem da aula.');
+    } finally {
+      setIsUploadingComingSoonImage(false);
+    }
+  };
+
   const updateLessonMaterialTitle = (clientId: string, title: string) => {
     setLessonData((current) => ({
       ...current,
@@ -265,6 +282,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       description: lesson.description || '',
       type: lesson.type === 'text' ? 'text' : 'video',
       content_url: lesson.content_url || '',
+      coming_soon_image_url: lesson.coming_soon_image_url || '',
       duration_minutes: lesson.duration_minutes || 0,
       is_coming_soon: Boolean(lesson.is_coming_soon),
       materials: normalizeLessonMaterials(getLessonMaterials(lesson)),
@@ -301,14 +319,14 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
     const modulesWithMaterials = await supabase
       .from('modules')
-      .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, is_coming_soon, order_index, materials, activity_questions)')
+      .select('id, title, order_index, lessons(id, title, description, type, content_url, coming_soon_image_url, duration_minutes, is_coming_soon, order_index, materials, activity_questions)')
       .eq('course_id', courseId)
       .order('order_index', { ascending: true });
 
     const { data: loadedModules } = modulesWithMaterials.error
       ? await supabase
           .from('modules')
-          .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, is_coming_soon, order_index, activity_questions)')
+          .select('id, title, order_index, lessons(id, title, description, type, content_url, coming_soon_image_url, duration_minutes, is_coming_soon, order_index, activity_questions)')
           .eq('course_id', courseId)
           .order('order_index', { ascending: true })
       : modulesWithMaterials;
@@ -496,6 +514,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
           description: lessonData.description,
           type: lessonData.type,
           content_url: lessonData.is_coming_soon ? '' : lessonData.content_url,
+          coming_soon_image_url: lessonData.is_coming_soon ? lessonData.coming_soon_image_url : '',
           materials: cleanMaterials,
           activity_questions: cleanQuestions,
           duration_minutes: lessonData.is_coming_soon ? 0 : lessonData.duration_minutes || 0,
@@ -817,6 +836,57 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                   <p className="mt-1 text-xs text-stone-500">Marque para exibir essa aula em cinza, com cadeado e texto "Em breve" para as alunas.</p>
                 </div>
               </label>
+              {lessonData.is_coming_soon ? (
+                <div className="space-y-3">
+                  <label className="block text-sm font-bold text-stone-700">Imagem da aula em breve</label>
+                  <div className="relative h-44 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                    {lessonData.coming_soon_image_url ? (
+                      <>
+                        <img
+                          src={lessonData.coming_soon_image_url}
+                          alt="Preview da aula em breve"
+                          className="h-full w-full object-cover grayscale"
+                        />
+                        <div className="absolute inset-0 bg-stone-900/35" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                            <Lock size={24} className="text-white" />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex h-full items-center justify-center gap-2 text-sm text-stone-500">
+                        <ImageIcon size={18} /> Nenhuma imagem enviada ainda
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-bold text-white">
+                      {isUploadingComingSoonImage ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                      {isUploadingComingSoonImage ? 'Enviando...' : 'Enviar imagem'}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] || null;
+                          void handleComingSoonImageUpload(file);
+                          event.currentTarget.value = '';
+                        }}
+                      />
+                    </label>
+                    {lessonData.coming_soon_image_url ? (
+                      <button
+                        type="button"
+                        onClick={() => setLessonData((current) => ({ ...current, coming_soon_image_url: '' }))}
+                        className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-bold text-stone-600"
+                      >
+                        <X size={16} /> Remover imagem
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
               <div>
                 <label className="mb-1 block text-sm font-bold text-stone-700">{lessonData.type === 'video' ? 'URL do video no YouTube' : 'Arquivo principal da aula'}</label>
                 {lessonData.is_coming_soon ? (

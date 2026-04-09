@@ -91,6 +91,7 @@ export const LessonSchema = z.object({
   type: z.enum(['video', 'text', 'quiz']).default('video'),
   content_url: z.string().url().nullable().optional(),
   content_text: z.string().min(1).nullable().optional(),
+  coming_soon_image_url: z.string().url().nullable().optional(),
   materials: z.array(
     z.object({
       title: z.string().min(1, 'Titulo do material e obrigatorio'),
@@ -117,6 +118,7 @@ export const UpdateLessonSchema = LessonSchema.pick({
   type: true,
   content_url: true,
   content_text: true,
+  coming_soon_image_url: true,
   materials: true,
   activity_questions: true,
   duration_minutes: true,

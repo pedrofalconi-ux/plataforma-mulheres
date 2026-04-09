@@ -115,6 +115,7 @@ export async function POST(request: Request) {
       description: emptyStringToNull(sanitizeText(payload.description)),
       content_url: emptyStringToNull(sanitizeText(payload.content_url)),
       content_text: emptyStringToNull(sanitizeHtml(payload.content_text)),
+      coming_soon_image_url: emptyStringToNull(sanitizeText(payload.coming_soon_image_url)),
       materials: sanitizeMaterials(payload.materials),
       activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
@@ -165,6 +166,7 @@ export async function PATCH(request: Request) {
       description: emptyStringToNull(sanitizeText(payload.description)),
       content_url: emptyStringToNull(sanitizeText(payload.content_url)),
       content_text: emptyStringToNull(sanitizeHtml(payload.content_text)),
+      coming_soon_image_url: emptyStringToNull(sanitizeText(payload.coming_soon_image_url)),
       materials: sanitizeMaterials(payload.materials),
       activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
