@@ -150,7 +150,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   const currentLessonQuestions = getLessonActivityQuestions(currentLesson);
 
   const renderLessonMedia = () => {
-    if (isLessonComingSoon(currentLesson)) {
+    if (isLessonComingSoon(currentLesson) || !currentLesson?.content_url) {
       const coverImage = currentLesson?.coming_soon_image_url || course?.thumbnail_url;
 
       return (
@@ -172,18 +172,9 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
             </div>
             <p className="text-lg font-semibold sm:text-2xl">Aula em breve</p>
             <p className="mt-2 max-w-xl text-sm leading-6 text-stone-200 sm:text-base">
-              Assim que a gravacao estiver disponivel, ela aparecera aqui para as alunas da plataforma.
+              Assim que o conteudo estiver disponivel, ele aparecera aqui para as alunas da plataforma.
             </p>
           </div>
-        </div>
-      );
-    }
-
-    if (!currentLesson?.content_url) {
-      return (
-        <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 text-white">
-          <FileText size={48} className="text-stone-600" />
-          <p>Nenhum conteudo principal disponivel para esta aula.</p>
         </div>
       );
     }
