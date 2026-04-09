@@ -2,7 +2,7 @@
 
 import React, { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
   AlertCircle,
@@ -35,6 +35,7 @@ function BrandMark() {
 
 function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const supabase = createClient();
 
@@ -55,6 +56,39 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
   const isRegisterMode = activeMode === 'register' || activeMode === 'admin-register';
   const isAdminRegister = activeMode === 'admin-register';
+
+  const redirectToDestination = (destination: string) => {
+    router.replace(destination);
+    if (typeof window !== 'undefined') {
+      window.location.replace(destination);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    async function redirectIfAuthenticated() {
+      const { data } = await supabase.auth.getUser();
+      if (!active || !data.user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      const destination = profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/';
+      if (pathname === '/login' || pathname === '/cadastro' || pathname?.startsWith('/cadastro/')) {
+        redirectToDestination(destination);
+      }
+    }
+
+    void redirectIfAuthenticated();
+
+    return () => {
+      active = false;
+    };
+  }, [pathname, router, supabase]);
 
   async function upgradeToAdmin() {
     const adminRes = await fetch('/api/auth/admin-upgrade', {
@@ -127,8 +161,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           await upgradeToAdmin();
         }
 
-        router.push(isAdminRegister ? '/admin' : '/');
-        router.refresh();
+        redirectToDestination(isAdminRegister ? '/admin' : '/');
         return;
       }
 
@@ -154,8 +187,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
           .eq('id', user.id)
           .single();
 
-        router.push(profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/');
-        router.refresh();
+        redirectToDestination(profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/');
       }
     } catch (err: any) {
       if (err instanceof z.ZodError) {
