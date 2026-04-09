@@ -104,6 +104,7 @@ export const LessonSchema = z.object({
     }),
   ).nullable().optional(),
   duration_minutes: z.number().int().default(0),
+  is_coming_soon: z.boolean().default(false),
   order_index: z.number().int().default(0),
 });
 
@@ -119,6 +120,7 @@ export const UpdateLessonSchema = LessonSchema.pick({
   materials: true,
   activity_questions: true,
   duration_minutes: true,
+  is_coming_soon: true,
   order_index: true,
 }).partial().extend({
   id: z.string().uuid(),

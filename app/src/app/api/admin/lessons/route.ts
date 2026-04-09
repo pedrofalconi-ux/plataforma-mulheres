@@ -48,6 +48,9 @@ async function getYouTubeDurationMinutes(url: string | null | undefined) {
 }
 
 async function resolveDurationMinutes(payload: Record<string, unknown>) {
+  const isComingSoon = payload.is_coming_soon === true;
+  if (isComingSoon) return 0;
+
   const currentDuration = typeof payload.duration_minutes === 'number'
     ? payload.duration_minutes
     : Number(payload.duration_minutes || 0);
