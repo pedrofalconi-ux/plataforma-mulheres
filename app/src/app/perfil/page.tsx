@@ -9,6 +9,7 @@ import {
   Mail, 
   Phone, 
   FileText, 
+  MessageCircle,
   Loader2, 
   CheckCircle2,
   Award,
@@ -41,6 +42,7 @@ export default function ProfilePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [stats, setStats] = useState({ courses: 0, certificates: 0 });
+  const [whatsappGroupUrl, setWhatsappGroupUrl] = useState('');
   const profileReadyRef = useRef(false);
   const lastSavedPayloadRef = useRef('');
 
@@ -60,6 +62,7 @@ export default function ProfilePage() {
       { data: profile },
       { data: pSkills },
       optionsResponse,
+      institutionalResponse,
       { count: coursesCount },
       { count: certsCount },
     ] = await Promise.all([
@@ -73,6 +76,7 @@ export default function ProfilePage() {
         .select('skill_id')
         .eq('profile_id', user.id),
       fetch('/api/profile/options', { cache: 'no-store' }),
+      fetch('/api/institucional', { cache: 'no-store' }),
       supabase
         .from('enrollments')
         .select('*', { count: 'exact', head: true })
@@ -98,6 +102,11 @@ export default function ProfilePage() {
       const options = await optionsResponse.json();
       setAvailableRegions(options.regions || []);
       setAvailableSkills(options.skills || []);
+    }
+
+    if (institutionalResponse.ok) {
+      const content = await institutionalResponse.json();
+      setWhatsappGroupUrl(content.whatsapp_group_url || '');
     }
 
     lastSavedPayloadRef.current = JSON.stringify({
@@ -349,6 +358,26 @@ export default function ProfilePage() {
                   : 'Continue estudando para garantir seus certificados e expandir seus conhecimentos.'}
               </p>
             </div>
+
+            {whatsappGroupUrl ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+                <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-emerald-700">
+                  <MessageCircle size={16} />
+                  Grupo de WhatsApp
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-emerald-900/80">
+                  Entre no grupo oficial para receber avisos, novidades e acompanhar a comunidade mais de perto.
+                </p>
+                <a
+                  href={whatsappGroupUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
+                >
+                  Entrar no grupo
+                </a>
+              </div>
+            ) : null}
           </div>
 
           {/* Form Column */}

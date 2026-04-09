@@ -10,6 +10,7 @@ type InstitutionalState = {
   mission: string;
   vision: string;
   values: string[];
+  whatsapp_group_url: string;
 };
 
 const initialState: InstitutionalState = {
@@ -19,6 +20,7 @@ const initialState: InstitutionalState = {
   mission: '',
   vision: '',
   values: [],
+  whatsapp_group_url: '',
 };
 
 export default function AdminInstitucionalPage() {
@@ -47,6 +49,7 @@ export default function AdminInstitucionalPage() {
           mission: data.mission || '',
           vision: data.vision || '',
           values: Array.isArray(data.values) ? data.values : [],
+          whatsapp_group_url: data.whatsapp_group_url || '',
         };
         setState(nextState);
         setValuesInput(nextState.values.join('\n'));
@@ -96,6 +99,7 @@ export default function AdminInstitucionalPage() {
         mission: data.mission || '',
         vision: data.vision || '',
         values: Array.isArray(data.values) ? data.values : [],
+        whatsapp_group_url: data.whatsapp_group_url || '',
       });
     } catch (err: any) {
       setError(err?.message || 'Falha ao salvar conteúdo institucional');
@@ -190,6 +194,20 @@ export default function AdminInstitucionalPage() {
               required
             />
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-bold text-stone-700">Link do grupo de WhatsApp</label>
+          <input
+            type="url"
+            value={state.whatsapp_group_url}
+            onChange={(e) => setState((prev) => ({ ...prev, whatsapp_group_url: e.target.value }))}
+            className="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="https://chat.whatsapp.com/..."
+          />
+          <p className="mt-2 text-xs text-stone-500">
+            Se preenchido, as alunas verão um botão para entrar no grupo diretamente pelo perfil.
+          </p>
         </div>
 
         <div>

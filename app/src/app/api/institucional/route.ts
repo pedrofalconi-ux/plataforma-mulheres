@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { emptyStringToNull, filterExistingColumns } from '@/lib/admin-api';
 
 const InstitutionalSchema = z.object({
   hero_title: z.string().min(8, 'Título principal muito curto').max(140),
@@ -9,6 +10,7 @@ const InstitutionalSchema = z.object({
   mission: z.string().min(12, 'Missão muito curta').max(1200),
   vision: z.string().min(12, 'Visão muito curta').max(1200),
   values: z.array(z.string().min(2)).min(3).max(10),
+  whatsapp_group_url: z.string().url('Link do grupo de WhatsApp inválido').nullable().optional(),
 });
 
 const fallbackContent = {
@@ -21,6 +23,7 @@ const fallbackContent = {
   vision:
     'Ver mulheres construindo lares com sabedoria, entendimento e vínculos saudáveis.',
   values: ['Sabedoria', 'Entendimento', 'Vínculos', 'Cuidado', 'Propósito'],
+  whatsapp_group_url: null,
 };
 
 const institutionalMissingMessage =
@@ -89,20 +92,22 @@ export async function PUT(request: NextRequest) {
 
   try {
     const payload = await request.json();
-    const validated = InstitutionalSchema.parse(payload);
+    const validated = InstitutionalSchema.parse({
+      ...payload,
+      whatsapp_group_url: emptyStringToNull(payload?.whatsapp_group_url),
+    });
 
     const adminClient = await createAdminClient();
+    const upsertData = await filterExistingColumns(adminClient, 'institutional_content', {
+      id: true,
+      ...validated,
+      updated_by: auth.userId,
+      updated_at: new Date().toISOString(),
+    });
+
     const { data, error } = await adminClient
       .from('institutional_content')
-      .upsert(
-        {
-          id: true,
-          ...validated,
-          updated_by: auth.userId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'id' },
-      )
+      .upsert(upsertData, { onConflict: 'id' })
       .select()
       .single();
 
