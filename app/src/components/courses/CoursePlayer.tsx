@@ -9,8 +9,8 @@ import {
   ExternalLink,
   FileText,
   Files,
-  Loader2,
   Lock,
+  Loader2,
   MessageCircle,
   Play,
 } from 'lucide-react';
@@ -151,25 +151,30 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
   const renderLessonMedia = () => {
     if (isLessonComingSoon(currentLesson)) {
+      const coverImage = currentLesson?.coming_soon_image_url || course?.thumbnail_url;
+
       return (
-        <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-4 overflow-hidden bg-stone-900 px-6 text-center text-white">
-          {currentLesson?.coming_soon_image_url ? (
+        <div className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden bg-stone-900 px-4 text-center text-white sm:px-6">
+          {coverImage ? (
             <>
               <img
-                src={currentLesson.coming_soon_image_url}
+                src={coverImage}
                 alt={currentLesson.title}
-                className="absolute inset-0 h-full w-full object-cover grayscale"
+                className="absolute inset-0 h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-stone-950/55" />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/45" />
             </>
           ) : null}
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
-            <Lock size={28} className="text-stone-200" />
+
+          <div className="relative flex max-w-md flex-col items-center">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur">
+              <Lock size={28} className="text-stone-100" />
+            </div>
+            <p className="text-lg font-semibold sm:text-2xl">Aula em breve</p>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-stone-200 sm:text-base">
+              Assim que a gravacao estiver disponivel, ela aparecera aqui para as alunas da plataforma.
+            </p>
           </div>
-          <p className="relative text-xl font-semibold">Esta aula sera liberada em breve.</p>
-          <p className="relative max-w-xl text-sm text-stone-300">
-            Assim que a gravacao estiver disponivel, ela aparecera aqui para as alunas da plataforma.
-          </p>
         </div>
       );
     }
