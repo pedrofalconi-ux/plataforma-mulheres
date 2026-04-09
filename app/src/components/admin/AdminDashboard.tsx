@@ -13,25 +13,18 @@ import {
   Bar,
 } from 'recharts';
 import { AlertCircle, BookOpen, Loader2, MapPin, Users } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 type DashboardStats = {
   totalUsuarios: number;
   matriculasAtivas: number;
-  projetosAprovados: number;
   faturamentoTotal: number;
   vendasNoMes: number;
-};
-
-type SalesRow = {
-  name: string;
-  value: number;
 };
 
 type ChartRow = {
   name: string;
   usuarios: number;
-  conclusoes: number;
+  faturamento: number;
 };
 
 type RecentSale = {
@@ -40,26 +33,6 @@ type RecentSale = {
   created_at: string;
   profiles: { full_name: string; display_name: string | null } | null;
 };
-
-function normalizeProfileJoin(
-  value: { full_name?: string; display_name?: string | null } | { full_name?: string; display_name?: string | null }[] | null,
-) {
-  if (Array.isArray(value)) {
-    return value[0]
-      ? {
-          full_name: value[0].full_name || '',
-          display_name: value[0].display_name ?? null,
-        }
-      : null;
-  }
-
-  if (!value) return null;
-
-  return {
-    full_name: value.full_name || '',
-    display_name: value.display_name ?? null,
-  };
-}
 
 function StatCard({
   title,
@@ -85,63 +58,14 @@ function StatCard({
   );
 }
 
-function buildLastSixMonthsSeries(
-  profileDates: string[],
-  completedEnrollmentsDates: string[],
-): ChartRow[] {
-  const now = new Date();
-  const months: Array<{ key: string; label: string }> = [];
-
-  for (let index = 5; index >= 0; index -= 1) {
-    const monthDate = new Date(now.getFullYear(), now.getMonth() - index, 1);
-    const key = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
-    const label = monthDate.toLocaleDateString('pt-BR', { month: 'short' });
-    months.push({ key, label });
-  }
-
-  const usersCountByMonth = new Map<string, number>();
-  const completionsCountByMonth = new Map<string, number>();
-
-  months.forEach((month) => {
-    usersCountByMonth.set(month.key, 0);
-    completionsCountByMonth.set(month.key, 0);
-  });
-
-  profileDates.forEach((date) => {
-    const parsed = new Date(date);
-    const key = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}`;
-    if (usersCountByMonth.has(key)) {
-      usersCountByMonth.set(key, (usersCountByMonth.get(key) || 0) + 1);
-    }
-  });
-
-  completedEnrollmentsDates.forEach((date) => {
-    const parsed = new Date(date);
-    const key = `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}`;
-    if (completionsCountByMonth.has(key)) {
-      completionsCountByMonth.set(key, (completionsCountByMonth.get(key) || 0) + 1);
-    }
-  });
-
-  return months.map((month) => ({
-    name: month.label,
-    usuarios: usersCountByMonth.get(month.key) || 0,
-    conclusoes: completionsCountByMonth.get(month.key) || 0,
-  }));
-}
-
 export default function AdminDashboard() {
-  const supabase = createClient();
-
   const [stats, setStats] = useState<DashboardStats>({
     totalUsuarios: 0,
     matriculasAtivas: 0,
-    projetosAprovados: 0,
     faturamentoTotal: 0,
     vendasNoMes: 0,
   });
   const [chartData, setChartData] = useState<ChartRow[]>([]);
-  const [salesData, setSalesData] = useState<SalesRow[]>([]);
   const [recentSales, setRecentSales] = useState<RecentSale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -152,91 +76,20 @@ export default function AdminDashboard() {
       setError('');
 
       try {
-        const [
-          usersCountRes,
-          activeEnrollmentsRes,
-          approvedProjectsRes,
-          profileRowsRes,
-          completedRowsRes,
-          ordersRes,
-        ] = await Promise.all([
-          supabase.from('profiles').select('*', { count: 'exact', head: true }),
-          supabase.from('enrollments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-          supabase.from('observatory_projects').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
-          supabase.from('profiles').select('created_at').order('created_at', { ascending: false }),
-          supabase.from('enrollments').select('completed_at').eq('status', 'completed').not('completed_at', 'is', null),
-          supabase
-            .from('checkout_orders')
-            .select('id, total_cents, created_at, status, profiles:profile_id (full_name, display_name)')
-            .in('status', ['confirmed', 'completed', 'paid'])
-            .order('created_at', { ascending: false }),
-        ]);
-
-        if (usersCountRes.error) throw usersCountRes.error;
-        if (activeEnrollmentsRes.error) throw activeEnrollmentsRes.error;
-        if (approvedProjectsRes.error) throw approvedProjectsRes.error;
-        if (profileRowsRes.error) throw profileRowsRes.error;
-        if (completedRowsRes.error) throw completedRowsRes.error;
-        if (ordersRes.error) throw ordersRes.error;
-
-        const allOrders = ordersRes.data || [];
-        const totalRevenue = allOrders.reduce((acc, curr) => acc + (curr.total_cents || 0), 0);
-
-        const now = new Date();
-        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const ordersThisMonth = allOrders.filter((order) => new Date(order.created_at) >= firstDayOfMonth);
-
-        setStats({
-          totalUsuarios: usersCountRes.count || 0,
-          matriculasAtivas: activeEnrollmentsRes.count || 0,
-          projetosAprovados: approvedProjectsRes.count || 0,
-          faturamentoTotal: totalRevenue / 100,
-          vendasNoMes: ordersThisMonth.length,
+        const response = await fetch('/api/admin/dashboard', {
+          method: 'GET',
+          cache: 'no-store',
         });
 
-        setRecentSales(
-          allOrders.slice(0, 5).map((order) => ({
-            id: order.id,
-            total_cents: order.total_cents || 0,
-            created_at: order.created_at,
-            profiles: normalizeProfileJoin(order.profiles as any),
-          })),
-        );
+        const data = await response.json().catch(() => ({}));
 
-        const monthlySales = new Map<string, number>();
-        for (let index = 5; index >= 0; index -= 1) {
-          const date = new Date(now.getFullYear(), now.getMonth() - index, 1);
-          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          monthlySales.set(key, 0);
+        if (!response.ok) {
+          throw new Error(data.error || 'Nao foi possivel carregar o painel.');
         }
 
-        allOrders.forEach((order) => {
-          const date = new Date(order.created_at);
-          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          if (monthlySales.has(key)) {
-            monthlySales.set(key, (monthlySales.get(key) || 0) + order.total_cents / 100);
-          }
-        });
-
-        const salesChart = Array.from(monthlySales.entries()).map(([key, value]) => {
-          const [year, month] = key.split('-');
-          const label = new Date(parseInt(year, 10), parseInt(month, 10) - 1).toLocaleDateString('pt-BR', {
-            month: 'short',
-          });
-
-          return { name: label, value };
-        });
-        setSalesData(salesChart);
-
-        const profileDates = (profileRowsRes.data || [])
-          .map((row) => row.created_at)
-          .filter((value): value is string => Boolean(value));
-
-        const completedDates = (completedRowsRes.data || [])
-          .map((row) => row.completed_at)
-          .filter((value): value is string => Boolean(value));
-
-        setChartData(buildLastSixMonthsSeries(profileDates, completedDates));
+        setStats(data.stats);
+        setChartData(data.chartData || []);
+        setRecentSales(data.recentSales || []);
       } catch (err: any) {
         console.error(err);
         setError(err.message || 'Nao foi possivel carregar o painel.');
@@ -246,7 +99,7 @@ export default function AdminDashboard() {
     }
 
     void loadDashboard();
-  }, [supabase]);
+  }, []);
 
   return (
     <div className="mx-auto max-w-7xl py-2 sm:py-4">
@@ -306,14 +159,14 @@ export default function AdminDashboard() {
               <h3 className="mb-4 text-lg font-bold text-stone-800">Faturamento Mensal (R$)</h3>
               <div className="h-56 sm:h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={salesData}>
+                  <BarChart data={chartData}>
                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
                     <Tooltip
                       formatter={(value) => [`R$ ${Number(value || 0).toFixed(2)}`, 'Faturamento']}
                       cursor={{ fill: 'transparent' }}
                     />
-                    <Bar dataKey="value" fill="#7f432d" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="faturamento" fill="#7f432d" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
