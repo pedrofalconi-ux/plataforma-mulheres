@@ -87,11 +87,17 @@ export async function logAuditEvent({
     const hasAuditLogs = await tableExists(adminClient, 'audit_logs');
     if (!hasAuditLogs) return;
 
+    const normalizedEntityId =
+      typeof entityId === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(entityId)
+        ? entityId
+        : null;
+
     await adminClient.from('audit_logs').insert({
       profile_id: profileId,
       action,
       entity_name: entityName,
-      entity_id: entityId ?? null,
+      entity_id: normalizedEntityId,
       old_value: oldValue ?? null,
       new_value: newValue ?? null,
       ip_address: request.headers.get('x-forwarded-for') || 'unknown',
