@@ -53,7 +53,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
             .select(`
               id, title, order_index, description,
               lessons (
-                id, title, description, type, duration_minutes, is_coming_soon, order_index
+                id, title, description, type, duration_minutes, is_coming_soon, coming_soon_image_url, order_index
               )
             `)
             .eq('course_id', courseId)
@@ -254,29 +254,56 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
                                 {moduleLessons.map((lesson: any, lessonIndex: number) => (
                                   <div
                                     key={lesson.id}
-                                    className={`flex items-center justify-between rounded-2xl p-4 transition-all ${isLessonComingSoon(lesson) ? 'bg-stone-100 text-stone-500' : 'hover:bg-[#F7F2ED]/50'}`}
+                                    className={`overflow-hidden rounded-2xl transition-all ${isLessonComingSoon(lesson) ? 'border border-stone-200 bg-stone-100 text-stone-500' : 'p-4 hover:bg-[#F7F2ED]/50'}`}
                                   >
-                                    <div className="flex items-start gap-4 sm:items-center">
-                                      {isLessonComingSoon(lesson) ? (
-                                        <Lock size={20} className="mt-0.5 text-stone-400 sm:mt-0" />
-                                      ) : lesson.type === 'video' ? (
-                                        <PlayCircle size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
-                                      ) : (
-                                        <FileText size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
-                                      )}
-                                      <span className={`text-base font-medium ${isLessonComingSoon(lesson) ? 'text-stone-500' : 'text-[#422523]'}`}>
-                                        {lessonIndex + 1}. {lesson.title}
-                                      </span>
-                                    </div>
                                     {isLessonComingSoon(lesson) ? (
-                                      <span className="text-xs font-bold uppercase tracking-widest text-stone-400">
-                                        Em breve
-                                      </span>
-                                    ) : lesson.duration_minutes > 0 ? (
-                                      <span className="text-xs font-bold tracking-widest text-[#422523]/30">
-                                        {formatDuration(lesson.duration_minutes)}
-                                      </span>
-                                    ) : null}
+                                      <div className="flex flex-col sm:flex-row">
+                                        <div className="relative h-32 w-full shrink-0 overflow-hidden bg-stone-300 sm:h-auto sm:w-44">
+                                          {lesson.coming_soon_image_url ? (
+                                            <img
+                                              src={lesson.coming_soon_image_url}
+                                              alt={lesson.title}
+                                              className="h-full w-full object-cover grayscale"
+                                            />
+                                          ) : null}
+                                          <div className="absolute inset-0 bg-stone-900/40" />
+                                          <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                                              <Lock size={20} className="text-white" />
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="flex flex-1 items-center justify-between gap-4 p-4">
+                                          <div className="flex items-start gap-4 sm:items-center">
+                                            <Lock size={20} className="mt-0.5 text-stone-400 sm:mt-0" />
+                                            <span className="text-base font-medium text-stone-500">
+                                              {lessonIndex + 1}. {lesson.title}
+                                            </span>
+                                          </div>
+                                          <span className="text-xs font-bold uppercase tracking-widest text-stone-400">
+                                            Em breve
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-start gap-4 sm:items-center">
+                                          {lesson.type === 'video' ? (
+                                            <PlayCircle size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
+                                          ) : (
+                                            <FileText size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
+                                          )}
+                                          <span className="text-base font-medium text-[#422523]">
+                                            {lessonIndex + 1}. {lesson.title}
+                                          </span>
+                                        </div>
+                                        {lesson.duration_minutes > 0 ? (
+                                          <span className="text-xs font-bold tracking-widest text-[#422523]/30">
+                                            {formatDuration(lesson.duration_minutes)}
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    )}
                                   </div>
                                 ))}
                               </div>

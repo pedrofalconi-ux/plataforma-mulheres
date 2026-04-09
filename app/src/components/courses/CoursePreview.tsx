@@ -154,28 +154,59 @@ export function CoursePreview({ course }: { course: CoursePreviewData }) {
                             ) : (
                               <div className="flex flex-col gap-1 py-3">
                                 {moduleLessons.map((lesson, idx) => (
-                                  <div key={lesson.id} className={`group flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors ${lesson.is_coming_soon ? 'bg-stone-200/80' : 'hover:bg-stone-200/50'}`}>
-                                    <div className="flex items-center gap-3">
-                                      {lesson.is_coming_soon ? (
-                                        <Lock size={18} className="text-stone-400" />
-                                      ) : lesson.type === 'video' ? (
-                                        <PlayCircle size={18} className="text-primary-500 opacity-70" />
-                                      ) : (
-                                        <FileText size={18} className="text-blue-500 opacity-70" />
-                                      )}
-                                      <span className={`text-sm font-medium ${lesson.is_coming_soon ? 'text-stone-500' : 'text-stone-700'}`}>
-                                        <span className="mr-2 text-stone-400 font-normal">{idx + 1}.</span> 
-                                        {lesson.title}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                      {lesson.is_coming_soon ? (
-                                        <span className="text-xs font-semibold uppercase tracking-wide text-stone-400">Em breve</span>
-                                      ) : lesson.duration_minutes > 0 ? (
-                                        <span className="text-xs text-stone-400">{lesson.duration_minutes} min</span>
-                                      ) : null}
-                                      <Lock size={14} className="text-stone-300 group-hover:text-stone-400 transition-colors" />
-                                    </div>
+                                  <div key={lesson.id} className={`group overflow-hidden rounded-lg transition-colors ${lesson.is_coming_soon ? 'border border-stone-200 bg-stone-200/80' : 'flex items-center justify-between px-3 py-2.5 hover:bg-stone-200/50'}`}>
+                                    {lesson.is_coming_soon ? (
+                                      <div className="flex flex-col sm:flex-row">
+                                        <div className="relative h-28 w-full shrink-0 overflow-hidden bg-stone-300 sm:w-36">
+                                          {lesson.coming_soon_image_url ? (
+                                            <img
+                                              src={lesson.coming_soon_image_url}
+                                              alt={lesson.title}
+                                              className="h-full w-full object-cover grayscale"
+                                            />
+                                          ) : null}
+                                          <div className="absolute inset-0 bg-stone-900/40" />
+                                          <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+                                              <Lock size={18} className="text-white" />
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="flex flex-1 items-center justify-between gap-4 px-4 py-3">
+                                          <div className="flex items-center gap-3">
+                                            <Lock size={18} className="text-stone-400" />
+                                            <span className="text-sm font-medium text-stone-500">
+                                              <span className="mr-2 font-normal text-stone-400">{idx + 1}.</span>
+                                              {lesson.title}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-4">
+                                            <span className="text-xs font-semibold uppercase tracking-wide text-stone-400">Em breve</span>
+                                            <Lock size={14} className="text-stone-300" />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <div className="flex items-center gap-3">
+                                          {lesson.type === 'video' ? (
+                                            <PlayCircle size={18} className="text-primary-500 opacity-70" />
+                                          ) : (
+                                            <FileText size={18} className="text-blue-500 opacity-70" />
+                                          )}
+                                          <span className="text-sm font-medium text-stone-700">
+                                            <span className="mr-2 font-normal text-stone-400">{idx + 1}.</span>
+                                            {lesson.title}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                          {lesson.duration_minutes > 0 ? (
+                                            <span className="text-xs text-stone-400">{lesson.duration_minutes} min</span>
+                                          ) : null}
+                                          <Lock size={14} className="text-stone-300 group-hover:text-stone-400 transition-colors" />
+                                        </div>
+                                      </>
+                                    )}
                                   </div>
                                 ))}
                               </div>

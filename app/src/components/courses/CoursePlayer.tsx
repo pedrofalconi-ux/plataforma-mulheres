@@ -92,7 +92,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
           .select(`
             id, title, order_index,
             lessons (
-              id, title, description, content_url, type, duration_minutes, is_coming_soon, order_index, materials, activity_questions
+              id, title, description, content_url, type, duration_minutes, is_coming_soon, coming_soon_image_url, order_index, materials, activity_questions
             )
           `)
           .eq('course_id', courseId)
@@ -104,7 +104,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
               .select(`
                 id, title, order_index,
                 lessons (
-                  id, title, description, content_url, type, duration_minutes, is_coming_soon, order_index, activity_questions
+                  id, title, description, content_url, type, duration_minutes, is_coming_soon, coming_soon_image_url, order_index, activity_questions
                 )
               `)
               .eq('course_id', courseId)
@@ -152,12 +152,22 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   const renderLessonMedia = () => {
     if (isLessonComingSoon(currentLesson)) {
       return (
-        <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 px-6 text-center text-white">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+        <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-4 overflow-hidden bg-stone-900 px-6 text-center text-white">
+          {currentLesson?.coming_soon_image_url ? (
+            <>
+              <img
+                src={currentLesson.coming_soon_image_url}
+                alt={currentLesson.title}
+                className="absolute inset-0 h-full w-full object-cover grayscale"
+              />
+              <div className="absolute inset-0 bg-stone-950/55" />
+            </>
+          ) : null}
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
             <Lock size={28} className="text-stone-200" />
           </div>
-          <p className="text-xl font-semibold">Esta aula sera liberada em breve.</p>
-          <p className="max-w-xl text-sm text-stone-300">
+          <p className="relative text-xl font-semibold">Esta aula sera liberada em breve.</p>
+          <p className="relative max-w-xl text-sm text-stone-300">
             Assim que a gravacao estiver disponivel, ela aparecera aqui para as alunas da plataforma.
           </p>
         </div>
