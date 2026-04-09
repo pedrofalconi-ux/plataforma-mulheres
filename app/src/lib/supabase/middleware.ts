@@ -23,13 +23,23 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isApiRoute = pathname.startsWith('/api');
-  const isAuthRoute = pathname === '/login';
+  const isAuthRoute =
+    pathname === '/login' ||
+    pathname === '/cadastro' ||
+    pathname.startsWith('/cadastro/');
   const isStaticAsset = pathname.startsWith('/_next') || pathname === '/favicon.ico' || /\.[a-zA-Z0-9]+$/.test(pathname);
 
   if (!user && !isApiRoute && !isAuthRoute && !isStaticAsset) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isAuthRoute) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const url = request.nextUrl.clone();
+    url.pathname = profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/';
     return NextResponse.redirect(url);
   }
 
