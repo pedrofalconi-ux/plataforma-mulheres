@@ -2,7 +2,18 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, ChevronRight, ClipboardList, ExternalLink, FileText, Files, Loader2, MessageCircle, Play } from 'lucide-react';
+import {
+  BookOpen,
+  ChevronRight,
+  ClipboardList,
+  ExternalLink,
+  FileText,
+  Files,
+  Loader2,
+  Lock,
+  MessageCircle,
+  Play,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import LessonQA from './LessonQA';
@@ -41,7 +52,15 @@ function getYouTubeId(url?: string | null) {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
+function isLessonComingSoon(lesson: any) {
+  return Boolean(lesson?.is_coming_soon);
+}
+
 function formatLessonMeta(lesson: any) {
+  if (isLessonComingSoon(lesson)) {
+    return 'Em breve';
+  }
+
   const materialsCount = getLessonMaterials(lesson).length;
   if (lesson.duration_minutes > 0 && materialsCount > 0) {
     return `${lesson.duration_minutes} min • ${materialsCount} material(is)`;
@@ -52,7 +71,7 @@ function formatLessonMeta(lesson: any) {
   if (materialsCount > 0) {
     return `${materialsCount} material(is)`;
   }
-  return lesson.type === 'video' ? 'Vídeo' : 'Leitura';
+  return lesson.type === 'video' ? 'Video' : 'Leitura';
 }
 
 export default function CoursePlayer({ courseId }: { courseId: string }) {
@@ -73,7 +92,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
           .select(`
             id, title, order_index,
             lessons (
-              id, title, description, content_url, type, duration_minutes, order_index, materials, activity_questions
+              id, title, description, content_url, type, duration_minutes, is_coming_soon, order_index, materials, activity_questions
             )
           `)
           .eq('course_id', courseId)
@@ -85,7 +104,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
               .select(`
                 id, title, order_index,
                 lessons (
-                  id, title, description, content_url, type, duration_minutes, order_index, activity_questions
+                  id, title, description, content_url, type, duration_minutes, is_coming_soon, order_index, activity_questions
                 )
               `)
               .eq('course_id', courseId)
@@ -103,8 +122,10 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
         setModules(orderedModules);
 
-        const firstLesson = orderedModules.flatMap((module: any) => module.lessons || [])[0] || null;
-        setCurrentLesson(firstLesson);
+        const firstAvailableLesson =
+          orderedModules.flatMap((module: any) => module.lessons || []).find((lesson: any) => !isLessonComingSoon(lesson)) || null;
+
+        setCurrentLesson(firstAvailableLesson);
       } catch (err) {
         console.error('Error loading course data:', err);
       } finally {
@@ -129,11 +150,25 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   const currentLessonQuestions = getLessonActivityQuestions(currentLesson);
 
   const renderLessonMedia = () => {
+    if (isLessonComingSoon(currentLesson)) {
+      return (
+        <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 px-6 text-center text-white">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/10">
+            <Lock size={28} className="text-stone-200" />
+          </div>
+          <p className="text-xl font-semibold">Esta aula sera liberada em breve.</p>
+          <p className="max-w-xl text-sm text-stone-300">
+            Assim que a gravacao estiver disponivel, ela aparecera aqui para as alunas da plataforma.
+          </p>
+        </div>
+      );
+    }
+
     if (!currentLesson?.content_url) {
       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 text-white">
           <FileText size={48} className="text-stone-600" />
-          <p>Nenhum conteúdo principal disponível para esta aula.</p>
+          <p>Nenhum conteudo principal disponivel para esta aula.</p>
         </div>
       );
     }
@@ -231,61 +266,67 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                       }`}
                     >
                       <BookOpen size={16} />
-                      <span>Conteúdo da Aula</span>
+                      <span>Conteudo da Aula</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('materials')}
-                      className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
-                        activeTab === 'materials' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
-                      }`}
-                    >
-                      <Files size={16} />
-                      <span>Materiais</span>
-                      {getLessonMaterials(currentLesson).length > 0 ? (
-                        <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
-                          {getLessonMaterials(currentLesson).length}
-                        </span>
-                      ) : null}
-                    </button>
-                    {currentLessonQuestions.length > 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => setActiveTab('activity')}
-                        className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
-                          activeTab === 'activity' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
-                        }`}
-                      >
-                        <ClipboardList size={16} />
-                        <span>Atividade</span>
-                        <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
-                          {currentLessonQuestions.length}
-                        </span>
-                      </button>
+                    {!isLessonComingSoon(currentLesson) ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('materials')}
+                          className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                            activeTab === 'materials' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
+                          }`}
+                        >
+                          <Files size={16} />
+                          <span>Materiais</span>
+                          {getLessonMaterials(currentLesson).length > 0 ? (
+                            <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
+                              {getLessonMaterials(currentLesson).length}
+                            </span>
+                          ) : null}
+                        </button>
+                        {currentLessonQuestions.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab('activity')}
+                            className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                              activeTab === 'activity' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
+                            }`}
+                          >
+                            <ClipboardList size={16} />
+                            <span>Atividade</span>
+                            <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
+                              {currentLessonQuestions.length}
+                            </span>
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('discussion')}
+                          className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
+                            activeTab === 'discussion' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
+                          }`}
+                        >
+                          <MessageCircle size={16} />
+                          <span>Discussao</span>
+                        </button>
+                      </>
                     ) : null}
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('discussion')}
-                      className={`motion-tab flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition ${
-                        activeTab === 'discussion' ? 'bg-primary-100 text-primary-800' : 'text-stone-500 hover:bg-stone-50'
-                      }`}
-                    >
-                      <MessageCircle size={16} />
-                      <span>Discussão</span>
-                    </button>
                   </div>
                 </div>
 
                 {activeTab === 'content' ? (
                   <div className="rounded-[28px] border border-primary-900/8 bg-white p-6 shadow-sm">
                     <p className="text-lg leading-relaxed text-stone-600">
-                      {currentLesson.description || 'Esta aula ainda não possui uma descrição detalhada.'}
+                      {isLessonComingSoon(currentLesson)
+                        ? 'Esta aula ainda nao foi gravada. Em breve ela sera liberada aqui com todo o conteudo.'
+                        : currentLesson.description || 'Esta aula ainda nao possui uma descricao detalhada.'}
                     </p>
                   </div>
                 ) : null}
               </div>
 
-              {activeTab === 'materials' ? (
+              {activeTab === 'materials' && !isLessonComingSoon(currentLesson) ? (
                 <div className="motion-card mt-10 rounded-[28px] border border-primary-900/8 bg-white p-6 shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
@@ -326,13 +367,13 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                     </div>
                   ) : (
                     <div className="motion-card mt-5 rounded-2xl border border-dashed border-stone-200 bg-stone-50 px-4 py-8 text-center text-sm text-stone-500">
-                      Esta aula ainda não possui materiais complementares cadastrados.
+                      Esta aula ainda nao possui materiais complementares cadastrados.
                     </div>
                   )}
                 </div>
               ) : null}
 
-              {activeTab === 'activity' ? (
+              {activeTab === 'activity' && !isLessonComingSoon(currentLesson) ? (
                 user ? (
                   <div className="motion-card mt-10">
                     <LessonActivity lessonId={currentLesson.id} initialQuestions={currentLessonQuestions} />
@@ -344,21 +385,21 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                 )
               ) : null}
 
-              {activeTab === 'discussion' ? (
+              {activeTab === 'discussion' && !isLessonComingSoon(currentLesson) ? (
                 user ? (
                   <div className="motion-card mt-10">
                     <LessonQA lessonId={currentLesson.id} />
                   </div>
                 ) : (
                   <div className="motion-card mt-10 rounded-[28px] border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
-                    Entre com sua conta apenas se quiser participar da discussão. O acesso ao conteúdo continua aberto mesmo sem login.
+                    Entre com sua conta apenas se quiser participar da discussao. O acesso ao conteudo continua aberto mesmo sem login.
                   </div>
                 )
               ) : null}
             </>
           ) : (
             <div className="rounded-[28px] border border-dashed border-stone-200 bg-white px-6 py-12 text-center text-stone-500">
-              Nenhuma aula foi publicada neste bloco ainda.
+              Nenhuma aula disponivel para assistir neste bloco ainda.
             </div>
           )}
         </div>
@@ -366,36 +407,50 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
       <div className="relative z-10 flex h-auto w-full flex-shrink-0 flex-col border-t border-stone-200 bg-white lg:h-full lg:w-[400px] lg:border-l lg:border-t-0">
         <div className="border-b border-stone-200 p-6">
-          <h2 className="text-xl font-bold text-stone-900">Conteúdo do Bloco</h2>
+          <h2 className="text-xl font-bold text-stone-900">Conteudo do Bloco</h2>
         </div>
 
         <div className="motion-list flex-1 overflow-y-auto">
           {modules.map((module, moduleIndex) => (
             <div key={module.id} className="border-b border-stone-100">
               <div className="bg-stone-50 p-4 text-sm font-bold uppercase tracking-wide text-stone-800">
-                Módulo {moduleIndex + 1}: {module.title}
+                Modulo {moduleIndex + 1}: {module.title}
               </div>
               <div className="flex flex-col">
                 {module.lessons.map((lesson: any, lessonIndex: number) => {
                   const isActive = currentLesson?.id === lesson.id;
+                  const isComingSoon = isLessonComingSoon(lesson);
 
                   return (
                     <button
                       key={lesson.id}
-                      onClick={() => setCurrentLesson(lesson)}
+                      onClick={() => {
+                        if (!isComingSoon) {
+                          setCurrentLesson(lesson);
+                        }
+                      }}
+                      disabled={isComingSoon}
                       className={`motion-card flex items-start gap-4 p-4 text-left transition-colors ${
-                        isActive ? 'border-l-4 border-l-primary-600 bg-primary-50' : 'border-l-4 border-l-transparent hover:bg-stone-50'
+                        isComingSoon
+                          ? 'cursor-not-allowed border-l-4 border-l-transparent bg-stone-100'
+                          : isActive
+                            ? 'border-l-4 border-l-primary-600 bg-primary-50'
+                            : 'border-l-4 border-l-transparent hover:bg-stone-50'
                       }`}
                     >
                       <div
                         className={`mt-0.5 shrink-0 rounded-full p-1 ${
-                          isActive ? 'bg-primary-600 text-white' : 'bg-stone-100 text-stone-400'
+                          isComingSoon
+                            ? 'bg-stone-200 text-stone-500'
+                            : isActive
+                              ? 'bg-primary-600 text-white'
+                              : 'bg-stone-100 text-stone-400'
                         }`}
                       >
-                        <Play size={14} className={isActive ? 'fill-current' : ''} />
+                        {isComingSoon ? <Lock size={14} /> : <Play size={14} className={isActive ? 'fill-current' : ''} />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className={`line-clamp-2 text-sm font-bold ${isActive ? 'text-primary-800' : 'text-stone-800'}`}>
+                        <div className={`line-clamp-2 text-sm font-bold ${isComingSoon ? 'text-stone-500' : isActive ? 'text-primary-800' : 'text-stone-800'}`}>
                           {lessonIndex + 1}. {lesson.title}
                         </div>
                         <div className="mt-1 text-xs text-stone-500">{formatLessonMeta(lesson)}</div>

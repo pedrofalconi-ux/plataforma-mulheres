@@ -8,6 +8,7 @@ import {
   ChevronDown,
   Clock,
   FileText,
+  Lock,
   Loader2,
   MessageSquareQuote,
   PlayCircle,
@@ -30,6 +31,10 @@ function formatDuration(mins: number) {
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
+function isLessonComingSoon(lesson: any) {
+  return Boolean(lesson?.is_coming_soon);
+}
+
 export default function CourseOverview({ courseId }: { courseId: string }) {
   const supabase = createClient();
 
@@ -48,7 +53,7 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
             .select(`
               id, title, order_index, description,
               lessons (
-                id, title, description, type, duration_minutes, order_index
+                id, title, description, type, duration_minutes, is_coming_soon, order_index
               )
             `)
             .eq('course_id', courseId)
@@ -249,19 +254,25 @@ export default function CourseOverview({ courseId }: { courseId: string }) {
                                 {moduleLessons.map((lesson: any, lessonIndex: number) => (
                                   <div
                                     key={lesson.id}
-                                    className="flex items-center justify-between rounded-2xl p-4 transition-all hover:bg-[#F7F2ED]/50"
+                                    className={`flex items-center justify-between rounded-2xl p-4 transition-all ${isLessonComingSoon(lesson) ? 'bg-stone-100 text-stone-500' : 'hover:bg-[#F7F2ED]/50'}`}
                                   >
                                     <div className="flex items-start gap-4 sm:items-center">
-                                      {lesson.type === 'video' ? (
+                                      {isLessonComingSoon(lesson) ? (
+                                        <Lock size={20} className="mt-0.5 text-stone-400 sm:mt-0" />
+                                      ) : lesson.type === 'video' ? (
                                         <PlayCircle size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
                                       ) : (
                                         <FileText size={20} className="mt-0.5 text-[#DBA1A2]/60 sm:mt-0" />
                                       )}
-                                      <span className="text-base font-medium text-[#422523]">
+                                      <span className={`text-base font-medium ${isLessonComingSoon(lesson) ? 'text-stone-500' : 'text-[#422523]'}`}>
                                         {lessonIndex + 1}. {lesson.title}
                                       </span>
                                     </div>
-                                    {lesson.duration_minutes > 0 ? (
+                                    {isLessonComingSoon(lesson) ? (
+                                      <span className="text-xs font-bold uppercase tracking-widest text-stone-400">
+                                        Em breve
+                                      </span>
+                                    ) : lesson.duration_minutes > 0 ? (
                                       <span className="text-xs font-bold tracking-widest text-[#422523]/30">
                                         {formatDuration(lesson.duration_minutes)}
                                       </span>
