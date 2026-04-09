@@ -183,6 +183,7 @@ export function NewsSection() {
 
 export function CtaSection() {
   const { isAuthenticated, loading } = useAuth();
+  const whatsappGroupUrl = 'https://chat.whatsapp.com/CqfMMJLcdz06bMAAZ7KeS3?mode=gi_t';
 
   if (loading || isAuthenticated) {
     return null;
@@ -200,13 +201,21 @@ export function CtaSection() {
             O acesso à plataforma é reservado para quem já possui conta criada e aprovada no ambiente de aprendizagem.
           </p>
 
-          <div className="mt-12">
+          <div className="mt-12 flex flex-col items-center gap-4">
             <Link
               href="/login"
               className="inline-flex min-w-[260px] items-center justify-center border border-white bg-white px-6 py-4 text-[0.82rem] font-extrabold uppercase tracking-[0.08em] text-primary-900 transition hover:border-stone-100 hover:bg-stone-100"
             >
               Entrar com minha conta
             </Link>
+            <a
+              href={whatsappGroupUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-w-[260px] items-center justify-center border border-white/28 bg-transparent px-6 py-4 text-[0.82rem] font-extrabold uppercase tracking-[0.08em] text-white transition hover:border-white hover:bg-white/8"
+            >
+              Entrar no grupo do WhatsApp
+            </a>
           </div>
         </div>
       </PageSection>
