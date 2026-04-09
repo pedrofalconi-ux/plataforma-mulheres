@@ -3,7 +3,7 @@
 import React, { use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, FileText, Image as ImageIcon, Link as LinkIcon, Loader2, Paperclip, Play, Plus, Save, Settings, Trash2, Upload, Video, X } from 'lucide-react';
+import { ArrowLeft, FileText, Image as ImageIcon, Link as LinkIcon, Loader2, Lock, Paperclip, Play, Plus, Save, Settings, Trash2, Upload, Video, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import ImageCropper from '@/components/admin/ImageCropper';
 
@@ -28,6 +28,7 @@ type LessonDraft = {
   type: 'video' | 'text';
   content_url: string;
   duration_minutes: number;
+  is_coming_soon: boolean;
   materials: LessonMaterial[];
   activity_questions: ActivityQuestion[];
 };
@@ -62,6 +63,7 @@ const emptyLessonDraft = (): LessonDraft => ({
   type: 'video',
   content_url: '',
   duration_minutes: 0,
+  is_coming_soon: false,
   materials: [],
   activity_questions: [],
 });
@@ -264,6 +266,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
       type: lesson.type === 'text' ? 'text' : 'video',
       content_url: lesson.content_url || '',
       duration_minutes: lesson.duration_minutes || 0,
+      is_coming_soon: Boolean(lesson.is_coming_soon),
       materials: normalizeLessonMaterials(getLessonMaterials(lesson)),
       activity_questions: normalizeActivityQuestions(Array.isArray(lesson.activity_questions) ? lesson.activity_questions : []),
     });
@@ -298,14 +301,14 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
 
     const modulesWithMaterials = await supabase
       .from('modules')
-      .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, order_index, materials, activity_questions)')
+      .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, is_coming_soon, order_index, materials, activity_questions)')
       .eq('course_id', courseId)
       .order('order_index', { ascending: true });
 
     const { data: loadedModules } = modulesWithMaterials.error
       ? await supabase
           .from('modules')
-          .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, order_index, activity_questions)')
+          .select('id, title, order_index, lessons(id, title, description, type, content_url, duration_minutes, is_coming_soon, order_index, activity_questions)')
           .eq('course_id', courseId)
           .order('order_index', { ascending: true })
       : modulesWithMaterials;
@@ -461,12 +464,12 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
     event.preventDefault();
     if (!lessonData.title || !activeModuleId || isSavingLesson) return;
 
-    if (lessonData.type === 'video' && !lessonData.content_url.trim()) {
+    if (!lessonData.is_coming_soon && lessonData.type === 'video' && !lessonData.content_url.trim()) {
       alert('Informe a URL do video no YouTube.');
       return;
     }
 
-    if (lessonData.type !== 'video' && !lessonData.content_url.trim()) {
+    if (!lessonData.is_coming_soon && lessonData.type !== 'video' && !lessonData.content_url.trim()) {
       alert('Envie o arquivo principal da aula.');
       return;
     }
@@ -492,10 +495,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
           title: lessonData.title,
           description: lessonData.description,
           type: lessonData.type,
-          content_url: lessonData.content_url,
+          content_url: lessonData.is_coming_soon ? '' : lessonData.content_url,
           materials: cleanMaterials,
           activity_questions: cleanQuestions,
-          duration_minutes: lessonData.duration_minutes || 0,
+          duration_minutes: lessonData.is_coming_soon ? 0 : lessonData.duration_minutes || 0,
+          is_coming_soon: lessonData.is_coming_soon,
           order_index: lessonOrderIndex,
         }),
       });
@@ -791,12 +795,35 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-bold text-stone-700">Duracao (minutos)</label>
-                  <input type="number" min="0" value={lessonData.duration_minutes} onChange={(event) => setLessonData({ ...lessonData, duration_minutes: parseInt(event.target.value, 10) || 0 })} readOnly={isYouTubeLessonUrl} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" />
+                  <input type="number" min="0" value={lessonData.duration_minutes} onChange={(event) => setLessonData({ ...lessonData, duration_minutes: parseInt(event.target.value, 10) || 0 })} readOnly={isYouTubeLessonUrl || lessonData.is_coming_soon} disabled={lessonData.is_coming_soon} className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-stone-100" />
                 </div>
               </div>
+              <label className="flex items-start gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={lessonData.is_coming_soon}
+                  onChange={(event) =>
+                    setLessonData((current) => ({
+                      ...current,
+                      is_coming_soon: event.target.checked,
+                      content_url: event.target.checked ? '' : current.content_url,
+                      duration_minutes: event.target.checked ? 0 : current.duration_minutes,
+                    }))
+                  }
+                  className="mt-1 h-4 w-4 rounded border-stone-300 text-primary-600 focus:ring-primary-500"
+                />
+                <div>
+                  <div className="text-sm font-bold text-stone-700">Aula ainda nao gravada</div>
+                  <p className="mt-1 text-xs text-stone-500">Marque para exibir essa aula em cinza, com cadeado e texto "Em breve" para as alunas.</p>
+                </div>
+              </label>
               <div>
                 <label className="mb-1 block text-sm font-bold text-stone-700">{lessonData.type === 'video' ? 'URL do video no YouTube' : 'Arquivo principal da aula'}</label>
-                {lessonData.type === 'video' ? (
+                {lessonData.is_coming_soon ? (
+                  <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4 text-sm text-stone-500">
+                    Esta aula aparecera apenas como "Em breve" ate voce liberar o conteudo.
+                  </div>
+                ) : lessonData.type === 'video' ? (
                   <input value={lessonData.content_url} onChange={(event) => setLessonData({ ...lessonData, content_url: event.target.value })} type="url" className="w-full rounded-xl border border-stone-200 px-4 py-2 outline-none focus:ring-2 focus:ring-primary-500" placeholder="https://youtube.com/..." />
                 ) : (
                   <div className="rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-4">
@@ -819,7 +846,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ id: st
               <div className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-3">
                 <p className="text-sm font-bold text-stone-700">Duracao da aula</p>
                 <p className="mt-1 text-sm text-stone-600">
-                  {lessonData.type !== 'video' ? (lessonData.content_url ? 'Arquivo principal anexado a esta aula.' : 'Envie o arquivo principal desta aula nesta tela.') : lessonData.duration_minutes > 0 ? `${lessonData.duration_minutes} min detectados automaticamente` : 'Cole o link do YouTube para a plataforma detectar a duracao automaticamente.'}
+                  {lessonData.is_coming_soon ? 'Para as alunas, a duracao sera substituida por "Em breve".' : lessonData.type !== 'video' ? (lessonData.content_url ? 'Arquivo principal anexado a esta aula.' : 'Envie o arquivo principal desta aula nesta tela.') : lessonData.duration_minutes > 0 ? `${lessonData.duration_minutes} min detectados automaticamente` : 'Cole o link do YouTube para a plataforma detectar a duracao automaticamente.'}
                 </p>
                 {lessonDurationStatus ? <p className={`mt-2 text-xs font-medium ${lessonDurationStatus.includes('automaticamente') ? 'text-primary-700' : 'text-amber-700'}`}>{isDetectingLessonDuration ? 'Detectando duracao do video...' : lessonDurationStatus}</p> : null}
               </div>
