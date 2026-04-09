@@ -34,7 +34,7 @@ const fallback = {
   values: ['Sabedoria', 'Entendimento', 'Vínculos', 'Cuidado', 'Propósito'],
 };
 
-const ABOUT_DRIVE_PREVIEW_URL = 'https://drive.google.com/file/d/1LyDPdnXepA6Hyed0pAfFToj8XwXv_agh/preview';
+const ABOUT_DRIVE_PREVIEW_URL = 'https://drive.google.com/file/d/1qJCoAl_EnkAHTugkU4Qj0HOa2cTmoMEu/preview';
 
 async function getInstitutionalContent() {
   try {
