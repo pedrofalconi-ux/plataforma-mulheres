@@ -13,6 +13,7 @@ import {
   Newspaper,
   Menu,
   ClipboardList,
+  UserCog,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -32,6 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/atividades', label: 'Atividades', icon: ClipboardList },
     { href: '/admin/blog', label: 'Blog Engine', icon: Newspaper },
     { href: '/admin/talentos', label: 'Banco de Talentos', icon: Users },
+    { href: '/admin/permissoes', label: 'Permissoes Admin', icon: UserCog },
     { href: '/admin/institucional', label: 'Painel Institucional', icon: FileText },
   ];
 
