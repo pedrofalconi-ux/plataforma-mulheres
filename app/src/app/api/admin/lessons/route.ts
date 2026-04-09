@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { CreateLessonSchema, UpdateLessonSchema } from '@/lib/schemas';
-import { filterExistingColumns, logAuditEvent, requireAdmin, sanitizeHtml, sanitizeText } from '@/lib/admin-api';
+import {
+  emptyStringToNull,
+  filterExistingColumns,
+  logAuditEvent,
+  requireAdmin,
+  sanitizeHtml,
+  sanitizeText,
+} from '@/lib/admin-api';
 
 const YOUTUBE_PATTERNS = [
   /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
@@ -105,9 +112,9 @@ export async function POST(request: Request) {
       ...payload,
       duration_minutes: await resolveDurationMinutes(payload),
       title: sanitizeText(payload.title),
-      description: sanitizeText(payload.description),
-      content_url: sanitizeText(payload.content_url),
-      content_text: sanitizeHtml(payload.content_text),
+      description: emptyStringToNull(sanitizeText(payload.description)),
+      content_url: emptyStringToNull(sanitizeText(payload.content_url)),
+      content_text: emptyStringToNull(sanitizeHtml(payload.content_text)),
       materials: sanitizeMaterials(payload.materials),
       activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
@@ -155,9 +162,9 @@ export async function PATCH(request: Request) {
       ...payload,
       duration_minutes: await resolveDurationMinutes(payload),
       title: sanitizeText(payload.title),
-      description: sanitizeText(payload.description),
-      content_url: sanitizeText(payload.content_url),
-      content_text: sanitizeHtml(payload.content_text),
+      description: emptyStringToNull(sanitizeText(payload.description)),
+      content_url: emptyStringToNull(sanitizeText(payload.content_url)),
+      content_text: emptyStringToNull(sanitizeHtml(payload.content_text)),
       materials: sanitizeMaterials(payload.materials),
       activity_questions: sanitizeActivityQuestions(payload.activity_questions),
     });
