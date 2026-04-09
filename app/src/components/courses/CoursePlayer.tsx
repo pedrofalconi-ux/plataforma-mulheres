@@ -122,10 +122,10 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
 
         setModules(orderedModules);
 
-        const firstAvailableLesson =
-          orderedModules.flatMap((module: any) => module.lessons || []).find((lesson: any) => !isLessonComingSoon(lesson)) || null;
+        const allLessons = orderedModules.flatMap((module: any) => module.lessons || []);
+        const firstAvailableLesson = allLessons.find((lesson: any) => !isLessonComingSoon(lesson));
 
-        setCurrentLesson(firstAvailableLesson);
+        setCurrentLesson(firstAvailableLesson || allLessons[0] || null);
       } catch (err) {
         console.error('Error loading course data:', err);
       } finally {
@@ -150,6 +150,15 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   const currentLessonQuestions = getLessonActivityQuestions(currentLesson);
 
   const renderLessonMedia = () => {
+    if (!currentLesson) {
+      return (
+        <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 px-6 text-center text-white">
+          <FileText size={48} className="text-stone-600" />
+          <p>Nenhuma aula disponivel neste bloco ainda.</p>
+        </div>
+      );
+    }
+
     if (isLessonComingSoon(currentLesson) || !currentLesson?.content_url) {
       const coverImage = currentLesson?.coming_soon_image_url || course?.thumbnail_url;
 
@@ -430,15 +439,12 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                   return (
                     <button
                       key={lesson.id}
-                      onClick={() => {
-                        if (!isComingSoon) {
-                          setCurrentLesson(lesson);
-                        }
-                      }}
-                      disabled={isComingSoon}
+                      onClick={() => setCurrentLesson(lesson)}
                       className={`motion-card flex items-start gap-4 p-4 text-left transition-colors ${
                         isComingSoon
-                          ? 'cursor-not-allowed border-l-4 border-l-transparent bg-stone-100'
+                          ? isActive
+                            ? 'border-l-4 border-l-primary-600 bg-stone-100'
+                            : 'border-l-4 border-l-transparent bg-stone-100 hover:bg-stone-200/70'
                           : isActive
                             ? 'border-l-4 border-l-primary-600 bg-primary-50'
                             : 'border-l-4 border-l-transparent hover:bg-stone-50'
