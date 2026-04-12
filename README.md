@@ -1,29 +1,5 @@
 
-# Ecossistema da Dignidade — Plataforma
-
-Portal Educacional e Observatório Social do Ecossistema da Dignidade. Construído com **Next.js 16 (App Router)**, **Supabase (PostgreSQL)** e **Tailwind CSS v4**.
-
-🔗 **Produção:** https://plataforma-mulheres.vercel.app/
-
----
-
-## 🗺️ Roadmap de Módulos
-
-| # | Módulo | Status |
-|---|--------|--------|
-| 1 | Backend Base e Modelagem (17 tabelas, RLS, Seeds, Zod) | ✅ Concluído |
-| 2 | Autenticação e Integração Front-End (Login, Cadastro, Middleware, RBAC) | ✅ Concluído |
-| 3 | LMS — Aulas, Progresso, Certificados, Comentários | ✅ Concluído |
-| 4 | Perfis Avançados, Admin, Eventos Ao-Vivo | ✅ Concluído |
-| 5 | Observatório Social, Blog, Landing Page Institucional | ✅ Concluído |
-| 6 | Course Preview — Tela de pré-venda pública `/cursos/[slug]` | ✅ Concluído |
-| 7 | Fórum da Comunidade — Tópicos, Respostas, API (Supabase RLS) | ✅ Concluído |
-| 8 | Monetização e Checkout (Mercado Pago, Carrinho, Webhooks) | ✅ Concluído |
-| 9 | Dashboards e Analytics (KPIs Financeiros, Recharts) | ✅ Concluído |
-| 10 | Refinamentos (Carga Horária Automática, UX) | ✅ Concluído |
-| 11 | Segurança, LGPD e Performance | 🚧 Em andamento |
-
----
+# Plataforma Nathi Faria
 
 ## 🛠️ Stack Tecnológica
 
