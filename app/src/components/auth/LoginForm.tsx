@@ -8,17 +8,15 @@ import {
   AlertCircle,
   CheckCircle2,
   Heart,
-  Loader2,
   Lock,
   Mail,
   ShieldCheck,
   User as UserIcon,
 } from 'lucide-react';
 import { z } from 'zod';
-import { BRAND_NAME } from '@/lib/constants';
 
 const loginSchema = z.object({
-  email: z.string().email('Digite um e-mail valido.'),
+  email: z.string().email('Digite um e-mail válido.'),
   password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres.'),
   name: z.string().optional(),
 });
@@ -29,6 +27,32 @@ function BrandMark() {
   return (
     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#DBA1A2] text-white shadow-xl">
       <Heart size={28} fill="currentColor" />
+    </div>
+  );
+}
+
+function LoadingIndicator() {
+  return (
+    <span className="inline-flex items-center gap-3">
+      <span className="relative flex h-5 w-5 items-center justify-center">
+        <span className="absolute inset-0 rounded-full border-2 border-white/35 border-t-white animate-spin" />
+        <span className="h-2 w-2 rounded-full bg-white/90" />
+      </span>
+      <span>Carregando...</span>
+    </span>
+  );
+}
+
+function PageLoadingState() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[#F7F2ED] px-6">
+      <div className="flex flex-col items-center gap-5 rounded-[28px] border border-[#E7D8D8] bg-white px-8 py-10 shadow-[0_20px_60px_rgba(66,37,35,0.08)]">
+        <div className="relative">
+          <div className="absolute inset-[-6px] rounded-full border-2 border-[#DBA1A2]/30 border-t-[#DBA1A2] animate-spin" />
+          <BrandMark />
+        </div>
+        <p className="text-sm font-medium text-[#422523]/70">Carregando sua experiência...</p>
+      </div>
     </div>
   );
 }
@@ -68,18 +92,34 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
     let active = true;
 
     async function redirectIfAuthenticated() {
-      const { data } = await supabase.auth.getUser();
-      if (!active || !data.user) return;
+      // Usar getUser() para validação real no servidor, não apenas a sessão local
+      const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+      if (!active || !authUser || authError) {
+        if (authError) console.error('Auth error in redirect check:', authError);
+        return;
+      }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authUser.id)
+          .single();
 
-      const destination = profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/';
-      if (pathname === '/login' || pathname === '/cadastro' || pathname?.startsWith('/cadastro/')) {
-        redirectToDestination(destination);
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          // Se houver erro, assume que é um aluno para evitar bloqueio total
+          redirectToDestination('/');
+          return;
+        }
+
+        const destination = profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/';
+        if (pathname === '/login' || pathname === '/cadastro' || pathname?.startsWith('/cadastro/')) {
+          redirectToDestination(destination);
+        }
+      } catch (err) {
+        console.error('Unexpected error in redirectIfAuthenticated:', err);
+        redirectToDestination('/');
       }
     }
 
@@ -190,10 +230,15 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
         redirectToDestination(profile?.role?.toLowerCase() === 'admin' ? '/admin' : '/');
       }
     } catch (err: any) {
+      console.error('Login error detail:', err);
       if (err instanceof z.ZodError) {
         setError(err.issues[0]?.message || 'Revise os dados informados.');
+      } else if (err?.message?.includes('Invalid login credentials')) {
+        setError('E-mail ou senha incorretos. Verifique seus dados.');
+      } else if (err?.message?.includes('Email not confirmed')) {
+        setError('Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.');
       } else {
-        setError(err?.message || 'Não foi possível concluir agora. Tente novamente.');
+        setError(err?.message || 'Não foi possível concluir agora. Tente de novo em alguns instantes.');
       }
     } finally {
       setLoading(false);
@@ -365,7 +410,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
                 className="flex w-full items-center justify-center gap-2 rounded-[22px] bg-[#DBA1A2] py-4 text-sm font-bold text-white shadow-lg shadow-[#DBA1A2]/30 transition-all hover:bg-[#D48F90] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loading ? (
-                  <Loader2 size={22} className="animate-spin" />
+                  <LoadingIndicator />
                 ) : isAdminRegister ? (
                   'Criar acesso administrativo'
                 ) : isRegisterMode ? (
@@ -415,7 +460,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
               {activeMode !== mode ? (
                 <p>
-                  Preferir abrir em uma página separada?{' '}
+                  Prefere abrir em uma página separada?{' '}
                   <Link
                     href={
                       activeMode === 'admin-register'
@@ -440,9 +485,7 @@ function FormContent({ mode = 'login' }: { mode?: LoginMode }) {
 
 export default function LoginForm({ mode = 'login' }: { mode?: LoginMode }) {
   return (
-    <Suspense
-      fallback={<div className="flex min-h-screen items-center justify-center bg-[#F7F2ED]">Carregando...</div>}
-    >
+    <Suspense fallback={<PageLoadingState />}>
       <FormContent mode={mode} />
     </Suspense>
   );

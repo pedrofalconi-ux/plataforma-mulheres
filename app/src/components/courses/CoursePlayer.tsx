@@ -146,12 +146,33 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
   );
 
   const flattenedLessons = useMemo(() => modules.flatMap((module) => module.lessons || []), [modules]);
-  const currentLessonIndex = flattenedLessons.findIndex((lesson) => lesson.id === currentLesson?.id);
-  const currentLessonQuestions = getLessonActivityQuestions(currentLesson);
+  const resolvedLesson = useMemo(() => {
+    if (currentLesson && flattenedLessons.some((lesson) => lesson.id === currentLesson.id)) {
+      return flattenedLessons.find((lesson) => lesson.id === currentLesson.id) || currentLesson;
+    }
+
+    return flattenedLessons.find((lesson) => !isLessonComingSoon(lesson)) || flattenedLessons[0] || null;
+  }, [currentLesson, flattenedLessons]);
+
+  useEffect(() => {
+    if (!resolvedLesson) {
+      if (currentLesson !== null) {
+        setCurrentLesson(null);
+      }
+      return;
+    }
+
+    if (currentLesson?.id !== resolvedLesson.id) {
+      setCurrentLesson(resolvedLesson);
+    }
+  }, [currentLesson, resolvedLesson]);
+
+  const currentLessonIndex = flattenedLessons.findIndex((lesson) => lesson.id === resolvedLesson?.id);
+  const currentLessonQuestions = getLessonActivityQuestions(resolvedLesson);
 
   const renderLessonMedia = () => {
-    if (!currentLesson) {
-      return (
+    if (!resolvedLesson) {
+       return (
         <div className="flex aspect-video w-full flex-col items-center justify-center gap-4 bg-stone-900 px-6 text-center text-white">
           <FileText size={48} className="text-stone-600" />
           <p>Nenhuma aula disponível neste bloco ainda.</p>
@@ -159,8 +180,32 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
       );
     }
 
-    if (isLessonComingSoon(currentLesson) || !currentLesson?.content_url) {
-      const coverImage = currentLesson?.coming_soon_image_url || course?.thumbnail_url;
+    if (isLessonComingSoon(resolvedLesson)) {
+      return (
+        <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-4 overflow-hidden bg-stone-900 px-6 text-center text-white">
+          {resolvedLesson?.coming_soon_image_url ? (
+            <>
+              <img
+                src={resolvedLesson.coming_soon_image_url}
+                alt={resolvedLesson.title}
+                className="absolute inset-0 h-full w-full object-cover grayscale"
+              />
+              <div className="absolute inset-0 bg-stone-950/55" />
+            </>
+          ) : null}
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-white/10 backdrop-blur">
+            <Lock size={28} className="text-stone-200" />
+          </div>
+          <p className="relative text-xl font-semibold">Esta aula será liberada em breve.</p>
+          <p className="relative max-w-xl text-sm text-stone-300">
+            Assim que a gravação estiver disponível, ela aparecerá aqui para as alunas da plataforma.
+          </p>
+        </div>
+      );
+    }
+
+    if (!resolvedLesson?.content_url) {
+      const coverImage = resolvedLesson?.coming_soon_image_url || course?.thumbnail_url;
 
       return (
         <div className="relative flex aspect-video w-full flex-col items-center justify-center overflow-hidden bg-stone-900 px-4 text-center text-white sm:px-6">
@@ -168,7 +213,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
             <>
               <img
                 src={coverImage}
-                alt={currentLesson.title}
+                alt={resolvedLesson.title}
                 className="absolute inset-0 h-full w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/70 to-stone-950/45" />
@@ -188,14 +233,14 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
       );
     }
 
-    const youtubeId = getYouTubeId(currentLesson.content_url);
+    const youtubeId = getYouTubeId(resolvedLesson.content_url);
     if (youtubeId) {
       return (
         <div className="aspect-video w-full">
           <iframe
             className="h-full w-full"
             src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
-            title={currentLesson.title}
+            title={resolvedLesson.title}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
@@ -204,10 +249,10 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
       );
     }
 
-    if (isPdfUrl(currentLesson.content_url)) {
+    if (isPdfUrl(resolvedLesson.content_url)) {
       return (
         <div className="aspect-video w-full bg-stone-100">
-          <iframe src={currentLesson.content_url} title={currentLesson.title} className="h-full w-full" />
+          <iframe src={resolvedLesson.content_url} title={resolvedLesson.title} className="h-full w-full" />
         </div>
       );
     }
@@ -217,7 +262,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
         <FileText size={48} className="text-stone-500" />
         <p className="max-w-xl text-lg font-semibold">Esta aula possui um arquivo principal anexado.</p>
         <a
-          href={currentLesson.content_url}
+          href={resolvedLesson.content_url}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-bold text-stone-900 transition hover:bg-primary-50"
@@ -259,11 +304,11 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
         <div className="w-full bg-black shadow-inner">{renderLessonMedia()}</div>
 
         <div className="mx-auto max-w-5xl p-8 pb-32">
-          {currentLesson ? (
+          {resolvedLesson ? (
             <>
               <div className="motion-float mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
                 <div>
-                  <h1 className="mb-2 font-serif text-3xl font-bold text-stone-900">{currentLesson.title}</h1>
+                  <h1 className="mb-2 font-serif text-3xl font-bold text-stone-900">{resolvedLesson.title}</h1>
                   <p className="text-sm text-stone-500">
                     Parte do bloco <span className="font-semibold text-stone-700">{course?.title}</span>
                   </p>
@@ -283,7 +328,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                       <BookOpen size={16} />
                       <span>Conteúdo da Aula</span>
                     </button>
-                    {!isLessonComingSoon(currentLesson) ? (
+                    {!isLessonComingSoon(resolvedLesson) ? (
                       <>
                         <button
                           type="button"
@@ -294,9 +339,9 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                         >
                           <Files size={16} />
                           <span>Materiais</span>
-                          {getLessonMaterials(currentLesson).length > 0 ? (
+                          {getLessonMaterials(resolvedLesson).length > 0 ? (
                             <span className="rounded-full bg-primary-700 px-2 py-0.5 text-[11px] text-white">
-                              {getLessonMaterials(currentLesson).length}
+                              {getLessonMaterials(resolvedLesson).length}
                             </span>
                           ) : null}
                         </button>
@@ -333,15 +378,15 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                 {activeTab === 'content' ? (
                   <div className="rounded-[28px] border border-primary-900/8 bg-white p-6 shadow-sm">
                     <p className="text-lg leading-relaxed text-stone-600">
-                      {isLessonComingSoon(currentLesson)
+                      {isLessonComingSoon(resolvedLesson)
                         ? 'Esta aula ainda não foi gravada. Em breve ela será liberada aqui com todo o conteúdo.'
-                        : currentLesson.description || 'Esta aula ainda não possui uma descrição detalhada.'}
+                        : resolvedLesson.description || 'Esta aula ainda não possui uma descrição detalhada.'}
                     </p>
                   </div>
                 ) : null}
               </div>
 
-              {activeTab === 'materials' && !isLessonComingSoon(currentLesson) ? (
+              {activeTab === 'materials' && !isLessonComingSoon(resolvedLesson) ? (
                 <div className="motion-card mt-10 rounded-[28px] border border-primary-900/8 bg-white p-6 shadow-sm">
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-100 text-primary-700">
@@ -353,9 +398,9 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                     </div>
                   </div>
 
-                  {getLessonMaterials(currentLesson).length > 0 ? (
+                  {getLessonMaterials(resolvedLesson).length > 0 ? (
                     <div className="motion-list mt-5 grid gap-3">
-                      {getLessonMaterials(currentLesson).map((material: any, index: number) => {
+                      {getLessonMaterials(resolvedLesson).map((material: any, index: number) => {
                         const isPdf = material.kind === 'pdf' || isPdfUrl(material.url);
 
                         return (
@@ -388,10 +433,10 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                 </div>
               ) : null}
 
-              {activeTab === 'activity' && !isLessonComingSoon(currentLesson) ? (
+              {activeTab === 'activity' && !isLessonComingSoon(resolvedLesson) ? (
                 user ? (
                   <div className="motion-card mt-10">
-                    <LessonActivity lessonId={currentLesson.id} initialQuestions={currentLessonQuestions} />
+                    <LessonActivity lessonId={resolvedLesson.id} initialQuestions={currentLessonQuestions} />
                   </div>
                 ) : (
                   <div className="motion-card mt-10 rounded-[28px] border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
@@ -400,10 +445,10 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
                 )
               ) : null}
 
-              {activeTab === 'discussion' && !isLessonComingSoon(currentLesson) ? (
+              {activeTab === 'discussion' && !isLessonComingSoon(resolvedLesson) ? (
                 user ? (
                   <div className="motion-card mt-10">
-                    <LessonQA lessonId={currentLesson.id} />
+                    <LessonQA lessonId={resolvedLesson.id} />
                   </div>
                 ) : (
                   <div className="motion-card mt-10 rounded-[28px] border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
@@ -433,7 +478,7 @@ export default function CoursePlayer({ courseId }: { courseId: string }) {
               </div>
               <div className="flex flex-col">
                 {module.lessons.map((lesson: any, lessonIndex: number) => {
-                  const isActive = currentLesson?.id === lesson.id;
+                  const isActive = resolvedLesson?.id === lesson.id;
                   const isComingSoon = isLessonComingSoon(lesson);
 
                   return (

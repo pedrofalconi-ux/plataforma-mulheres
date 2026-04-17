@@ -23,50 +23,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     async function getUserProfile(userId: string, email?: string) {
-      // Tenta buscar o profile
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+          
+        if (error && mounted) {
+          console.error('Error fetching profile:', error);
+        }
         
-      if (error && mounted) {
-        console.error('Error fetching profile:', error);
-        // Mesmo sem perfil, permite acesso básico para evitar loop em alguns casos, ou trate conforme regras
+        if (data && mounted) {
+          setUser({
+            id: data.id,
+            name: data.full_name || data.name || '',
+            email: email || '',
+            role: data.role || 'student',
+            avatar: data.avatar_url,
+          });
+        } else if (mounted) {
+          // Fallback básico caso o trigger de perfil ainda não tenha rodado
+          setUser({
+            id: userId,
+            name: '',
+            email: email || '',
+            role: 'student',
+          });
+        }
+      } finally {
+        if (mounted) setLoading(false);
       }
-      
-      if (data && mounted) {
-        setUser({
-          id: data.id,
-          name: data.full_name || data.name || '',
-          email: email || '',
-          role: data.role || 'student',
-          avatar: data.avatar_url,
-        });
-      } else if (mounted) {
-        // Fallback básico caso o trigger de perfil ainda não tenha rodado
-        setUser({
-          id: userId,
-          name: '',
-          email: email || '',
-          role: 'student',
-        });
-      }
-      setLoading(false);
     }
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && mounted) {
-        getUserProfile(session.user.id, session.user.email);
-      } else if (mounted) {
+    async function initialize() {
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser && mounted) {
+          await getUserProfile(authUser.id, authUser.email);
+        } else if (mounted) {
+          setUser(null);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        if (mounted) {
+          setUser(null);
+          setLoading(false);
+        }
+      }
+    }
+
+    void initialize();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
         setUser(null);
         setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user && mounted) {
-        getUserProfile(session.user.id, session.user.email);
+      } else if (session?.user && mounted) {
+        void getUserProfile(session.user.id, session.user.email);
       } else if (mounted) {
         setUser(null);
         setLoading(false);

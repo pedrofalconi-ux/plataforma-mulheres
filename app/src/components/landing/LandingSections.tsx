@@ -11,24 +11,29 @@ import {
   HeartHandshake,
   Sparkles,
 } from 'lucide-react';
-import { EditorialButtonLink, EditorialPanel, PageSection, SectionIntro } from '@/components/brand/Editorial';
+import {
+  EditorialButtonLink,
+  EditorialPanel,
+  PageSection,
+  SectionIntro,
+} from '@/components/brand/Editorial';
 import { useAuth } from '@/hooks/useAuth';
 
 const HERO_SLIDES = [
   {
     src: '/hero/hero-1.jpeg',
-    alt: 'Criancas assistindo a uma atividade em familia',
-    label: 'Rotinas que aproximam a familia',
+    alt: 'Crianças assistindo a uma atividade em família',
+    label: 'Rotinas que aproximam a família',
   },
   {
     src: '/hero/hero-2.jpeg',
     alt: 'Família reunida em um momento de celebração',
-    label: 'Memorias construidas com presenca',
+    label: 'Memórias construídas com presença',
   },
   {
     src: '/hero/hero-3.jpeg',
     alt: 'Mulher em um ambiente de acolhimento e celebração',
-    label: 'Feminilidade, casa e intencao',
+    label: 'Feminilidade, casa e intenção',
   },
 ];
 
@@ -44,26 +49,26 @@ export function HeroSection() {
   }, []);
 
   return (
-    <PageSection className="pt-10">
-      <div className="hero-sheen border border-primary-900/8 px-8 py-10 text-white sm:px-10 lg:px-16 lg:py-14">
-        <div className="grid items-center gap-14 lg:grid-cols-2">
+    <PageSection className="pt-6 sm:pt-10">
+      <div className="hero-sheen border border-primary-900/8 px-5 py-6 text-white sm:px-8 sm:py-8 lg:px-16 lg:py-14">
+        <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14">
           <div className="flex flex-col justify-center">
             <p className="editorial-kicker !text-white/78">Plataforma Nathi Faria</p>
-            <h1 className="mt-5 max-w-2xl font-serif text-[4rem] leading-[1.05] text-white sm:text-[5.2rem]">
+            <h1 className="mt-4 max-w-2xl font-serif text-[2.7rem] leading-[1.02] text-white sm:mt-5 sm:text-[3.5rem] md:text-[4.4rem] lg:text-[5.2rem]">
               Transformando a sua casa num lar.
             </h1>
-            <p className="mt-8 max-w-lg text-lg leading-9 text-white/86">
+            <p className="mt-5 max-w-lg text-base leading-8 text-white/86 sm:mt-7 sm:text-lg sm:leading-9">
               A casa se torna um lar quando nela as pessoas usam o tempo para formar vínculos.
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <EditorialButtonLink href="/trilhas" className="!min-w-[260px]">
+            <div className="mt-8 flex flex-col gap-4 sm:mt-10 sm:flex-row">
+              <EditorialButtonLink href="/trilhas" className="!min-w-0 sm:!min-w-[260px]">
                 Acessar meu aprendizado <ArrowRight size={18} />
               </EditorialButtonLink>
             </div>
           </div>
 
           <div className="relative lg:ml-auto lg:w-full lg:max-w-[580px]">
-            <div className="relative min-h-[480px] overflow-hidden border-4 border-white/70 bg-white/15 md:min-h-[540px]">
+            <div className="relative min-h-[320px] overflow-hidden border-4 border-white/70 bg-white/15 sm:min-h-[420px] md:min-h-[540px]">
               {HERO_SLIDES.map((slide, index) => (
                 <div
                   key={slide.src}
@@ -83,8 +88,8 @@ export function HeroSection() {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
-              <div className="absolute bottom-0 left-0 right-0 border-t border-white/18 bg-black/35 px-5 py-4 backdrop-blur-sm">
-                <div className="text-sm text-white/92">
+              <div className="absolute bottom-0 left-0 right-0 border-t border-white/18 bg-black/35 px-4 py-3 backdrop-blur-sm sm:px-5 sm:py-4">
+                <div className="text-xs text-white/92 sm:text-sm">
                   <span>{HERO_SLIDES[activeSlide]?.label}</span>
                 </div>
               </div>
@@ -127,7 +132,10 @@ export function PillarsSection() {
 
       <div className="mt-16 grid gap-6 md:grid-cols-3">
         {pillars.map((pillar) => (
-          <EditorialPanel key={pillar.title} className="flex min-h-[320px] flex-col items-center p-10 text-center">
+          <EditorialPanel
+            key={pillar.title}
+            className="flex min-h-[320px] flex-col items-center p-10 text-center"
+          >
             <div className="mb-10 flex h-16 w-16 items-center justify-center border border-primary-900/12 bg-primary-50 text-primary-800">
               {pillar.icon}
             </div>
@@ -162,7 +170,11 @@ export function NewsSection() {
             description="Um espaço editorial para quem deseja estudar com profundidade e aplicar com delicadeza."
             className="max-w-3xl"
           />
-          <EditorialButtonLink href="/blog" variant="secondary" className="border-white/40 !text-white">
+          <EditorialButtonLink
+            href="/blog"
+            variant="secondary"
+            className="border-white/40 !text-white"
+          >
             Ver todos os conteúdos
           </EditorialButtonLink>
         </div>
@@ -178,7 +190,9 @@ export function NewsSection() {
                 </div>
               </div>
               <div className="border-t border-white/10 p-8">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-white/55">{news.date}</p>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.24em] text-white/55">
+                  {news.date}
+                </p>
                 <h3 className="mt-4 text-3xl leading-none text-white">{news.title}</h3>
                 <p className="mt-4 line-clamp-3 text-sm leading-7 text-white/72">{news.summary}</p>
                 <div className="mt-8 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.24em] text-white">
