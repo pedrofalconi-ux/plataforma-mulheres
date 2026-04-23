@@ -10,8 +10,6 @@
 - **Gráficos:** Recharts
 - **Deploy:** Vercel (CI/CD automático via GitHub)
 
----
-
 ## 🧠 Fluxo de Desenvolvimento (GSD Framework)
 
 Este projeto usa o framework [**Get Shit Done v1.30.0**](https://github.com/gsd-build/get-shit-done) para organizar o desenvolvimento em fases planejadas e rastreadas.
